@@ -1,0 +1,67 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\defcounter {refsection}{0}\relax 
+\select@language {lithuanian}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Įvadas}{2}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {1.}Kintamumo modeliavimas (Variability modeling)}{3}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {1.1.}Funkcinis modeliavimas (Feature modeling)}{3}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {1.1.1.}Programinės įrangos produktų linijos kūrimas (Software product line engineering)}{3}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {1.2.}Decision modeling (Decision modeling)}{3}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {1.2.1.}Skirsnis}{3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.}Blockchain}{4}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {2.1.}Blockchain 1.0}{4}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {2.1.1.}Kriptovaliutos}{4}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {2.2.}Blockchain 2.0-Ethereum}{4}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {2.2.1.}Išmanieji kontraktai-Solidity}{4}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {2.2.2.}Prminis kriptovaliutų platinimas (ICO)}{4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.}Pirminio kriptovaliuto platinimo išmaniojo kontrakto funkcinis? modeliavimas}{5}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {3.1.}Problema (Problem space feature modeling)}{5}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {3.1.1.}Goal/Objective}{5}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {3.1.2.}Quality attribute feature modeling}{5}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {3.1.3.}Product line artifacts design and development}{5}
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {3.2.}Solution space feature modeling}{5}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Išvados}{6}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Literatūra}{7}
+\defcounter {refsection}{0}\relax 
+\select@language {english}
+\defcounter {refsection}{0}\relax 
+\select@language {lithuanian}
+\defcounter {refsection}{0}\relax 
+\select@language {english}
+\defcounter {refsection}{0}\relax 
+\select@language {lithuanian}
+\defcounter {refsection}{0}\relax 
+\select@language {english}
+\defcounter {refsection}{0}\relax 
+\select@language {lithuanian}
+\defcounter {refsection}{0}\relax 
+\select@language {english}
+\defcounter {refsection}{0}\relax 
+\select@language {lithuanian}
+\defcounter {refsection}{0}\relax 
+\select@language {english}
+\defcounter {refsection}{0}\relax 
+\select@language {lithuanian}
+\defcounter {refsection}{0}\relax 
+\def \@dotsep {1000}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Priedas Nr.1}{}
