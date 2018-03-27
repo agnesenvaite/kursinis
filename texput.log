@@ -1,18 +1,18 @@
-This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2018.3.18)  26 MAR 2018 17:47
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2018.3.18)  27 MAR 2018 11:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**bibliografija.tex
+**library.tex
 
 ! Emergency stop.
-<*> bibliografija.tex
-                     
+<*> library.tex
+               
 *** (job aborted, file error in nonstop mode)
 
  
 Here is how much of TeX's memory you used:
  2 strings out of 492998
- 23 string characters out of 6136605
+ 17 string characters out of 6136605
  61722 words of memory out of 5000000
  4084 multiletter control sequences out of 15000+600000
  3640 words of font info for 14 fonts, out of 8000000 for 9000
