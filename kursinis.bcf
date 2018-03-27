@@ -2147,14 +2147,6 @@
   </bcf:bibdata>
   <bcf:section number="0">
     <bcf:citekey order="1">Berger2010</bcf:citekey>
-    <bcf:citekey order="2">PvzStraipsnEn</bcf:citekey>
-    <bcf:citekey order="2">PvzKonfLt</bcf:citekey>
-    <bcf:citekey order="2">PvzKonfEn</bcf:citekey>
-    <bcf:citekey order="2">PvzKnygLt</bcf:citekey>
-    <bcf:citekey order="2">PvzKnygEn</bcf:citekey>
-    <bcf:citekey order="2">PvzElPubLt</bcf:citekey>
-    <bcf:citekey order="2">PvzElPubEn</bcf:citekey>
-    <bcf:citekey order="2">PvzMagistrLt</bcf:citekey>
   </bcf:section>
   <bcf:sortlist section="0" name="anyt/global/" type="entry" sortscheme="anyt" sortnamekeyscheme="global" labelprefix="">
   <bcf:sorting>
