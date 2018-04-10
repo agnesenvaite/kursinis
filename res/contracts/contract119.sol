@@ -1,377 +1,345 @@
-pragma solidity ^0.4.11;
+ pragma solidity ^0.4.11;
+
+
+/**
+ * @title SafeMath
+ * @dev Math operations with safety checks that throw on error
+ */
 library SafeMath {
-  function mul(uint a, uint b) internal returns (uint) {
-    uint c = a * b;
+  function mul(uint256 a, uint256 b) internal returns (uint256) {
+    uint256 c = a * b;
     assert(a == 0 || c / a == b);
     return c;
   }
-  function div(uint a, uint b) internal returns (uint) {
-    assert(b > 0);
-    uint c = a / b;
-    assert(a == b * c + a % b);
+
+  function div(uint256 a, uint256 b) internal returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
     return c;
   }
-  function sub(uint a, uint b) internal returns (uint) {
+
+  function sub(uint256 a, uint256 b) internal returns (uint256) {
     assert(b <= a);
     return a - b;
   }
-  function add(uint a, uint b) internal returns (uint) {
-    uint c = a + b;
+
+  function add(uint256 a, uint256 b) internal returns (uint256) {
+    uint256 c = a + b;
     assert(c >= a);
     return c;
   }
-  function max64(uint64 a, uint64 b) internal constant returns (uint64) {
-    return a >= b ? a : b;
-  }
-  function min64(uint64 a, uint64 b) internal constant returns (uint64) {
-    return a < b ? a : b;
-  }
-  function max256(uint256 a, uint256 b) internal constant returns (uint256) {
-    return a >= b ? a : b;
-  }
-  function min256(uint256 a, uint256 b) internal constant returns (uint256) {
-    return a < b ? a : b;
-  }
-  function assert(bool assertion) internal {
-    if (!assertion) {
-      throw;
-    }
-  }
 }
-contract Ownable {
-    address public owner;
-    function Ownable() {
-        owner = msg.sender;
-    }
-    modifier onlyOwner {
-        if (msg.sender != owner) throw;
-        _;
-    }
-    function transferOwnership(address newOwner) onlyOwner {
-        if (newOwner != address(0)) {
-            owner = newOwner;
-        }
-    }
-}
-/*
- * Pausable
- * Abstract contract that allows children to implement an
- * emergency stop mechanism.
+
+
+/**
+ * @title ERC20Basic
+ * @dev Simpler version of ERC20 interface
+ * @dev see https://github.com/ethereum/EIPs/issues/20
  */
-contract Pausable is Ownable {
-  bool public stopped;
-  modifier stopInEmergency {
-    if (stopped) {
-      throw;
-    }
-    _;
-  }
-  
-  modifier onlyInEmergency {
-    if (!stopped) {
-      throw;
-    }
-    _;
-  }
-  // called by the owner on emergency, triggers stopped state
-  function emergencyStop() external onlyOwner {
-    stopped = true;
-  }
-  // called by the owner on end of emergency, returns to normal state
-  function release() external onlyOwner onlyInEmergency {
-    stopped = false;
-  }
-}
 contract ERC20Basic {
-  uint public totalSupply;
-  function balanceOf(address who) constant returns (uint);
-  function transfer(address to, uint value);
-  event Transfer(address indexed from, address indexed to, uint value);
+  uint256 public totalSupply;
+  function balanceOf(address who) constant returns (uint256);
+  function transfer(address to, uint256 value);
+  event Transfer(address indexed from, address indexed to, uint256 value);
 }
-contract ERC20 is ERC20Basic {
-  function allowance(address owner, address spender) constant returns (uint);
-  function transferFrom(address from, address to, uint value);
-  function approve(address spender, uint value);
-  event Approval(address indexed owner, address indexed spender, uint value);
-}
-/*
- * PullPayment
- * Base contract supporting async send for pull payments.
- * Inherit from this contract and use asyncSend instead of send.
+
+
+/**
+ * @title Basic token
+ * @dev Basic version of StandardToken, with no allowances. 
  */
-contract PullPayment {
-  using SafeMath for uint;
-  
-  mapping(address => uint) public payments;
-  event LogRefundETH(address to, uint value);
-  /**
-  *  Store sent amount as credit to be pulled, called by payer 
-  **/
-  function asyncSend(address dest, uint amount) internal {
-    payments[dest] = payments[dest].add(amount);
-  }
-  // withdraw accumulated balance, called by payee
-  function withdrawPayments() {
-    address payee = msg.sender;
-    uint payment = payments[payee];
-    
-    if (payment == 0) {
-      throw;
-    }
-    if (this.balance < payment) {
-      throw;
-    }
-    payments[payee] = 0;
-    if (!payee.send(payment)) {
-      throw;
-    }
-    LogRefundETH(payee,payment);
-  }
-}
 contract BasicToken is ERC20Basic {
-  
-  using SafeMath for uint;
-  
-  mapping(address => uint) balances;
-  
-  /*
-   * Fix for the ERC20 short address attack  
+  using SafeMath for uint256;
+
+  mapping(address => uint256) balances;
+
+  /**
+  * @dev transfer token for a specified address
+  * @param _to The address to transfer to.
+  * @param _value The amount to be transferred.
   */
-  modifier onlyPayloadSize(uint size) {
-     if(msg.data.length < size + 4) {
-       throw;
-     }
-     _;
-  }
-  function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) {
+  function transfer(address _to, uint256 _value) {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
     Transfer(msg.sender, _to, _value);
   }
-  function balanceOf(address _owner) constant returns (uint balance) {
+
+  /**
+  * @dev Gets the balance of the specified address.
+  * @param _owner The address to query the the balance of. 
+  * @return An uint256 representing the amount owned by the passed address.
+  */
+  function balanceOf(address _owner) constant returns (uint256 balance) {
     return balances[_owner];
   }
+
 }
-contract StandardToken is BasicToken, ERC20 {
-  mapping (address => mapping (address => uint)) allowed;
-  function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) {
+
+
+/**
+ * @title ERC20 interface
+ * @dev see https://github.com/ethereum/EIPs/issues/20
+ */
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) constant returns (uint256);
+  function transferFrom(address from, address to, uint256 value);
+  function approve(address spender, uint256 value);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+
+/**
+ * @title Standard ERC20 token
+ *
+ * @dev Implementation of the basic standard token.
+ * @dev https://github.com/ethereum/EIPs/issues/20
+ * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
+ */
+contract StandardToken is ERC20, BasicToken {
+
+  mapping (address => mapping (address => uint256)) allowed;
+
+
+  /**
+   * @dev Transfer tokens from one address to another
+   * @param _from address The address which you want to send tokens from
+   * @param _to address The address which you want to transfer to
+   * @param _value uint256 the amout of tokens to be transfered
+   */
+  function transferFrom(address _from, address _to, uint256 _value) {
     var _allowance = allowed[_from][msg.sender];
+
     // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
     // if (_value > _allowance) throw;
+
     balances[_to] = balances[_to].add(_value);
     balances[_from] = balances[_from].sub(_value);
     allowed[_from][msg.sender] = _allowance.sub(_value);
     Transfer(_from, _to, _value);
   }
-  function approve(address _spender, uint _value) {
+
+  /**
+   * @dev Aprove the passed address to spend the specified amount of tokens on behalf of msg.sender.
+   * @param _spender The address which will spend the funds.
+   * @param _value The amount of tokens to be spent.
+   */
+  function approve(address _spender, uint256 _value) {
+
     // To change the approve amount you first have to reduce the addresses`
     //  allowance to zero by calling `approve(_spender, 0)` if it is not
     //  already 0 to mitigate the race condition described here:
     //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
     if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
+
     allowed[msg.sender][_spender] = _value;
     Approval(msg.sender, _spender, _value);
   }
-  function allowance(address _owner, address _spender) constant returns (uint remaining) {
+
+  /**
+   * @dev Function to check the amount of tokens that an owner allowed to a spender.
+   * @param _owner address The address which owns the funds.
+   * @param _spender address The address which will spend the funds.
+   * @return A uint256 specifing the amount of tokens still avaible for the spender.
+   */
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
+
 }
+
+
 /**
- *  SkinCoin token contract. Implements
+ * @title Stalled ERC20 token
  */
-contract SkinCoin is StandardToken, Ownable {
-  string public constant name = "SkinCoin";
-  string public constant symbol = "SKIN";
-  uint public constant decimals = 6;
-  // Constructor
-  function SkinCoin() {
-      totalSupply = 1000000000000000;
-      balances[msg.sender] = totalSupply; // Send all tokens to owner
-  }
-  /**
-   *  Burn away the specified amount of SkinCoin tokens
-   */
-  function burn(uint _value) onlyOwner returns (bool) {
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    totalSupply = totalSupply.sub(_value);
-    Transfer(msg.sender, 0x0, _value);
-    return true;
-  }
+contract TIXStalledToken {
+  uint256 public totalSupply;
+  bool public isFinalized; // switched to true in operational state
+  address public ethFundDeposit; // deposit address for ETH for Blocktix
+
+  function balanceOf(address who) constant returns (uint256);
 }
-/*
-  Crowdsale Smart Contract for the skincoin.org project
-  This smart contract collects ETH, and in return emits SkinCoin tokens to the backers
-*/
-contract Crowdsale is Pausable, PullPayment {
-    
-    using SafeMath for uint;
-    struct Backer {
-        uint weiReceived; // Amount of Ether given
-        uint coinSent;
-    }
-    /*
-    * Constants
+
+
+/**
+ * @title Blocktix Token Generation Event contract
+ *
+ * @dev Based on code by BAT: https://github.com/brave-intl/basic-attention-token-crowdsale/blob/master/contracts/BAToken.sol
+ */
+contract TIXToken is StandardToken {
+    mapping(address => bool) converted; // Converting from old token contract
+
+    string public constant name = "Blocktix Token";
+    string public constant symbol = "TIX";
+    uint256 public constant decimals = 18;
+    string public version = "1.0.1";
+
+    // crowdsale parameters
+    bool public isFinalized;                      // switched to true in operational state
+    uint256 public startTime = 1501271999;        // crowdsale start time (in seconds) - this will be set once the conversion is done
+    uint256 public constant endTime = 1501271999; // crowdsale end time (in seconds)
+    uint256 public constant tokenGenerationCap =  62.5 * (10**6) * 10**decimals; // 62.5m TIX
+    uint256 public constant tokenExchangeRate = 1041;
+
+    // addresses
+    address public tixGenerationContract; // contract address for TIX v1 Funding
+    address public ethFundDeposit;        // deposit address for ETH for Blocktix
+
+    /**
+    * @dev modifier to allow actions only when the contract IS finalized
     */
-    /* Minimum number of SkinCoin to sell */
-    uint public constant MIN_CAP = 30000000000000; // 30,000,000 SkinCoins
-    /* Maximum number of SkinCoin to sell */
-    uint public constant MAX_CAP = 600000000000000; // 600,000,000 SkinCoins
-    /* Minimum amount to invest */
-    uint public constant MIN_INVEST_ETHER = 100 finney;
-    /* Crowdsale period */
-    uint private constant CROWDSALE_PERIOD = 30 days;
-    /* Number of SkinCoins per Ether */
-    uint public constant COIN_PER_ETHER = 6000000000; // 6,000 SkinCoins
-    /*
-    * Variables
-    */
-    /* SkinCoin contract reference */
-    SkinCoin public coin;
-    /* Multisig contract that will receive the Ether */
-    address public multisigEther;
-    /* Number of Ether received */
-    uint public etherReceived;
-    /* Number of SkinCoins sent to Ether contributors */
-    uint public coinSentToEther;
-    /* Crowdsale start time */
-    uint public startTime;
-    /* Crowdsale end time */
-    uint public endTime;
-    /* Is crowdsale still on going */
-    bool public crowdsaleClosed;
-    /* Backers Ether indexed by their Ethereum address */
-    mapping(address => Backer) public backers;
-    /*
-    * Modifiers
-    */
-    modifier minCapNotReached() {
-        if ((now < endTime) || coinSentToEther >= MIN_CAP ) throw;
+    modifier whenFinalized() {
+        if (!isFinalized) throw;
         _;
     }
-    modifier respectTimeFrame() {
-        if ((now < startTime) || (now > endTime )) throw;
+
+    /**
+    * @dev modifier to allow actions only when the contract IS NOT finalized
+    */
+    modifier whenNotFinalized() {
+        if (isFinalized) throw;
         _;
     }
-    /*
-     * Event
-    */
-    event LogReceivedETH(address addr, uint value);
-    event LogCoinsEmited(address indexed from, uint amount);
-    /*
-     * Constructor
-    */
-    function Crowdsale(address _skinCoinAddress, address _to) {
-        coin = SkinCoin(_skinCoinAddress);
-        multisigEther = _to;
+
+    // ensures that the current time is between _startTime (inclusive) and _endTime (exclusive)
+    modifier between(uint256 _startTime, uint256 _endTime) {
+        assert(now >= _startTime && now < _endTime);
+        _;
     }
-    /* 
-     * The fallback function corresponds to a donation in ETH
+
+    // verifies that an amount is greater than zero
+    modifier validAmount() {
+        require(msg.value > 0);
+        _;
+    }
+
+    // validates an address - currently only checks that it isn't null
+    modifier validAddress(address _address) {
+        require(_address != 0x0);
+        _;
+    }
+
+    // events
+    event CreateTIX(address indexed _to, uint256 _value);
+
+    /**
+    * @dev Contructor that assigns all presale tokens and starts the sale
+    */
+    function TIXToken(address _tixGenerationContract)
+    {
+        isFinalized = false; // Initialize presale
+        tixGenerationContract = _tixGenerationContract;
+        ethFundDeposit = TIXStalledToken(tixGenerationContract).ethFundDeposit();
+    }
+
+
+    /**
+    * @dev transfer token for a specified address
+    * @param _to The address to transfer to.
+    * @param _value The amount to be transferred.
+    *
+    * can only be called during once the the funding period has been finalized
+    */
+    function transfer(address _to, uint _value) whenFinalized {
+        super.transfer(_to, _value);
+    }
+
+    /**
+    * @dev Transfer tokens from one address to another
+    * @param _from address The address which you want to send tokens from
+    * @param _to address The address which you want to transfer to
+    * @param _value uint256 the amout of tokens to be transfered
+    *
+    * can only be called during once the the funding period has been finalized
+    */
+    function transferFrom(address _from, address _to, uint _value) whenFinalized {
+        super.transferFrom(_from, _to, _value);
+    }
+
+    /**
+     * @dev Accepts ETH and generates TIX tokens
+     *
+     * can only be called during the crowdsale
      */
-    function() stopInEmergency respectTimeFrame payable {
-        receiveETH(msg.sender);
-    }
-    /* 
-     * To call to start the crowdsale
-     */
-    function start() onlyOwner {
-        if (startTime != 0) throw; // Crowdsale was already started
-        startTime = now ;            
-        endTime =  now + CROWDSALE_PERIOD;    
-    }
-    /*
-     *  Receives a donation in Ether
-    */
-    function receiveETH(address beneficiary) internal {
-        if (msg.value < MIN_INVEST_ETHER) throw; // Don't accept funding under a predefined threshold
-        
-        uint coinToSend = bonus(msg.value.mul(COIN_PER_ETHER).div(1 ether)); // Compute the number of SkinCoin to send
-        if (coinToSend.add(coinSentToEther) > MAX_CAP) throw;    
-        Backer backer = backers[beneficiary];
-        coin.transfer(beneficiary, coinToSend); // Transfer SkinCoins right now 
-        backer.coinSent = backer.coinSent.add(coinToSend);
-        backer.weiReceived = backer.weiReceived.add(msg.value); // Update the total wei collected during the crowdfunding for this backer    
-        etherReceived = etherReceived.add(msg.value); // Update the total wei collected during the crowdfunding
-        coinSentToEther = coinSentToEther.add(coinToSend);
-        // Send events
-        LogCoinsEmited(msg.sender ,coinToSend);
-        LogReceivedETH(beneficiary, etherReceived); 
-    }
-    
-    /*
-     *Compute the SkinCoin bonus according to the investment period
-     */
-    function bonus(uint amount) internal constant returns (uint) {
-        if (now < startTime.add(2 days)) return amount.add(amount.div(5));   // bonus 20%
-        return amount;
-    }
-    /*  
-     * Finalize the crowdsale, should be called after the refund period
-    */
-    function finalize() onlyOwner public {
-        if (now < endTime) { // Cannot finalise before CROWDSALE_PERIOD or before selling all coins
-            if (coinSentToEther == MAX_CAP) {
-            } else {
+    function generateTokens()
+        public
+        payable
+        whenNotFinalized
+        between(startTime, endTime)
+        validAmount
+    {
+        if (totalSupply == tokenGenerationCap)
+            throw;
+
+        uint256 tokens = SafeMath.mul(msg.value, tokenExchangeRate); // check that we're not over totals
+        uint256 checkedSupply = SafeMath.add(totalSupply, tokens);
+        uint256 diff;
+
+        // return if something goes wrong
+        if (tokenGenerationCap < checkedSupply)
+        {
+            diff = SafeMath.sub(checkedSupply, tokenGenerationCap);
+            if (diff > 10**12)
                 throw;
-            }
+            checkedSupply = SafeMath.sub(checkedSupply, diff);
+            tokens = SafeMath.sub(tokens, diff);
         }
-        if (coinSentToEther < MIN_CAP && now < endTime + 15 days) throw; // If MIN_CAP is not reached donors have 15days to get refund before we can finalise
-        if (!multisigEther.send(this.balance)) throw; // Move the remaining Ether to the multisig address
-        
-        uint remains = coin.balanceOf(this);
-        if (remains > 0) { // Burn the rest of SkinCoins
-            if (!coin.burn(remains)) throw ;
-        }
-        crowdsaleClosed = true;
+
+        totalSupply = checkedSupply;
+        balances[msg.sender] += tokens;
+        CreateTIX(msg.sender, tokens); // logs token creation
     }
-    /*  
-    * Failsafe drain
+
+    function hasConverted(address who) constant returns (bool)
+    {
+      return converted[who];
+    }
+
+    function convert(address _owner)
+        external
+    {
+        TIXStalledToken tixStalled = TIXStalledToken(tixGenerationContract);
+        if (tixStalled.isFinalized()) throw; // We can't convert tokens after the contract is finalized
+        if (converted[_owner]) throw; // Throw if they have already converted
+        uint256 balanceOf = tixStalled.balanceOf(_owner);
+        if (balanceOf <= 0) throw; // Throw if they don't have an existing balance
+        converted[_owner] = true;
+        totalSupply += balanceOf;
+        balances[_owner] += balanceOf;
+        Transfer(this, _owner, balanceOf);
+    }
+
+    function continueGeneration()
+        external
+    {
+        TIXStalledToken tixStalled = TIXStalledToken(tixGenerationContract);
+        // Allow the sale to continue
+        if (totalSupply == tixStalled.totalSupply() && tixStalled.isFinalized())
+          startTime = now;
+        else
+          throw;
+    }
+
+    /**
+    * @dev Ends the funding period and sends the ETH home
     */
-    function drain() onlyOwner {
-        if (!owner.send(this.balance)) throw;
+    function finalize()
+        external
+        whenNotFinalized
+    {
+        if (msg.sender != ethFundDeposit) throw; // locks finalize to the ultimate ETH owner
+        if (now <= endTime && totalSupply != tokenGenerationCap) throw;
+        // move to operational
+        isFinalized = true;
+        if(!ethFundDeposit.send(this.balance)) throw;  // send the eth to Blocktix
     }
-    /**
-     * Allow to change the team multisig address in the case of emergency.
-     */
-    function setMultisig(address addr) onlyOwner public {
-        if (addr == address(0)) throw;
-        multisigEther = addr;
-    }
-    /**
-     * Manually back SkinCoin owner address.
-     */
-    function backSkinCoinOwner() onlyOwner public {
-        coin.transferOwnership(owner);
-    }
-    /**
-     * Transfer remains to owner in case if impossible to do min invest
-     */
-    function getRemainCoins() onlyOwner public {
-        var remains = MAX_CAP - coinSentToEther;
-        uint minCoinsToSell = bonus(MIN_INVEST_ETHER.mul(COIN_PER_ETHER) / (1 ether));
-        if(remains > minCoinsToSell) throw;
-        Backer backer = backers[owner];
-        coin.transfer(owner, remains); // Transfer SkinCoins right now 
-        backer.coinSent = backer.coinSent.add(remains);
-        coinSentToEther = coinSentToEther.add(remains);
-        // Send events
-        LogCoinsEmited(this ,remains);
-        LogReceivedETH(owner, etherReceived); 
-    }
-    /* 
-     * When MIN_CAP is not reach:
-     * 1) backer call the "approve" function of the SkinCoin token contract with the amount of all SkinCoins they got in order to be refund
-     * 2) backer call the "refund" function of the Crowdsale contract with the same amount of SkinCoins
-     * 3) backer call the "withdrawPayments" function of the Crowdsale contract to get a refund in ETH
-     */
-    function refund(uint _value) minCapNotReached public {
-        
-        if (_value != backers[msg.sender].coinSent) throw; // compare value from backer balance
-        coin.transferFrom(msg.sender, address(this), _value); // get the token back to the crowdsale contract
-        if (!coin.burn(_value)) throw ; // token sent for refund are burnt
-        uint ETHToSend = backers[msg.sender].weiReceived;
-        backers[msg.sender].weiReceived=0;
-        if (ETHToSend > 0) {
-            asyncSend(msg.sender, ETHToSend); // pull payment to get refund in ETH
-        }
+
+    // fallback
+    function()
+        payable
+        whenNotFinalized
+    {
+        generateTokens();
     }
 }
+https://etherscan.io/address/0xea1f346faf023f974eb5adaf088bbcdf02d761f4

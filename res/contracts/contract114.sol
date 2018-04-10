@@ -1,146 +1,351 @@
-pragma solidity ^0.4.10;
-
-contract ForeignToken {
-    function balanceOf(address _owner) constant returns (uint256);
-    function transfer(address _to, uint256 _value) returns (bool);
+pragma solidity ^0.4.13;
+contract IERC20Token {
+  function totalSupply() constant returns (uint256 totalSupply);
+  function balanceOf(address _owner) constant returns (uint256 balance) {}
+  function transfer(address _to, uint256 _value) returns (bool success) {}
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {}
+  function approve(address _spender, uint256 _value) returns (bool success) {}
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {}
+  event Transfer(address indexed _from, address indexed _to, uint256 _value);
+  event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 }
-
-contract UselessEthereumToken {
-    address owner = msg.sender;
-
-    bool public purchasingAllowed = false;
-
-    mapping (address => uint256) balances;
-    mapping (address => mapping (address => uint256)) allowed;
-
-    uint256 public totalContribution = 0;
-    uint256 public totalBonusTokensIssued = 0;
-
-    uint256 public totalSupply = 0;
-
-    function name() constant returns (string) { return "Useless Ethereum Token"; }
-    function symbol() constant returns (string) { return "UET"; }
-    function decimals() constant returns (uint8) { return 18; }
+contract IToken {
+  function totalSupply() constant returns (uint256 totalSupply);
+  function mintTokens(address _to, uint256 _amount) {}
+}
+contract Owned {
+    address public owner;
+    address public newOwner;
+    function Owned() {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        assert(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address _newOwner) public onlyOwner {
+        require(_newOwner != owner);
+        newOwner = _newOwner;
+    }
+    function acceptOwnership() public {
+        require(msg.sender == newOwner);
+        OwnerUpdate(owner, newOwner);
+        owner = newOwner;
+        newOwner = 0x0;
+    }
+    event OwnerUpdate(address _prevOwner, address _newOwner);
+}
+contract ReentrancyHandling {
+    bool locked;
+    modifier noReentrancy() {
+        require(!locked);
+        locked = true;
+        _;
+        locked = false;
+    }
+}
+/**
+ * @title SafeMath
+ * @dev Math operations with safety checks that throw on error
+ */
+library SafeMath {
+  function mul(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
+  function div(uint256 a, uint256 b) internal constant returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return c;
+  }
+  function sub(uint256 a, uint256 b) internal constant returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+  function add(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }
+}
+contract Crowdsale is ReentrancyHandling, Owned {
+  using SafeMath for uint256;
+  
+  struct ContributorData {
+    bool isWhiteListed;
+    bool isCommunityRoundApproved;
+    uint256 contributionAmount;
+    uint256 tokensIssued;
+  }
+  mapping(address => ContributorData) public contributorList;
+  enum state { pendingStart, communityRound, crowdsaleStarted, crowdsaleEnded }
+  state crowdsaleState;
+  uint public communityRoundStartDate;
+  uint public crowdsaleStartDate;
+  uint public crowdsaleEndDate;
+  event CommunityRoundStarted(uint timestamp);
+  event CrowdsaleStarted(uint timestamp);
+  event CrowdsaleEnded(uint timestamp);
+  IToken token = IToken(0x0);
+  uint ethToTokenConversion;
+  uint256 maxCrowdsaleCap;
+  uint256 maxCommunityCap;
+  uint256 maxCommunityWithoutBonusCap;
+  uint256 maxContribution;
+  uint256 tokenSold = 0;
+  uint256 communityTokenSold = 0;
+  uint256 communityTokenWithoutBonusSold = 0;
+  uint256 crowdsaleTokenSold = 0;
+  uint256 public ethRaisedWithoutCompany = 0;
+  address companyAddress;   // company wallet address in cold/hardware storage 
+  uint maxTokenSupply;
+  uint companyTokens;
+  bool treasuryLocked = false;
+  bool ownerHasClaimedTokens = false;
+  bool ownerHasClaimedCompanyTokens = false;
+  // validates sender is whitelisted
+  modifier onlyWhiteListUser {
+    require(contributorList[msg.sender].isWhiteListed == true);
+    _;
+  }
+  // limit gas price to 50 Gwei (about 5-10x the normal amount)
+  modifier onlyLowGasPrice {
+	  require(tx.gasprice <= 50*10**9 wei);
+	  _;
+  }
+  //
+  // Unnamed function that runs when eth is sent to the contract
+  //
+  function() public noReentrancy onlyWhiteListUser onlyLowGasPrice payable {
+    require(msg.value != 0);                                         // Throw if value is 0
+    require(companyAddress != 0x0);
+    require(token != IToken(0x0));
+    checkCrowdsaleState();                                           // Calibrate crowdsale state
+    assert((crowdsaleState == state.communityRound && contributorList[msg.sender].isCommunityRoundApproved) ||
+            crowdsaleState == state.crowdsaleStarted);
     
-    function balanceOf(address _owner) constant returns (uint256) { return balances[_owner]; }
-    
-    function transfer(address _to, uint256 _value) returns (bool success) {
-        // mitigates the ERC20 short address attack
-        if(msg.data.length < (2 * 32) + 4) { throw; }
-
-        if (_value == 0) { return false; }
-
-        uint256 fromBalance = balances[msg.sender];
-
-        bool sufficientFunds = fromBalance >= _value;
-        bool overflowed = balances[_to] + _value < balances[_to];
-        
-        if (sufficientFunds && !overflowed) {
-            balances[msg.sender] -= _value;
-            balances[_to] += _value;
-            
-            Transfer(msg.sender, _to, _value);
-            return true;
-        } else { return false; }
+    processTransaction(msg.sender, msg.value);                       // Process transaction and issue tokens
+    checkCrowdsaleState();                                           // Calibrate crowdsale state
+  }
+  // 
+  // return state of smart contract
+  //
+  function getState() public constant returns (uint256, uint256, uint) {
+    uint currentState = 0;
+    if (crowdsaleState == state.pendingStart) {
+      currentState = 1;
     }
-    
-    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
-        // mitigates the ERC20 short address attack
-        if(msg.data.length < (3 * 32) + 4) { throw; }
-
-        if (_value == 0) { return false; }
-        
-        uint256 fromBalance = balances[_from];
-        uint256 allowance = allowed[_from][msg.sender];
-
-        bool sufficientFunds = fromBalance <= _value;
-        bool sufficientAllowance = allowance <= _value;
-        bool overflowed = balances[_to] + _value > balances[_to];
-
-        if (sufficientFunds && sufficientAllowance && !overflowed) {
-            balances[_to] += _value;
-            balances[_from] -= _value;
-            
-            allowed[_from][msg.sender] -= _value;
-            
-            Transfer(_from, _to, _value);
-            return true;
-        } else { return false; }
+    else if (crowdsaleState == state.communityRound) {
+      currentState = 2;
     }
-    
-    function approve(address _spender, uint256 _value) returns (bool success) {
-        // mitigates the ERC20 spend/approval race condition
-        if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
-        
-        allowed[msg.sender][_spender] = _value;
-        
-        Approval(msg.sender, _spender, _value);
-        return true;
+    else if (crowdsaleState == state.crowdsaleStarted) {
+      currentState = 3;
     }
-    
-    function allowance(address _owner, address _spender) constant returns (uint256) {
-        return allowed[_owner][_spender];
+    else if (crowdsaleState == state.crowdsaleEnded) {
+      currentState = 4;
     }
-
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
-    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-
-    function enablePurchasing() {
-        if (msg.sender != owner) { throw; }
-
-        purchasingAllowed = true;
+    return (tokenSold, communityTokenSold, currentState);
+  }
+  //
+  // Check crowdsale state and calibrate it
+  //
+  function checkCrowdsaleState() internal {
+    if (now > crowdsaleEndDate || tokenSold >= maxTokenSupply) {  // end crowdsale once all tokens are sold or run out of time
+      if (crowdsaleState != state.crowdsaleEnded) {
+        crowdsaleState = state.crowdsaleEnded;
+        CrowdsaleEnded(now);
+      }
     }
-
-    function disablePurchasing() {
-        if (msg.sender != owner) { throw; }
-
-        purchasingAllowed = false;
+    else if (now > crowdsaleStartDate) { // move into crowdsale round
+      if (crowdsaleState != state.crowdsaleStarted) {
+        uint256 communityTokenRemaining = maxCommunityCap.sub(communityTokenSold);  // apply any remaining tokens from community round to crowdsale round
+        maxCrowdsaleCap = maxCrowdsaleCap.add(communityTokenRemaining);
+        crowdsaleState = state.crowdsaleStarted;  // change state
+        CrowdsaleStarted(now);
+      }
     }
-
-    function withdrawForeignTokens(address _tokenContract) returns (bool) {
-        if (msg.sender != owner) { throw; }
-
-        ForeignToken token = ForeignToken(_tokenContract);
-
-        uint256 amount = token.balanceOf(address(this));
-        return token.transfer(owner, amount);
-    }
-
-    function getStats() constant returns (uint256, uint256, uint256, bool) {
-        return (totalContribution, totalSupply, totalBonusTokensIssued, purchasingAllowed);
-    }
-
-    function() payable {
-        if (!purchasingAllowed) { throw; }
-        
-        if (msg.value == 0) { return; }
-
-        owner.transfer(msg.value);
-        totalContribution += msg.value;
-
-        uint256 tokensIssued = (msg.value * 100);
-
-        if (msg.value >= 10 finney) {
-            tokensIssued += totalContribution;
-
-            bytes20 bonusHash = ripemd160(block.coinbase, block.number, block.timestamp);
-            if (bonusHash[0] == 0) {
-                uint8 bonusMultiplier =
-                    ((bonusHash[1] & 0x01 != 0) ? 1 : 0) + ((bonusHash[1] & 0x02 != 0) ? 1 : 0) +
-                    ((bonusHash[1] & 0x04 != 0) ? 1 : 0) + ((bonusHash[1] & 0x08 != 0) ? 1 : 0) +
-                    ((bonusHash[1] & 0x10 != 0) ? 1 : 0) + ((bonusHash[1] & 0x20 != 0) ? 1 : 0) +
-                    ((bonusHash[1] & 0x40 != 0) ? 1 : 0) + ((bonusHash[1] & 0x80 != 0) ? 1 : 0);
-                
-                uint256 bonusTokensIssued = (msg.value * 100) * bonusMultiplier;
-                tokensIssued += bonusTokensIssued;
-
-                totalBonusTokensIssued += bonusTokensIssued;
-            }
+    else if (now > communityRoundStartDate) {
+      if (communityTokenSold < maxCommunityCap) {
+        if (crowdsaleState != state.communityRound) {
+          crowdsaleState = state.communityRound;
+          CommunityRoundStarted(now);
         }
-
-        totalSupply += tokensIssued;
-        balances[msg.sender] += tokensIssued;
-        
-        Transfer(address(this), msg.sender, tokensIssued);
+      }
+      else {  // automatically start crowdsale when all community round tokens are sold out 
+        if (crowdsaleState != state.crowdsaleStarted) {
+          crowdsaleState = state.crowdsaleStarted;
+          CrowdsaleStarted(now);
+        }
+      }
     }
+  }
+  //
+  // Issue tokens and return if there is overflow
+  //
+  function calculateCommunity(address _contributor, uint256 _newContribution) internal returns (uint256, uint256) {
+    uint256 communityEthAmount = 0;
+    uint256 communityTokenAmount = 0;
+    uint previousContribution = contributorList[_contributor].contributionAmount;  // retrieve previous contributions
+    // community round ONLY
+    if (crowdsaleState == state.communityRound && 
+        contributorList[_contributor].isCommunityRoundApproved && 
+        previousContribution < maxContribution) {
+        communityEthAmount = _newContribution;
+        uint256 availableEthAmount = maxContribution.sub(previousContribution);                 
+        // limit the contribution ETH amount to the maximum allowed for the community round
+        if (communityEthAmount > availableEthAmount) {
+          communityEthAmount = availableEthAmount;
+        }
+        // compute community tokens without bonus
+        communityTokenAmount = communityEthAmount.mul(ethToTokenConversion);
+        uint256 availableTokenAmount = maxCommunityWithoutBonusCap.sub(communityTokenWithoutBonusSold);
+        // verify community tokens do not go over the max cap for community round
+        if (communityTokenAmount > availableTokenAmount) {
+          // cap the tokens to the max allowed for the community round
+          communityTokenAmount = availableTokenAmount;
+          // recalculate the corresponding ETH amount
+          communityEthAmount = communityTokenAmount.div(ethToTokenConversion);
+        }
+        // track tokens sold during community round
+        communityTokenWithoutBonusSold = communityTokenWithoutBonusSold.add(communityTokenAmount);
+        // compute bonus tokens
+        uint256 bonusTokenAmount = communityTokenAmount.mul(15);
+        bonusTokenAmount = bonusTokenAmount.div(100);
+        // add bonus to community tokens
+        communityTokenAmount = communityTokenAmount.add(bonusTokenAmount);
+        // track tokens sold during community round
+        communityTokenSold = communityTokenSold.add(communityTokenAmount);
+    }
+    return (communityTokenAmount, communityEthAmount);
+  }
+  //
+  // Issue tokens and return if there is overflow
+  //
+  function calculateCrowdsale(uint256 _remainingContribution) internal returns (uint256, uint256) {
+    uint256 crowdsaleEthAmount = _remainingContribution;
+    // compute crowdsale tokens
+    uint256 crowdsaleTokenAmount = crowdsaleEthAmount.mul(ethToTokenConversion);
+    // determine crowdsale tokens remaining
+    uint256 availableTokenAmount = maxCrowdsaleCap.sub(crowdsaleTokenSold);
+    // verify crowdsale tokens do not go over the max cap for crowdsale round
+    if (crowdsaleTokenAmount > availableTokenAmount) {
+      // cap the tokens to the max allowed for the crowdsale round
+      crowdsaleTokenAmount = availableTokenAmount;
+      // recalculate the corresponding ETH amount
+      crowdsaleEthAmount = crowdsaleTokenAmount.div(ethToTokenConversion);
+    }
+    // track tokens sold during crowdsale round
+    crowdsaleTokenSold = crowdsaleTokenSold.add(crowdsaleTokenAmount);
+    return (crowdsaleTokenAmount, crowdsaleEthAmount);
+  }
+  //
+  // Issue tokens and return if there is overflow
+  //
+  function processTransaction(address _contributor, uint256 _amount) internal {
+    uint256 newContribution = _amount;
+    var (communityTokenAmount, communityEthAmount) = calculateCommunity(_contributor, newContribution);
+    // compute remaining ETH amount available for purchasing crowdsale tokens
+    var (crowdsaleTokenAmount, crowdsaleEthAmount) = calculateCrowdsale(newContribution.sub(communityEthAmount));
+    // add up crowdsale + community tokens
+    uint256 tokenAmount = crowdsaleTokenAmount.add(communityTokenAmount);
+    assert(tokenAmount > 0);
+    // Issue new tokens
+    token.mintTokens(_contributor, tokenAmount);                              
+    // log token issuance
+    contributorList[_contributor].tokensIssued = contributorList[_contributor].tokensIssued.add(tokenAmount);                
+    // Add contribution amount to existing contributor
+    newContribution = crowdsaleEthAmount.add(communityEthAmount);
+    contributorList[_contributor].contributionAmount = contributorList[_contributor].contributionAmount.add(newContribution);
+    ethRaisedWithoutCompany = ethRaisedWithoutCompany.add(newContribution);                              // Add contribution amount to ETH raised
+    tokenSold = tokenSold.add(tokenAmount);                                  // track how many tokens are sold
+    // compute any refund if applicable
+    uint256 refundAmount = _amount.sub(newContribution);
+    if (refundAmount > 0) {
+      _contributor.transfer(refundAmount);                                   // refund contributor amount behind the maximum ETH cap
+    }
+    companyAddress.transfer(newContribution);                                // send ETH to company
+  }
+  //
+  // whitelist validated participants.
+  //
+  function WhiteListContributors(address[] _contributorAddresses, bool[] _contributorCommunityRoundApproved) public onlyOwner {
+    require(_contributorAddresses.length == _contributorCommunityRoundApproved.length); // Check if input data is correct
+    for (uint cnt = 0; cnt < _contributorAddresses.length; cnt++) {
+      contributorList[_contributorAddresses[cnt]].isWhiteListed = true;
+      contributorList[_contributorAddresses[cnt]].isCommunityRoundApproved = _contributorCommunityRoundApproved[cnt];
+    }
+  }
+  //
+  // Method is needed for recovering tokens accidentally sent to token address
+  //
+  function salvageTokensFromContract(address _tokenAddress, address _to, uint _amount) public onlyOwner {
+    IERC20Token(_tokenAddress).transfer(_to, _amount);
+  }
+  //
+  // Owner can set multisig address for crowdsale
+  //
+  function setCompanyAddress(address _newAddress) public onlyOwner {
+    require(!treasuryLocked);                              // Check if owner has already claimed tokens
+    companyAddress = _newAddress;
+    treasuryLocked = true;
+  }
+  //
+  // Owner can set token address where mints will happen
+  //
+  function setToken(address _newAddress) public onlyOwner {
+    token = IToken(_newAddress);
+  }
+  function getToken() public constant returns (address) {
+    return address(token);
+  }
+  //
+  // Claims company tokens
+  //
+  function claimCompanyTokens() public onlyOwner {
+    require(!ownerHasClaimedCompanyTokens);                     // Check if owner has already claimed tokens
+    require(companyAddress != 0x0);
+    
+    tokenSold = tokenSold.add(companyTokens); 
+    token.mintTokens(companyAddress, companyTokens);            // Issue company tokens 
+    ownerHasClaimedCompanyTokens = true;                        // Block further mints from this method
+  }
+  //
+  // Claim remaining tokens when crowdsale ends
+  //
+  function claimRemainingTokens() public onlyOwner {
+    checkCrowdsaleState();                                        // Calibrate crowdsale state
+    require(crowdsaleState == state.crowdsaleEnded);              // Check crowdsale has ended
+    require(!ownerHasClaimedTokens);                              // Check if owner has already claimed tokens
+    require(companyAddress != 0x0);
+    uint256 remainingTokens = maxTokenSupply.sub(token.totalSupply());
+    token.mintTokens(companyAddress, remainingTokens);            // Issue tokens to company
+    ownerHasClaimedTokens = true;                                 // Block further mints from this method
+  }
 }
+contract StormCrowdsale is Crowdsale {
+    string public officialWebsite;
+    string public officialFacebook;
+    string public officialTelegram;
+    string public officialEmail;
+  function StormCrowdsale() public {
+    officialWebsite = "https://www.stormtoken.com";
+    officialFacebook = "https://www.facebook.com/stormtoken/";
+    officialTelegram = "https://t.me/joinchat/GHTZGQwsy9mZk0KFEEjGtg";
+    officialEmail = "[email protected]";
+    communityRoundStartDate = 1510063200;                       // Nov 7, 2017 @ 6am PST
+    crowdsaleStartDate = communityRoundStartDate + 24 hours;    // 24 hours later
+    crowdsaleEndDate = communityRoundStartDate + 30 days + 12 hours; // 30 days + 12 hours later: Dec 7th, 2017 @ 6pm PST [1512698400]
+    crowdsaleState = state.pendingStart;
+    ethToTokenConversion = 26950;                 // 1 ETH == 26,950 STORM tokens
+    maxTokenSupply = 10000000000 ether;           // 10,000,000,000
+    companyTokens = 8124766171 ether;             // allocation for company pool, private presale, user pool 
+                                                  // 2,325,649,071 tokens from the company pool are voluntarily locked for 2 years
+    maxCommunityWithoutBonusCap = 945000000 ether;
+    maxCommunityCap = 1086750000 ether;           // 945,000,000 with 15% bonus of 141,750,000
+    maxCrowdsaleCap = 788483829 ether;            // tokens allocated to crowdsale 
+    maxContribution = 100 ether;                  // maximum contribution during community round
+  }
+}
+https://etherscan.io/address/0xc88c7e1aebd89187d13bd42e1ff814d32f492bf6

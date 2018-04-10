@@ -1,486 +1,594 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.6;
 
 /*
-    Overflow protected math functions
-*/
-contract SafeMath {
-    /**
-        constructor
-    */
-    function SafeMath() {
-    }
+    Copyright 2016, Jordi Baylina
 
-    /**
-        @dev returns the sum of _x and _y, asserts if the calculation overflows
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-        @param _x   value 1
-        @param _y   value 2
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-        @return sum
-    */
-    function safeAdd(uint256 _x, uint256 _y) internal returns (uint256) {
-        uint256 z = _x + _y;
-        assert(z >= _x);
-        return z;
-    }
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-    /**
-        @dev returns the difference of _x minus _y, asserts if the subtraction results in a negative number
+/// @title MiniMeToken Contract
+/// @author Jordi Baylina
+/// @dev This token contract's goal is to make it easy for anyone to clone this
+///  token using the token distribution at a given block, this will allow DAO's
+///  and DApps to upgrade their features in a decentralized manner without
+///  affecting the original token
+/// @dev It is ERC20 compliant, but still needs to under go further testing.
 
-        @param _x   minuend
-        @param _y   subtrahend
 
-        @return difference
-    */
-    function safeSub(uint256 _x, uint256 _y) internal returns (uint256) {
-        assert(_x >= _y);
-        return _x - _y;
-    }
+/// @dev The token controller contract must implement these functions
+contract TokenController {
+    /// @notice Called when `_owner` sends ether to the MiniMe Token contract
+    /// @param _owner The address that sent the ether to create tokens
+    /// @return True if the ether is accepted, false if it throws
+    function proxyPayment(address _owner) payable returns(bool);
 
-    /**
-        @dev returns the product of multiplying _x by _y, asserts if the calculation overflows
+    /// @notice Notifies the controller about a token transfer allowing the
+    ///  controller to react if desired
+    /// @param _from The origin of the transfer
+    /// @param _to The destination of the transfer
+    /// @param _amount The amount of the transfer
+    /// @return False if the controller does not authorize the transfer
+    function onTransfer(address _from, address _to, uint _amount) returns(bool);
 
-        @param _x   factor 1
-        @param _y   factor 2
+    /// @notice Notifies the controller about an approval allowing the
+    ///  controller to react if desired
+    /// @param _owner The address that calls `approve()`
+    /// @param _spender The spender in the `approve()` call
+    /// @param _amount The amount in the `approve()` call
+    /// @return False if the controller does not authorize the approval
+    function onApprove(address _owner, address _spender, uint _amount)
+        returns(bool);
+}
 
-        @return product
-    */
-    function safeMul(uint256 _x, uint256 _y) internal returns (uint256) {
-        uint256 z = _x * _y;
-        assert(_x == 0 || z / _x == _y);
-        return z;
+contract Controlled {
+    /// @notice The address of the controller is the only address that can call
+    ///  a function with this modifier
+    modifier onlyController { if (msg.sender != controller) throw; _; }
+
+    address public controller;
+
+    function Controlled() { controller = msg.sender;}
+
+    /// @notice Changes the controller of the contract
+    /// @param _newController The new controller of the contract
+    function changeController(address _newController) onlyController {
+        controller = _newController;
     }
 }
 
-/*
-    Owned contract interface
-*/
-contract IOwned {
-    // this function isn't abstract since the compiler emits automatically generated getter functions as external
-    function owner() public constant returns (address owner) { owner; }
+/// @dev The actual token contract, the default controller is the msg.sender
+///  that deploys the contract, so usually this token will be deployed by a
+///  token controller contract, which Giveth will call a "Campaign"
+contract MiniMeToken is Controlled {
 
-    function transferOwnership(address _newOwner) public;
-    function acceptOwnership() public;
+    string public name;                //The Token's name: e.g. DigixDAO Tokens
+    uint8 public decimals;             //Number of decimals of the smallest unit
+    string public symbol;              //An identifier: e.g. REP
+    string public version = 'MMT_0.1'; //An arbitrary versioning scheme
+
+
+    /// @dev `Checkpoint` is the structure that attaches a block number to a
+    ///  given value, the block number attached is the one that last changed the
+    ///  value
+    struct  Checkpoint {
+
+        // `fromBlock` is the block number that the value was generated from
+        uint128 fromBlock;
+
+        // `value` is the amount of tokens at a specific block number
+        uint128 value;
+    }
+
+    // `parentToken` is the Token address that was cloned to produce this token;
+    //  it will be 0x0 for a token that was not cloned
+    MiniMeToken public parentToken;
+
+    // `parentSnapShotBlock` is the block number from the Parent Token that was
+    //  used to determine the initial distribution of the Clone Token
+    uint public parentSnapShotBlock;
+
+    // `creationBlock` is the block number that the Clone Token was created
+    uint public creationBlock;
+
+    // `balances` is the map that tracks the balance of each address, in this
+    //  contract when the balance changes the block number that the change
+    //  occurred is also included in the map
+    mapping (address => Checkpoint[]) balances;
+
+    // `allowed` tracks any extra transfer rights as in all ERC20 tokens
+    mapping (address => mapping (address => uint256)) allowed;
+
+    // Tracks the history of the `totalSupply` of the token
+    Checkpoint[] totalSupplyHistory;
+
+    // Flag that determines if the token is transferable or not.
+    bool public transfersEnabled;
+
+    // The factory used to create new clone tokens
+    MiniMeTokenFactory public tokenFactory;
+
+////////////////
+// Constructor
+////////////////
+
+    /// @notice Constructor to create a MiniMeToken
+    /// @param _tokenFactory The address of the MiniMeTokenFactory contract that
+    ///  will create the Clone token contracts, the token factory needs to be
+    ///  deployed first
+    /// @param _parentToken Address of the parent token, set to 0x0 if it is a
+    ///  new token
+    /// @param _parentSnapShotBlock Block of the parent token that will
+    ///  determine the initial distribution of the clone token, set to 0 if it
+    ///  is a new token
+    /// @param _tokenName Name of the new token
+    /// @param _decimalUnits Number of decimals of the new token
+    /// @param _tokenSymbol Token Symbol for the new token
+    /// @param _transfersEnabled If true, tokens will be able to be transferred
+    function MiniMeToken(
+        address _tokenFactory,
+        address _parentToken,
+        uint _parentSnapShotBlock,
+        string _tokenName,
+        uint8 _decimalUnits,
+        string _tokenSymbol,
+        bool _transfersEnabled
+    ) {
+        tokenFactory = MiniMeTokenFactory(_tokenFactory);
+        name = _tokenName;                                 // Set the name
+        decimals = _decimalUnits;                          // Set the decimals
+        symbol = _tokenSymbol;                             // Set the symbol
+        parentToken = MiniMeToken(_parentToken);
+        parentSnapShotBlock = _parentSnapShotBlock;
+        transfersEnabled = _transfersEnabled;
+        creationBlock = block.number;
+    }
+
+
+///////////////////
+// ERC20 Methods
+///////////////////
+
+    /// @notice Send `_amount` tokens to `_to` from `msg.sender`
+    /// @param _to The address of the recipient
+    /// @param _amount The amount of tokens to be transferred
+    /// @return Whether the transfer was successful or not
+    function transfer(address _to, uint256 _amount) returns (bool success) {
+        if (!transfersEnabled) throw;
+        return doTransfer(msg.sender, _to, _amount);
+    }
+
+    /// @notice Send `_amount` tokens to `_to` from `_from` on the condition it
+    ///  is approved by `_from`
+    /// @param _from The address holding the tokens being transferred
+    /// @param _to The address of the recipient
+    /// @param _amount The amount of tokens to be transferred
+    /// @return True if the transfer was successful
+    function transferFrom(address _from, address _to, uint256 _amount
+    ) returns (bool success) {
+
+        // The controller of this contract can move tokens around at will,
+        //  this is important to recognize! Confirm that you trust the
+        //  controller of this contract, which in most situations should be
+        //  another open source smart contract or 0x0
+        if (msg.sender != controller) {
+            if (!transfersEnabled) throw;
+
+            // The standard ERC 20 transferFrom functionality
+            if (allowed[_from][msg.sender] < _amount) return false;
+            allowed[_from][msg.sender] -= _amount;
+        }
+        return doTransfer(_from, _to, _amount);
+    }
+
+    /// @dev This is the actual transfer function in the token contract, it can
+    ///  only be called by other functions in this contract.
+    /// @param _from The address holding the tokens being transferred
+    /// @param _to The address of the recipient
+    /// @param _amount The amount of tokens to be transferred
+    /// @return True if the transfer was successful
+    function doTransfer(address _from, address _to, uint _amount
+    ) internal returns(bool) {
+
+           if (_amount == 0) {
+               return true;
+           }
+
+           // Do not allow transfer to 0x0 or the token contract itself
+           if ((_to == 0) || (_to == address(this))) throw;
+
+           // If the amount being transfered is more than the balance of the
+           //  account the transfer returns false
+           var previousBalanceFrom = balanceOfAt(_from, block.number);
+           if (previousBalanceFrom < _amount) {
+               return false;
+           }
+
+           // Alerts the token controller of the transfer
+           if (isContract(controller)) {
+               if (!TokenController(controller).onTransfer(_from, _to, _amount))
+               throw;
+           }
+
+           // First update the balance array with the new value for the address
+           //  sending the tokens
+           updateValueAtNow(balances[_from], previousBalanceFrom - _amount);
+
+           // Then update the balance array with the new value for the address
+           //  receiving the tokens
+           var previousBalanceTo = balanceOfAt(_to, block.number);
+           updateValueAtNow(balances[_to], previousBalanceTo + _amount);
+
+           // An event to make the transfer easy to find on the blockchain
+           Transfer(_from, _to, _amount);
+
+           return true;
+    }
+
+    /// @param _owner The address that's balance is being requested
+    /// @return The balance of `_owner` at the current block
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balanceOfAt(_owner, block.number);
+    }
+
+    /// @notice `msg.sender` approves `_spender` to spend `_amount` tokens on
+    ///  its behalf. This is a modified version of the ERC20 approve function
+    ///  to be a little bit safer
+    /// @param _spender The address of the account able to transfer the tokens
+    /// @param _amount The amount of tokens to be approved for transfer
+    /// @return True if the approval was successful
+    function approve(address _spender, uint256 _amount) returns (bool success) {
+        if (!transfersEnabled) throw;
+
+        // To change the approve amount you first have to reduce the addresses´
+        //  allowance to zero by calling `approve(_spender,0)` if it is not
+        //  already 0 to mitigate the race condition described here:
+        //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+        if ((_amount!=0) && (allowed[msg.sender][_spender] !=0)) throw;
+
+        // Alerts the token controller of the approve function call
+        if (isContract(controller)) {
+            if (!TokenController(controller).onApprove(msg.sender, _spender, _amount))
+                throw;
+        }
+
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+
+    /// @dev This function makes it easy to read the `allowed[]` map
+    /// @param _owner The address of the account that owns the token
+    /// @param _spender The address of the account able to transfer the tokens
+    /// @return Amount of remaining tokens of _owner that _spender is allowed
+    ///  to spend
+    function allowance(address _owner, address _spender
+    ) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+
+    /// @notice `msg.sender` approves `_spender` to send `_amount` tokens on
+    ///  its behalf, and then a function is triggered in the contract that is
+    ///  being approved, `_spender`. This allows users to use their tokens to
+    ///  interact with contracts in one function call instead of two
+    /// @param _spender The address of the contract able to transfer the tokens
+    /// @param _amount The amount of tokens to be approved for transfer
+    /// @return True if the function call was successful
+    function approveAndCall(address _spender, uint256 _amount, bytes _extraData
+    ) returns (bool success) {
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+
+        // This portion is copied from ConsenSys's Standard Token Contract. It
+        //  calls the receiveApproval function that is part of the contract that
+        //  is being approved (`_spender`). The function should look like:
+        //  `receiveApproval(address _from, uint256 _amount, address
+        //  _tokenContract, bytes _extraData)` It is assumed that the call
+        //  *should* succeed, otherwise the plain vanilla approve would be used
+        if(!_spender.call(
+            bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))),
+            msg.sender,
+            _amount,
+            this,
+            _extraData
+            )) { throw;
+        }
+        return true;
+    }
+
+    /// @dev This function makes it easy to get the total number of tokens
+    /// @return The total number of tokens
+    function totalSupply() constant returns (uint) {
+        return totalSupplyAt(block.number);
+    }
+
+
+////////////////
+// Query balance and totalSupply in History
+////////////////
+
+    /// @dev Queries the balance of `_owner` at a specific `_blockNumber`
+    /// @param _owner The address from which the balance will be retrieved
+    /// @param _blockNumber The block number when the balance is queried
+    /// @return The balance at `_blockNumber`
+    function balanceOfAt(address _owner, uint _blockNumber) constant
+        returns (uint) {
+
+        // If the `_blockNumber` requested is before the genesis block for the
+        //  the token being queried, the value returned is 0
+        if (_blockNumber < creationBlock) {
+            return 0;
+
+        // These next few lines are used when the balance of the token is
+        //  requested before a check point was ever created for this token, it
+        //  requires that the `parentToken.balanceOfAt` be queried at the
+        //  genesis block for that token as this contains initial balance of
+        //  this token
+        } else if ((balances[_owner].length == 0)
+            || (balances[_owner][0].fromBlock > _blockNumber)) {
+            if (address(parentToken) != 0) {
+                return parentToken.balanceOfAt(_owner, parentSnapShotBlock);
+            } else {
+                // Has no parent
+                return 0;
+            }
+
+        // This will return the expected balance during normal situations
+        } else {
+            return getValueAt(balances[_owner], _blockNumber);
+        }
+
+    }
+
+    /// @notice Total amount of tokens at a specific `_blockNumber`.
+    /// @param _blockNumber The block number when the totalSupply is queried
+    /// @return The total amount of tokens at `_blockNumber`
+    function totalSupplyAt(uint _blockNumber) constant returns(uint) {
+
+        // If the `_blockNumber` requested is before the genesis block for the
+        //  the token being queried, the value returned is 0
+        if (_blockNumber < creationBlock) {
+            return 0;
+
+        // These next few lines are used when the totalSupply of the token is
+        //  requested before a check point was ever created for this token, it
+        //  requires that the `parentToken.totalSupplyAt` be queried at the
+        //  genesis block for this token as that contains totalSupply of this
+        //  token at this block number.
+        } else if ((totalSupplyHistory.length == 0)
+            || (totalSupplyHistory[0].fromBlock > _blockNumber)) {
+            if (address(parentToken) != 0) {
+                return parentToken.totalSupplyAt(parentSnapShotBlock);
+            } else {
+                return 0;
+            }
+
+        // This will return the expected totalSupply during normal situations
+        } else {
+            return getValueAt(totalSupplyHistory, _blockNumber);
+        }
+    }
+
+////////////////
+// Clone Token Method
+////////////////
+
+    /// @notice Creates a new clone token with the initial distribution being
+    ///  this token at `_snapshotBlock`
+    /// @param _cloneTokenName Name of the clone token
+    /// @param _cloneDecimalUnits Number of decimals of the smallest unit
+    /// @param _cloneTokenSymbol Symbol of the clone token
+    /// @param _snapshotBlock Block when the distribution of the parent token is
+    ///  copied to set the initial distribution of the new clone token;
+    ///  if the block is higher than the actual block, the current block is used
+    /// @param _transfersEnabled True if transfers are allowed in the clone
+    /// @return The address of the new MiniMeToken Contract
+    function createCloneToken(
+        string _cloneTokenName,
+        uint8 _cloneDecimalUnits,
+        string _cloneTokenSymbol,
+        uint _snapshotBlock,
+        bool _transfersEnabled
+        ) returns(address) {
+        if (_snapshotBlock > block.number) _snapshotBlock = block.number;
+        MiniMeToken cloneToken = tokenFactory.createCloneToken(
+            this,
+            _snapshotBlock,
+            _cloneTokenName,
+            _cloneDecimalUnits,
+            _cloneTokenSymbol,
+            _transfersEnabled
+            );
+
+        cloneToken.changeController(msg.sender);
+
+        // An event to make the token easy to find on the blockchain
+        NewCloneToken(address(cloneToken), _snapshotBlock);
+        return address(cloneToken);
+    }
+
+////////////////
+// Generate and destroy tokens
+////////////////
+
+    /// @notice Generates `_amount` tokens that are assigned to `_owner`
+    /// @param _owner The address that will be assigned the new tokens
+    /// @param _amount The quantity of tokens generated
+    /// @return True if the tokens are generated correctly
+    function generateTokens(address _owner, uint _amount
+    ) onlyController returns (bool) {
+        uint curTotalSupply = getValueAt(totalSupplyHistory, block.number);
+        updateValueAtNow(totalSupplyHistory, curTotalSupply + _amount);
+        var previousBalanceTo = balanceOf(_owner);
+        updateValueAtNow(balances[_owner], previousBalanceTo + _amount);
+        Transfer(0, _owner, _amount);
+        return true;
+    }
+
+
+    /// @notice Burns `_amount` tokens from `_owner`
+    /// @param _owner The address that will lose the tokens
+    /// @param _amount The quantity of tokens to burn
+    /// @return True if the tokens are burned correctly
+    function destroyTokens(address _owner, uint _amount
+    ) onlyController returns (bool) {
+        uint curTotalSupply = getValueAt(totalSupplyHistory, block.number);
+        if (curTotalSupply < _amount) throw;
+        updateValueAtNow(totalSupplyHistory, curTotalSupply - _amount);
+        var previousBalanceFrom = balanceOf(_owner);
+        if (previousBalanceFrom < _amount) throw;
+        updateValueAtNow(balances[_owner], previousBalanceFrom - _amount);
+        Transfer(_owner, 0, _amount);
+        return true;
+    }
+
+////////////////
+// Enable tokens transfers
+////////////////
+
+
+    /// @notice Enables token holders to transfer their tokens freely if true
+    /// @param _transfersEnabled True if transfers are allowed in the clone
+    function enableTransfers(bool _transfersEnabled) onlyController {
+        transfersEnabled = _transfersEnabled;
+    }
+
+////////////////
+// Internal helper functions to query and set a value in a snapshot array
+////////////////
+
+    /// @dev `getValueAt` retrieves the number of tokens at a given block number
+    /// @param checkpoints The history of values being queried
+    /// @param _block The block number to retrieve the value at
+    /// @return The number of tokens being queried
+    function getValueAt(Checkpoint[] storage checkpoints, uint _block
+    ) constant internal returns (uint) {
+        if (checkpoints.length == 0) return 0;
+
+        // Shortcut for the actual value
+        if (_block >= checkpoints[checkpoints.length-1].fromBlock)
+            return checkpoints[checkpoints.length-1].value;
+        if (_block < checkpoints[0].fromBlock) return 0;
+
+        // Binary search of the value in the array
+        uint min = 0;
+        uint max = checkpoints.length-1;
+        while (max > min) {
+            uint mid = (max + min + 1)/ 2;
+            if (checkpoints[mid].fromBlock<=_block) {
+                min = mid;
+            } else {
+                max = mid-1;
+            }
+        }
+        return checkpoints[min].value;
+    }
+
+    /// @dev `updateValueAtNow` used to update the `balances` map and the
+    ///  `totalSupplyHistory`
+    /// @param checkpoints The history of data being updated
+    /// @param _value The new number of tokens
+    function updateValueAtNow(Checkpoint[] storage checkpoints, uint _value
+    ) internal  {
+        if ((checkpoints.length == 0)
+        || (checkpoints[checkpoints.length -1].fromBlock < block.number)) {
+               Checkpoint newCheckPoint = checkpoints[ checkpoints.length++ ];
+               newCheckPoint.fromBlock =  uint128(block.number);
+               newCheckPoint.value = uint128(_value);
+           } else {
+               Checkpoint oldCheckPoint = checkpoints[checkpoints.length-1];
+               oldCheckPoint.value = uint128(_value);
+           }
+    }
+
+    /// @dev Internal function to determine if an address is a contract
+    /// @param _addr The address being queried
+    /// @return True if `_addr` is a contract
+    function isContract(address _addr) constant internal returns(bool) {
+        uint size;
+        if (_addr == 0) return false;
+        assembly {
+            size := extcodesize(_addr)
+        }
+        return size>0;
+    }
+
+    /// @notice The fallback function: If the contract's controller has not been
+    ///  set to 0, then the `proxyPayment` method is called which relays the
+    ///  ether and creates tokens as described in the token controller contract
+    function ()  payable {
+        if (isContract(controller)) {
+            if (! TokenController(controller).proxyPayment.value(msg.value)(msg.sender))
+                throw;
+        } else {
+            throw;
+        }
+    }
+
+
+////////////////
+// Events
+////////////////
+    event Transfer(address indexed _from, address indexed _to, uint256 _amount);
+    event NewCloneToken(address indexed _cloneToken, uint _snapshotBlock);
+    event Approval(
+        address indexed _owner,
+        address indexed _spender,
+        uint256 _amount
+        );
+
 }
 
-/*
-    Provides support and utilities for contract ownership
-*/
-contract Owned is IOwned {
-    address public owner;
-    address public newOwner;
 
-    event OwnerUpdate(address _prevOwner, address _newOwner);
+////////////////
+// MiniMeTokenFactory
+////////////////
 
-    /**
-        @dev constructor
-    */
-    function Owned() {
-        owner = msg.sender;
-    }
+/// @dev This contract is used to generate clone contracts from a contract.
+///  In solidity this is the way to create a contract from a contract of the
+///  same class
+contract MiniMeTokenFactory {
 
-    // allows execution by the owner only
-    modifier ownerOnly {
-        assert(msg.sender == owner);
-        _;
-    }
+    /// @notice Update the DApp by creating a new token with new functionalities
+    ///  the msg.sender becomes the controller of this clone token
+    /// @param _parentToken Address of the token being cloned
+    /// @param _snapshotBlock Block of the parent token that will
+    ///  determine the initial distribution of the clone token
+    /// @param _tokenName Name of the new token
+    /// @param _decimalUnits Number of decimals of the new token
+    /// @param _tokenSymbol Token Symbol for the new token
+    /// @param _transfersEnabled If true, tokens will be able to be transferred
+    /// @return The address of the new token contract
+    function createCloneToken(
+        address _parentToken,
+        uint _snapshotBlock,
+        string _tokenName,
+        uint8 _decimalUnits,
+        string _tokenSymbol,
+        bool _transfersEnabled
+    ) returns (MiniMeToken) {
+        MiniMeToken newToken = new MiniMeToken(
+            this,
+            _parentToken,
+            _snapshotBlock,
+            _tokenName,
+            _decimalUnits,
+            _tokenSymbol,
+            _transfersEnabled
+            );
 
-    /**
-        @dev allows transferring the contract ownership
-        the new owner still need to accept the transfer
-        can only be called by the contract owner
-
-        @param _newOwner    new contract owner
-    */
-    function transferOwnership(address _newOwner) public ownerOnly {
-        require(_newOwner != owner);
-        newOwner = _newOwner;
-    }
-
-    /**
-        @dev used by a new owner to accept an ownership transfer
-    */
-    function acceptOwnership() public {
-        require(msg.sender == newOwner);
-        OwnerUpdate(owner, newOwner);
-        owner = newOwner;
-        newOwner = 0x0;
+        newToken.changeController(msg.sender);
+        return newToken;
     }
 }
-
-/*
-    ERC20 Standard Token interface
-*/
-contract IERC20Token {
-    // these functions aren't abstract since the compiler emits automatically generated getter functions as external
-    function name() public constant returns (string name) { name; }
-    function symbol() public constant returns (string symbol) { symbol; }
-    function decimals() public constant returns (uint8 decimals) { decimals; }
-    function totalSupply() public constant returns (uint256 totalSupply) { totalSupply; }
-    function balanceOf(address _owner) public constant returns (uint256 balance) { _owner; balance; }
-    function allowance(address _owner, address _spender) public constant returns (uint256 remaining) { _owner; _spender; remaining; }
-
-    function transfer(address _to, uint256 _value) public returns (bool success);
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
-    function approve(address _spender, uint256 _value) public returns (bool success);
-}
-
-/*
-    Token Holder interface
-*/
-contract ITokenHolder is IOwned {
-    function withdrawTokens(IERC20Token _token, address _to, uint256 _amount) public;
-}
-
-/*
-    We consider every contract to be a 'token holder' since it's currently not possible
-    for a contract to deny receiving tokens.
-
-    The TokenHolder's contract sole purpose is to provide a safety mechanism that allows
-    the owner to send tokens that were sent to the contract by mistake back to their sender.
-*/
-contract TokenHolder is ITokenHolder, Owned {
-    /**
-        @dev constructor
-    */
-    function TokenHolder() {
-    }
-
-    // validates an address - currently only checks that it isn't null
-    modifier validAddress(address _address) {
-        require(_address != 0x0);
-        _;
-    }
-
-    // verifies that the address is different than this contract address
-    modifier notThis(address _address) {
-        require(_address != address(this));
-        _;
-    }
-
-    /**
-        @dev withdraws tokens held by the contract and sends them to an account
-        can only be called by the owner
-
-        @param _token   ERC20 token contract address
-        @param _to      account to receive the new amount
-        @param _amount  amount to withdraw
-    */
-    function withdrawTokens(IERC20Token _token, address _to, uint256 _amount)
-        public
-        ownerOnly
-        validAddress(_token)
-        validAddress(_to)
-        notThis(_to)
-    {
-        assert(_token.transfer(_to, _amount));
-    }
-}
-
-/*
-    Smart Token interface
-*/
-contract ISmartToken is ITokenHolder, IERC20Token {
-    function disableTransfers(bool _disable) public;
-    function issue(address _to, uint256 _amount) public;
-    function destroy(address _from, uint256 _amount) public;
-}
-
-/*
-    The smart token controller is an upgradable part of the smart token that allows
-    more functionality as well as fixes for bugs/exploits.
-    Once it accepts ownership of the token, it becomes the token's sole controller
-    that can execute any of its functions.
-
-    To upgrade the controller, ownership must be transferred to a new controller, along with
-    any relevant data.
-
-    The smart token must be set on construction and cannot be changed afterwards.
-    Wrappers are provided (as opposed to a single 'execute' function) for each of the token's functions, for easier access.
-
-    Note that the controller can transfer token ownership to a new controller that
-    doesn't allow executing any function on the token, for a trustless solution.
-    Doing that will also remove the owner's ability to upgrade the controller.
-*/
-contract SmartTokenController is TokenHolder {
-    ISmartToken public token;   // smart token
-
-    /**
-        @dev constructor
-    */
-    function SmartTokenController(ISmartToken _token)
-        validAddress(_token)
-    {
-        token = _token;
-    }
-
-    // ensures that the controller is the token's owner
-    modifier active() {
-        assert(token.owner() == address(this));
-        _;
-    }
-
-    // ensures that the controller is not the token's owner
-    modifier inactive() {
-        assert(token.owner() != address(this));
-        _;
-    }
-
-    /**
-        @dev allows transferring the token ownership
-        the new owner still need to accept the transfer
-        can only be called by the contract owner
-
-        @param _newOwner    new token owner
-    */
-    function transferTokenOwnership(address _newOwner) public ownerOnly {
-        token.transferOwnership(_newOwner);
-    }
-
-    /**
-        @dev used by a new owner to accept a token ownership transfer
-        can only be called by the contract owner
-    */
-    function acceptTokenOwnership() public ownerOnly {
-        token.acceptOwnership();
-    }
-
-    /**
-        @dev disables/enables token transfers
-        can only be called by the contract owner
-
-        @param _disable    true to disable transfers, false to enable them
-    */
-    function disableTokenTransfers(bool _disable) public ownerOnly {
-        token.disableTransfers(_disable);
-    }
-
-    /**
-        @dev allows the owner to execute the token's issue function
-
-        @param _to         account to receive the new amount
-        @param _amount     amount to increase the supply by
-    */
-    function issueTokens(address _to, uint256 _amount) public ownerOnly {
-        token.issue(_to, _amount);
-    }
-
-    /**
-        @dev allows the owner to execute the token's destroy function
-
-        @param _from       account to remove the amount from
-        @param _amount     amount to decrease the supply by
-    */
-    function destroyTokens(address _from, uint256 _amount) public ownerOnly {
-        token.destroy(_from, _amount);
-    }
-
-    /**
-        @dev withdraws tokens held by the token and sends them to an account
-        can only be called by the owner
-
-        @param _token   ERC20 token contract address
-        @param _to      account to receive the new amount
-        @param _amount  amount to withdraw
-    */
-    function withdrawFromToken(IERC20Token _token, address _to, uint256 _amount) public ownerOnly {
-        token.withdrawTokens(_token, _to, _amount);
-    }
-}
-
-/*
-    Crowdsale v0.1
-
-    The crowdsale version of the smart token controller, allows contributing ether in exchange for Bancor tokens
-    The price remains fixed for the entire duration of the crowdsale
-    Note that 20% of the contributions are the Bancor token's reserve
-*/
-contract CrowdsaleController is SmartTokenController, SafeMath {
-    uint256 public constant DURATION = 14 days;                 // crowdsale duration
-    uint256 public constant TOKEN_PRICE_N = 1;                  // initial price in wei (numerator)
-    uint256 public constant TOKEN_PRICE_D = 100;                // initial price in wei (denominator)
-    uint256 public constant BTCS_ETHER_CAP = 50000 ether;       // maximum bitcoin suisse ether contribution
-    uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
-
-    string public version = '0.1';
-
-    uint256 public startTime = 0;                   // crowdsale start time (in seconds)
-    uint256 public endTime = 0;                     // crowdsale end time (in seconds)
-    uint256 public totalEtherCap = 1000000 ether;   // current ether contribution cap, initialized with a temp value as a safety mechanism until the real cap is revealed
-    uint256 public totalEtherContributed = 0;       // ether contributed so far
-    bytes32 public realEtherCapHash;                // ensures that the real cap is predefined on deployment and cannot be changed later
-    address public beneficiary = 0x0;               // address to receive all ether contributions
-    address public btcs = 0x0;                      // bitcoin suisse address
-
-    // triggered on each contribution
-    event Contribution(address indexed _contributor, uint256 _amount, uint256 _return);
-
-    /**
-        @dev constructor
-
-        @param _token          smart token the crowdsale is for
-        @param _startTime      crowdsale start time
-        @param _beneficiary    address to receive all ether contributions
-        @param _btcs           bitcoin suisse address
-    */
-    function CrowdsaleController(ISmartToken _token, uint256 _startTime, address _beneficiary, address _btcs, bytes32 _realEtherCapHash)
-        SmartTokenController(_token)
-        validAddress(_beneficiary)
-        validAddress(_btcs)
-        earlierThan(_startTime)
-        validAmount(uint256(_realEtherCapHash))
-    {
-        startTime = _startTime;
-        endTime = startTime + DURATION;
-        beneficiary = _beneficiary;
-        btcs = _btcs;
-        realEtherCapHash = _realEtherCapHash;
-    }
-
-    // verifies that an amount is greater than zero
-    modifier validAmount(uint256 _amount) {
-        require(_amount > 0);
-        _;
-    }
-
-    // verifies that the gas price is lower than 50 gwei
-    modifier validGasPrice() {
-        assert(tx.gasprice <= MAX_GAS_PRICE);
-        _;
-    }
-
-    // verifies that the ether cap is valid based on the key provided
-    modifier validEtherCap(uint256 _cap, uint256 _key) {
-        require(computeRealCap(_cap, _key) == realEtherCapHash);
-        _;
-    }
-
-    // ensures that it's earlier than the given time
-    modifier earlierThan(uint256 _time) {
-        assert(now < _time);
-        _;
-    }
-
-    // ensures that the current time is between _startTime (inclusive) and _endTime (exclusive)
-    modifier between(uint256 _startTime, uint256 _endTime) {
-        assert(now >= _startTime && now < _endTime);
-        _;
-    }
-
-    // ensures that the sender is bitcoin suisse
-    modifier btcsOnly() {
-        assert(msg.sender == btcs);
-        _;
-    }
-
-    // ensures that we didn't reach the ether cap
-    modifier etherCapNotReached(uint256 _contribution) {
-        assert(safeAdd(totalEtherContributed, _contribution) <= totalEtherCap);
-        _;
-    }
-
-    // ensures that we didn't reach the bitcoin suisse ether cap
-    modifier btcsEtherCapNotReached(uint256 _ethContribution) {
-        assert(safeAdd(totalEtherContributed, _ethContribution) <= BTCS_ETHER_CAP);
-        _;
-    }
-
-    /**
-        @dev computes the real cap based on the given cap & key
-
-        @param _cap    cap
-        @param _key    key used to compute the cap hash
-
-        @return computed real cap hash
-    */
-    function computeRealCap(uint256 _cap, uint256 _key) public constant returns (bytes32) {
-        return keccak256(_cap, _key);
-    }
-
-    /**
-        @dev enables the real cap defined on deployment
-
-        @param _cap    predefined cap
-        @param _key    key used to compute the cap hash
-    */
-    function enableRealCap(uint256 _cap, uint256 _key)
-        public
-        ownerOnly
-        active
-        between(startTime, endTime)
-        validEtherCap(_cap, _key)
-    {
-        require(_cap < totalEtherCap); // validate input
-        totalEtherCap = _cap;
-    }
-
-    /**
-        @dev computes the number of tokens that should be issued for a given contribution
-
-        @param _contribution    contribution amount
-
-        @return computed number of tokens
-    */
-    function computeReturn(uint256 _contribution) public constant returns (uint256) {
-        return safeMul(_contribution, TOKEN_PRICE_D) / TOKEN_PRICE_N;
-    }
-
-    /**
-        @dev ETH contribution
-        can only be called during the crowdsale
-
-        @return tokens issued in return
-    */
-    function contributeETH()
-        public
-        payable
-        between(startTime, endTime)
-        returns (uint256 amount)
-    {
-        return processContribution();
-    }
-
-    /**
-        @dev Contribution through BTCs (Bitcoin Suisse only)
-        can only be called before the crowdsale started
-
-        @return tokens issued in return
-    */
-    function contributeBTCs()
-        public
-        payable
-        btcsOnly
-        btcsEtherCapNotReached(msg.value)
-        earlierThan(startTime)
-        returns (uint256 amount)
-    {
-        return processContribution();
-    }
-
-    /**
-        @dev handles contribution logic
-        note that the Contribution event is triggered using the sender as the contributor, regardless of the actual contributor
-
-        @return tokens issued in return
-    */
-    function processContribution() private
-        active
-        etherCapNotReached(msg.value)
-        validGasPrice
-        returns (uint256 amount)
-    {
-        uint256 tokenAmount = computeReturn(msg.value);
-        assert(beneficiary.send(msg.value)); // transfer the ether to the beneficiary account
-        totalEtherContributed = safeAdd(totalEtherContributed, msg.value); // update the total contribution amount
-        token.issue(msg.sender, tokenAmount); // issue new funds to the contributor in the smart token
-        token.issue(beneficiary, tokenAmount); // issue tokens to the beneficiary
-
-        Contribution(msg.sender, msg.value, tokenAmount);
-        return tokenAmount;
-    }
-
-    // fallback
-    function() payable {
-        contributeETH();
-    }
-}
+https://etherscan.io/address/0xb9e7f8568e08d5659f5d29c4997173d84cdf2607

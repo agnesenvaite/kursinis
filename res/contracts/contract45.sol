@@ -1,10 +1,6 @@
-pragma solidity ^0.4.6;
+pragma solidity ^0.4.11;
 
-
-/**
- * Math operations with safety checks
- */
-contract SafeMath {
+library SafeMath {
   function mul(uint a, uint b) internal returns (uint) {
     uint c = a * b;
     assert(a == 0 || c / a == b);
@@ -29,6 +25,22 @@ contract SafeMath {
     return c;
   }
 
+  function max64(uint64 a, uint64 b) internal constant returns (uint64) {
+    return a >= b ? a : b;
+  }
+
+  function min64(uint64 a, uint64 b) internal constant returns (uint64) {
+    return a < b ? a : b;
+  }
+
+  function max256(uint256 a, uint256 b) internal constant returns (uint256) {
+    return a >= b ? a : b;
+  }
+
+  function min256(uint256 a, uint256 b) internal constant returns (uint256) {
+    return a < b ? a : b;
+  }
+
   function assert(bool assertion) internal {
     if (!assertion) {
       throw;
@@ -36,237 +48,288 @@ contract SafeMath {
   }
 }
 
-
-/// Implements ERC 20 Token standard: https://github.com/ethereum/EIPs/issues/20
-/// @title Abstract token contract - Functions to be implemented by token contracts.
-contract AbstractToken {
-    // This is not an abstract function, because solc won't recognize generated getter functions for public variables as functions
-    function totalSupply() constant returns (uint256 supply) {}
-    function balanceOf(address owner) constant returns (uint256 balance);
-    function transfer(address to, uint256 value) returns (bool success);
-    function transferFrom(address from, address to, uint256 value) returns (bool success);
-    function approve(address spender, uint256 value) returns (bool success);
-    function allowance(address owner, address spender) constant returns (uint256 remaining);
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-    event Issuance(address indexed to, uint256 value);
+contract PreICO {
+  function balanceOf(address _owner) constant returns (uint256);
+  function burnTokens(address _owner);
 }
 
+contract ERC20Basic {
+  uint public totalSupply;
+  function balanceOf(address who) constant returns (uint);
+  function transfer(address to, uint value);
+  event Transfer(address indexed from, address indexed to, uint value);
+}
 
-contract StandardToken is AbstractToken {
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) constant returns (uint);
+  function transferFrom(address from, address to, uint value);
+  function approve(address spender, uint value);
+  event Approval(address indexed owner, address indexed spender, uint value);
+}
 
-    /*
-     *  Data structures
-     */
-    mapping (address => uint256) balances;
-    mapping (address => mapping (address => uint256)) allowed;
-    uint256 public totalSupply;
+contract BasicToken is ERC20Basic {
+  using SafeMath for uint;
 
-    /*
-     *  Read and write storage functions
-     */
-    /// @dev Transfers sender's tokens to a given address. Returns success.
-    /// @param _to Address of token receiver.
-    /// @param _value Number of tokens to transfer.
-    function transfer(address _to, uint256 _value) returns (bool success) {
-        if (balances[msg.sender] >= _value && balances[_to] + _value > balances[_to]) {
-            balances[msg.sender] -= _value;
-            balances[_to] += _value;
-            Transfer(msg.sender, _to, _value);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+  mapping(address => uint) balances;
 
-    /// @dev Allows allowed third party to transfer tokens from one address to another. Returns success.
-    /// @param _from Address from where tokens are withdrawn.
-    /// @param _to Address to where tokens are sent.
-    /// @param _value Number of tokens to transfer.
-    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
-      if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && balances[_to] + _value > balances[_to]) {
-            balances[_to] += _value;
-            balances[_from] -= _value;
-            allowed[_from][msg.sender] -= _value;
-            Transfer(_from, _to, _value);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+  /*
+   * Fix for the ERC20 short address attack  
+   */
+  modifier onlyPayloadSize(uint size) {
+     if(msg.data.length < size + 4) {
+       throw;
+     }
+     _;
+  }
 
-    /// @dev Returns number of tokens owned by given address.
-    /// @param _owner Address of token owner.
-    function balanceOf(address _owner) constant returns (uint256 balance) {
-        return balances[_owner];
-    }
+  function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+  }
 
-    /// @dev Sets approved amount of tokens for spender. Returns success.
-    /// @param _spender Address of allowed account.
-    /// @param _value Number of approved tokens.
-    function approve(address _spender, uint256 _value) returns (bool success) {
-        allowed[msg.sender][_spender] = _value;
-        Approval(msg.sender, _spender, _value);
-        return true;
-    }
+  function balanceOf(address _owner) constant returns (uint balance) {
+    return balances[_owner];
+  }
+  
+}
 
-    /*
-     * Read storage functions
-     */
-    /// @dev Returns number of allowed tokens for given address.
-    /// @param _owner Address of token owner.
-    /// @param _spender Address of token spender.
-    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
-      return allowed[_owner][_spender];
-    }
+contract StandardToken is BasicToken, ERC20 {
+
+  mapping (address => mapping (address => uint)) allowed;
+
+  function transferFrom(address _from, address _to, uint _value) {
+    var _allowance = allowed[_from][msg.sender];
+
+    // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
+    // if (_value > _allowance) throw;
+
+    balances[_to] = balances[_to].add(_value);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = _allowance.sub(_value);
+    Transfer(_from, _to, _value);
+  }
+
+  function approve(address _spender, uint _value) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+  }
+
+  function allowance(address _owner, address _spender) constant returns (uint remaining) {
+    return allowed[_owner][_spender];
+  }
 
 }
 
+contract ATL is StandardToken {
 
-/// @title Token contract - Implements Standard Token Interface with HumaniQ features.
-/// @author Evgeny Yurtaev - <[email protected]>
-/// @author Alexey Bashlykov - <[email protected]>
-contract HumaniqToken is StandardToken, SafeMath {
+  string public name = "ATLANT Token";
+  string public symbol = "ATL";
+  uint public decimals = 18;
+  uint constant TOKEN_LIMIT = 150 * 1e6 * 1e18;
 
-    /*
-     * External contracts
-     */
-    address public minter;
+  address public ico;
 
-    /*
-     * Token meta data
-     */
-    string constant public name = "Humaniq";
-    string constant public symbol = "HMQ";
-    uint8 constant public decimals = 8;
+  bool public tokensAreFrozen = true;
 
-    // Address of the founder of Humaniq.
-    address public founder = 0xc890b1f532e674977dfdb791cafaee898dfa9671;
+  function ATL(address _ico) {
+    ico = _ico;
+  }
 
-    // Multisig address of the founders
-    address public multisig = 0xa2c9a7578e2172f32a36c5c0e49d64776f9e7883;
+  function mint(address _holder, uint _value) external {
+    require(msg.sender == ico);
+    require(_value != 0);
+    require(totalSupply + _value <= TOKEN_LIMIT);
 
-    // Address where all tokens created during ICO stage initially allocated
-    address constant public allocationAddressICO = 0x1111111111111111111111111111111111111111;
+    balances[_holder] += _value;
+    totalSupply += _value;
+    Transfer(0x0, _holder, _value);
+  }
 
-    // Address where all tokens created during preICO stage initially allocated
-    address constant public allocationAddressPreICO = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+  function unfreeze() external {
+    require(msg.sender == ico);
+    tokensAreFrozen = false;
+  }
 
-    // 31 820 314 tokens were minted during preICO
-    uint constant public preICOSupply = mul(31820314, 100000000);
+  function transfer(address _to, uint _value) public {
+    require(!tokensAreFrozen);
+    super.transfer(_to, _value);
+  }
 
-    // 131 038 286 tokens were minted during ICO
-    uint constant public ICOSupply = mul(131038286, 100000000);
 
-    // Max number of tokens that can be minted
-    uint public maxTotalSupply;
+  function transferFrom(address _from, address _to, uint _value) public {
+    require(!tokensAreFrozen);
+    super.transferFrom(_from, _to, _value);
+  }
 
-    /*
-     * Modifiers
-     */
-    modifier onlyFounder() {
-        // Only founder is allowed to do this action.
-        if (msg.sender != founder) {
-            throw;
-        }
-        _;
-    }
 
-    modifier onlyMinter() {
-        // Only minter is allowed to proceed.
-        if (msg.sender != minter) {
-            throw;
-        }
-        _;
-    }
-
-    /*
-     * Contract functions
-     */
-
-    /// @dev Crowdfunding contract issues new tokens for address. Returns success.
-    /// @param _for Address of receiver.
-    /// @param tokenCount Number of tokens to issue.
-    function issueTokens(address _for, uint tokenCount)
-        external
-        payable
-        onlyMinter
-        returns (bool)
-    {
-        if (tokenCount == 0) {
-            return false;
-        }
-
-        if (add(totalSupply, tokenCount) > maxTotalSupply) {
-            throw;
-        }
-
-        totalSupply = add(totalSupply, tokenCount);
-        balances[_for] = add(balances[_for], tokenCount);
-        Issuance(_for, tokenCount);
-        return true;
-    }
-
-    /// @dev Function to change address that is allowed to do emission.
-    /// @param newAddress Address of new emission contract.
-    function changeMinter(address newAddress)
-        public
-        onlyFounder
-        returns (bool)
-    {   
-        // Forbid previous emission contract to distribute tokens minted during ICO stage
-        delete allowed[allocationAddressICO][minter];
-
-        minter = newAddress;
-
-        // Allow emission contract to distribute tokens minted during ICO stage
-        allowed[allocationAddressICO][minter] = balanceOf(allocationAddressICO);
-    }
-
-    /// @dev Function to change founder address.
-    /// @param newAddress Address of new founder.
-    function changeFounder(address newAddress)
-        public
-        onlyFounder
-        returns (bool)
-    {   
-        founder = newAddress;
-    }
-
-    /// @dev Function to change multisig address.
-    /// @param newAddress Address of new multisig.
-    function changeMultisig(address newAddress)
-        public
-        onlyFounder
-        returns (bool)
-    {
-        multisig = newAddress;
-    }
-
-    /// @dev Contract constructor function sets initial token balances.
-    function HumaniqToken(address founderAddress)
-    {   
-        // Set founder address
-        founder = founderAddress;
-
-        // Allocate all created tokens during ICO stage to allocationAddressICO.
-        balances[allocationAddressICO] = ICOSupply;
-
-        // Allocate all created tokens during preICO stage to allocationAddressPreICO.
-        balances[allocationAddressPreICO] = preICOSupply;
-
-        // Allow founder to distribute tokens minted during preICO stage
-        allowed[allocationAddressPreICO][founder] = preICOSupply;
-
-        // Give 14 percent of all tokens to founders.
-        balances[multisig] = div(mul(ICOSupply, 14), 86);
-
-        // Set correct totalSupply and limit maximum total supply.
-        totalSupply = add(ICOSupply, balances[multisig]);
-        totalSupply = add(totalSupply, preICOSupply);
-        maxTotalSupply = mul(totalSupply, 5);
-    }
+  function approve(address _spender, uint _value) public {
+    require(!tokensAreFrozen);
+    super.approve(_spender, _value);
+  }
 }
+
+contract ICO {
+
+  uint public constant MIN_TOKEN_PRICE = 425; // min atl per ETH
+  uint public constant TOKENS_FOR_SALE = 103548812 * 1e18;
+  uint public constant ATL_PER_ATP = 2; // Migration rate
+
+  event Buy(address holder, uint atlValue);
+  event ForeignBuy(address holder, uint atlValue, string txHash);
+  event Migrate(address holder, uint atlValue);
+  event RunIco();
+  event PauseIco();
+  event FinishIco(address teamFund, address bountyFund);
+
+  PreICO preICO;
+  ATL public atl;
+
+  address public team;
+  address public tradeRobot;
+  modifier teamOnly { require(msg.sender == team); _; }
+  modifier robotOnly { require(msg.sender == tradeRobot); _; }
+
+  uint public tokensSold = 0;
+
+  enum IcoState { Created, Running, Paused, Finished }
+  IcoState icoState = IcoState.Created;
+
+
+  function ICO(address _team, address _preICO, address _tradeRobot) {
+    atl = new ATL(this);
+    preICO = PreICO(_preICO);
+    team = _team;
+    tradeRobot = _tradeRobot;
+  }
+
+
+  function() external payable {
+    buyFor(msg.sender);
+  }
+
+
+  function buyFor(address _investor) public payable {
+    require(icoState == IcoState.Running);
+    require(msg.value > 0);
+    uint _total = buy(_investor, msg.value * MIN_TOKEN_PRICE);
+    Buy(_investor, _total);
+  }
+
+
+  function getBonus(uint _value, uint _sold)
+    public constant returns (uint)
+  {
+    uint[8] memory _bonusPricePattern = [ 505, 495, 485, 475, 465, 455, 445, uint(435) ];
+    uint _step = TOKENS_FOR_SALE / 10;
+    uint _bonus = 0;
+
+    for (uint8 i = 0; _value > 0 && i < _bonusPricePattern.length; ++i) {
+      uint _min = _step * i;
+      uint _max = _step * (i+1);
+
+      if (_sold >= _min && _sold < _max) {
+        uint bonusedPart = min(_value, _max - _sold);
+        _bonus += bonusedPart * _bonusPricePattern[i] / MIN_TOKEN_PRICE - bonusedPart;
+        _value -= bonusedPart;
+        _sold += bonusedPart;
+      }
+    }
+
+    return _bonus;
+  }
+
+  function foreignBuy(address _investor, uint _atlValue, string _txHash)
+    external robotOnly
+  {
+    require(icoState == IcoState.Running);
+    require(_atlValue > 0);
+    uint _total = buy(_investor, _atlValue);
+    ForeignBuy(_investor, _total, _txHash);
+  }
+
+
+  function setRobot(address _robot) external teamOnly {
+    tradeRobot = _robot;
+  }
+
+
+  function migrateSome(address[] _investors) external robotOnly {
+    for (uint i = 0; i < _investors.length; i++)
+      doMigration(_investors[i]);
+  }
+
+
+  function startIco() external teamOnly {
+    require(icoState == IcoState.Created || icoState == IcoState.Paused);
+    icoState = IcoState.Running;
+    RunIco();
+  }
+
+
+  function pauseIco() external teamOnly {
+    require(icoState == IcoState.Running);
+    icoState = IcoState.Paused;
+    PauseIco();
+  }
+
+
+  function finishIco(
+    address _teamFund,
+    address _bountyFund
+  )
+    external teamOnly
+  {
+    require(icoState == IcoState.Running || icoState == IcoState.Paused);
+
+    atl.mint(_teamFund, 22500000 * 1e18);
+    atl.mint(_bountyFund, 18750000 * 1e18);
+    atl.unfreeze();
+
+    icoState = IcoState.Finished;
+    FinishIco(_teamFund, _bountyFund);
+  }
+
+
+  function withdrawEther(uint _value) external teamOnly {
+    team.transfer(_value);
+  }
+
+
+  function withdrawToken(address _tokenContract, uint _val) external teamOnly
+  {
+    ERC20 _tok = ERC20(_tokenContract);
+    _tok.transfer(team, _val);
+  }
+
+
+  function min(uint a, uint b) internal constant returns (uint) {
+    return a < b ? a : b;
+  }
+
+
+  function buy(address _investor, uint _atlValue) internal returns (uint) {
+    uint _bonus = getBonus(_atlValue, tokensSold);
+    uint _total = _atlValue + _bonus;
+
+    require(tokensSold + _total <= TOKENS_FOR_SALE);
+
+    atl.mint(_investor, _total);
+    tokensSold += _total;
+    return _total;
+  }
+
+
+  function doMigration(address _investor) internal {
+    uint _atpBalance = preICO.balanceOf(_investor);
+    require(_atpBalance > 0);
+
+    preICO.burnTokens(_investor);
+
+    uint _atlValue = _atpBalance * ATL_PER_ATP;
+    atl.mint(_investor, _atlValue);
+
+    Migrate(_investor, _atlValue);
+  }
+}
+https://etherscan.io/address/0xf46ede17c0bab20d87cd079a2632f71433a407b9

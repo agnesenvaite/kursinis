@@ -1,574 +1,591 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.16;
+
+// ----------------------------------------------------------------------------
+//
+// IDH indaHash token public sale contract
+//
+// For details, please visit: https://indahash.com/ico
+//
+// ----------------------------------------------------------------------------
 
 
-/**
- * @title SafeMath
- * @dev Math operations with safety checks that throw on error
- */
-library SafeMath {
-  function mul(uint256 a, uint256 b) internal constant returns (uint256) {
-    uint256 c = a * b;
-    assert(a == 0 || c / a == b);
-    return c;
+// ----------------------------------------------------------------------------
+//
+// SafeMath3
+//
+// Adapted from https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/math/SafeMath.sol
+// (no need to implement division)
+//
+// ----------------------------------------------------------------------------
+
+library SafeMath3 {
+
+  function mul(uint a, uint b) internal constant returns (uint c) {
+    c = a * b;
+    assert( a == 0 || c / a == b );
   }
 
-  function div(uint256 a, uint256 b) internal constant returns (uint256) {
-    // assert(b > 0); // Solidity automatically throws when dividing by 0
-    uint256 c = a / b;
-    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-    return c;
-  }
-
-  function sub(uint256 a, uint256 b) internal constant returns (uint256) {
-    assert(b <= a);
+  function sub(uint a, uint b) internal constant returns (uint) {
+    assert( b <= a );
     return a - b;
   }
 
-  function add(uint256 a, uint256 b) internal constant returns (uint256) {
-    uint256 c = a + b;
-    assert(c >= a);
-    return c;
+  function add(uint a, uint b) internal constant returns (uint c) {
+    c = a + b;
+    assert( c >= a );
   }
+
 }
 
-/**
- * @title Ownable
- * @dev The Ownable contract has an owner address, and provides basic authorization control
- * functions, this simplifies the implementation of "user permissions".
- */
-contract Ownable {
+
+// ----------------------------------------------------------------------------
+//
+// Owned contract
+//
+// ----------------------------------------------------------------------------
+
+contract Owned {
+
   address public owner;
+  address public newOwner;
 
+  // Events ---------------------------
 
-  /**
-   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
-   * account.
-   */
-  function Ownable() {
-    owner = msg.sender;
-  }
+  event OwnershipTransferProposed(address indexed _from, address indexed _to);
+  event OwnershipTransferred(address indexed _from, address indexed _to);
 
+  // Modifier -------------------------
 
-  /**
-   * @dev Throws if called by any account other than the owner.
-   */
-  modifier onlyOwner() {
-    require(msg.sender == owner);
+  modifier onlyOwner {
+    require( msg.sender == owner );
     _;
   }
 
+  // Functions ------------------------
 
-  /**
-   * @dev Allows the current owner to transfer control of the contract to a newOwner.
-   * @param newOwner The address to transfer ownership to.
-   */
-  function transferOwnership(address newOwner) onlyOwner {
-    require(newOwner != address(0));
+  function Owned() {
+    owner = msg.sender;
+  }
+
+  function transferOwnership(address _newOwner) onlyOwner {
+    require( _newOwner != owner );
+    require( _newOwner != address(0x0) );
+    OwnershipTransferProposed(owner, _newOwner);
+    newOwner = _newOwner;
+  }
+
+  function acceptOwnership() {
+    require(msg.sender == newOwner);
+    OwnershipTransferred(owner, newOwner);
     owner = newOwner;
   }
 
 }
 
 
-/**
- * @title Claimable
- * @dev Extension for the Ownable contract, where the ownership needs to be claimed.
- * This allows the new owner to accept the transfer.
- */
-contract Claimable is Ownable {
-  address public pendingOwner;
+// ----------------------------------------------------------------------------
+//
+// ERC Token Standard #20 Interface
+// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20-token-standard.md
+//
+// ----------------------------------------------------------------------------
 
-  /**
-   * @dev Modifier throws if called by any account other than the pendingOwner.
-   */
-  modifier onlyPendingOwner() {
-    require(msg.sender == pendingOwner);
-    _;
-  }
+contract ERC20Interface {
 
-  /**
-   * @dev Allows the current owner to set the pendingOwner address.
-   * @param newOwner The address to transfer ownership to.
-   */
-  function transferOwnership(address newOwner) onlyOwner {
-    pendingOwner = newOwner;
-  }
+  // Events ---------------------------
 
-  /**
-   * @dev Allows the pendingOwner address to finalize the transfer.
-   */
-  function claimOwnership() onlyPendingOwner {
-    owner = pendingOwner;
-    pendingOwner = 0x0;
-  }
-}
+  event Transfer(address indexed _from, address indexed _to, uint _value);
+  event Approval(address indexed _owner, address indexed _spender, uint _value);
 
-/**
- * @title ERC20Basic
- * @dev Simpler version of ERC20 interface
- * @dev see https://github.com/ethereum/EIPs/issues/179
- */
-contract ERC20Basic {
-  uint256 public totalSupply;
-  function balanceOf(address who) constant returns (uint256);
-  function transfer(address to, uint256 value) returns (bool);
-  event Transfer(address indexed from, address indexed to, uint256 value);
+  // Functions ------------------------
+
+  function totalSupply() constant returns (uint);
+  function balanceOf(address _owner) constant returns (uint balance);
+  function transfer(address _to, uint _value) returns (bool success);
+  function transferFrom(address _from, address _to, uint _value) returns (bool success);
+  function approve(address _spender, uint _value) returns (bool success);
+  function allowance(address _owner, address _spender) constant returns (uint remaining);
+
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// ERC Token Standard #20
+//
+// ----------------------------------------------------------------------------
 
-/**
- * @title ERC20 interface
- * @dev see https://github.com/ethereum/EIPs/issues/20
- */
-contract ERC20 is ERC20Basic {
-  function allowance(address owner, address spender) constant returns (uint256);
-  function transferFrom(address from, address to, uint256 value) returns (bool);
-  function approve(address spender, uint256 value) returns (bool);
-  event Approval(address indexed owner, address indexed spender, uint256 value);
-}
+contract ERC20Token is ERC20Interface, Owned {
+  
+  using SafeMath3 for uint;
 
+  uint public tokensIssuedTotal = 0;
+  mapping(address => uint) balances;
+  mapping(address => mapping (address => uint)) allowed;
 
-/**
- * @title Basic token
- * @dev Basic version of StandardToken, with no allowances.
- */
-contract BasicToken is ERC20Basic {
-  using SafeMath for uint256;
+  // Functions ------------------------
 
-  mapping(address => uint256) balances;
+  /* Total token supply */
 
-  /**
-  * @dev transfer token for a specified address
-  * @param _to The address to transfer to.
-  * @param _value The amount to be transferred.
-  */
-  function transfer(address _to, uint256 _value) returns (bool) {
-    require(_to != address(0));
-
-    // SafeMath.sub will throw if there is not enough balance.
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-    Transfer(msg.sender, _to, _value);
-    return true;
+  function totalSupply() constant returns (uint) {
+    return tokensIssuedTotal;
   }
 
-  /**
-  * @dev Gets the balance of the specified address.
-  * @param _owner The address to query the the balance of.
-  * @return An uint256 representing the amount owned by the passed address.
-  */
-  function balanceOf(address _owner) constant returns (uint256 balance) {
+  /* Get the account balance for an address */
+
+  function balanceOf(address _owner) constant returns (uint balance) {
     return balances[_owner];
   }
 
-}
+  /* Transfer the balance from owner's account to another account */
 
+  function transfer(address _to, uint _amount) returns (bool success) {
+    // amount sent cannot exceed balance
+    require( balances[msg.sender] >= _amount );
 
-/**
- * @title Standard ERC20 token
- *
- * @dev Implementation of the basic standard token.
- * @dev https://github.com/ethereum/EIPs/issues/20
- * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
- */
-contract StandardToken is ERC20, BasicToken {
+    // update balances
+    balances[msg.sender] = balances[msg.sender].sub(_amount);
+    balances[_to]        = balances[_to].add(_amount);
 
-  mapping (address => mapping (address => uint256)) allowed;
-
-
-  /**
-   * @dev Transfer tokens from one address to another
-   * @param _from address The address which you want to send tokens from
-   * @param _to address The address which you want to transfer to
-   * @param _value uint256 the amount of tokens to be transferred
-   */
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
-    require(_to != address(0));
-
-    var _allowance = allowed[_from][msg.sender];
-
-    // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
-    // require (_value <= _allowance);
-
-    balances[_from] = balances[_from].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-    allowed[_from][msg.sender] = _allowance.sub(_value);
-    Transfer(_from, _to, _value);
+    // log event
+    Transfer(msg.sender, _to, _amount);
     return true;
   }
 
-  /**
-   * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
-   * @param _spender The address which will spend the funds.
-   * @param _value The amount of tokens to be spent.
-   */
-  function approve(address _spender, uint256 _value) returns (bool) {
+  /* Allow _spender to withdraw from your account up to _amount */
 
-    // To change the approve amount you first have to reduce the addresses`
-    //  allowance to zero by calling `approve(_spender, 0)` if it is not
-    //  already 0 to mitigate the race condition described here:
-    //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-    require((_value == 0) || (allowed[msg.sender][_spender] == 0));
-
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
+  function approve(address _spender, uint _amount) returns (bool success) {
+    // approval amount cannot exceed the balance
+    require ( balances[msg.sender] >= _amount );
+      
+    // update allowed amount
+    allowed[msg.sender][_spender] = _amount;
+    
+    // log event
+    Approval(msg.sender, _spender, _amount);
     return true;
   }
 
-  /**
-   * @dev Function to check the amount of tokens that an owner allowed to a spender.
-   * @param _owner address The address which owns the funds.
-   * @param _spender address The address which will spend the funds.
-   * @return A uint256 specifying the amount of tokens still available for the spender.
-   */
-  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+  /* Spender of tokens transfers tokens from the owner's balance */
+  /* Must be pre-approved by owner */
+
+  function transferFrom(address _from, address _to, uint _amount) returns (bool success) {
+    // balance checks
+    require( balances[_from] >= _amount );
+    require( allowed[_from][msg.sender] >= _amount );
+
+    // update balances and allowed amount
+    balances[_from]            = balances[_from].sub(_amount);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+    balances[_to]              = balances[_to].add(_amount);
+
+    // log event
+    Transfer(_from, _to, _amount);
+    return true;
+  }
+
+  /* Returns the amount of tokens approved by the owner */
+  /* that can be transferred by spender */
+
+  function allowance(address _owner, address _spender) constant returns (uint remaining) {
     return allowed[_owner][_spender];
   }
 
-  /**
-   * approve should be called when allowed[_spender] == 0. To increment
-   * allowed value is better to use this function to avoid 2 calls (and wait until
-   * the first transaction is mined)
-   * From MonolithDAO Token.sol
-   */
-  function increaseApproval (address _spender, uint _addedValue)
-    returns (bool success) {
-    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
-    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
-    return true;
-  }
-
-  function decreaseApproval (address _spender, uint _subtractedValue)
-    returns (bool success) {
-    uint oldValue = allowed[msg.sender][_spender];
-    if (_subtractedValue > oldValue) {
-      allowed[msg.sender][_spender] = 0;
-    } else {
-      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
-    }
-    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
-    return true;
-  }
-
 }
 
 
-/**
- * @title Mintable token
- * @dev Simple ERC20 Token example, with mintable token creation
- * @dev Issue: * https://github.com/OpenZeppelin/zeppelin-solidity/issues/120
- * Based on code by TokenMarketNet: https://github.com/TokenMarketNet/ico/blob/master/contracts/MintableToken.sol
- */
+// ----------------------------------------------------------------------------
+//
+// IDH public token sale
+//
+// ----------------------------------------------------------------------------
 
-contract MintableToken is StandardToken, Ownable {
-  event Mint(address indexed to, uint256 amount);
-  event MintFinished();
+contract IndaHashToken is ERC20Token {
 
-  bool public mintingFinished = false;
+  /* Utility variable */
+  
+  uint constant E6 = 10**6;
+  
+  /* Basic token data */
 
+  string public constant name     = "indaHash Coin";
+  string public constant symbol   = "IDH";
+  uint8  public constant decimals = 6;
 
-  modifier canMint() {
-    require(!mintingFinished);
-    _;
-  }
-
-  /**
-   * @dev Function to mint tokens
-   * @param _to The address that will receive the minted tokens.
-   * @param _amount The amount of tokens to mint.
-   * @return A boolean that indicates if the operation was successful.
-   */
-  function mint(address _to, uint256 _amount) onlyOwner canMint returns (bool) {
-    totalSupply = totalSupply.add(_amount);
-    balances[_to] = balances[_to].add(_amount);
-    Mint(_to, _amount);
-    Transfer(0x0, _to, _amount);
-    return true;
-  }
-
-  /**
-   * @dev Function to stop minting new tokens.
-   * @return True if the operation was successful.
-   */
-  function finishMinting() onlyOwner returns (bool) {
-    mintingFinished = true;
-    MintFinished();
-    return true;
-  }
-}
-
-/*
-* Horizon State Decision Token Contract
-*
-* Version 0.9
-*
-* Author Nimo Naamani
-*
-* This smart contract code is Copyright 2017 Horizon State (https://Horizonstate.com)
-*
-* Licensed under the Apache License, version 2.0: http://www.apache.org/licenses/LICENSE-2.0
-*
-* @title Horizon State Token
-* @dev ERC20 Decision Token (HST)
-* @author Nimo Naamani
-*
-* HST tokens have 18 decimal places. The smallest meaningful (and transferable)
-* unit is therefore 0.000000000000000001 HST. This unit is called a 'danni'.
-*
-* 1 HST = 1 * 10**18 = 1000000000000000000 dannis.
-*
-* Maximum total HST supply is 1 Billion.
-* This is equivalent to 1000000000 * 10**18 = 1e27 dannis.
-*
-* HST are mintable on demand (as they are being purchased), which means that
-* 1 Billion is the maximum.
-*/
-
-// @title The Horizon State Decision Token (HST)
-contract DecisionToken is MintableToken, Claimable {
-
-  using SafeMath for uint256;
-
-  // Name to appear in ERC20 wallets
-  string public constant name = "Decision Token";
-
-  // Symbol for the Decision Token to appear in ERC20 wallets
-  string public constant symbol = "HST";
-
-  // Version of the source contract
-  string public constant version = "1.0";
-
-  // Number of decimals for token display
-  uint8 public constant decimals = 18;
-
-  // Release timestamp. As part of the contract, tokens can only be transfered
-  // 10 days after this trigger is set
-  uint256 public triggerTime = 0;
-
-  // @title modifier to allow actions only when the token can be released
-  modifier onlyWhenReleased() {
-    require(now >= triggerTime);
-    _;
-  }
-
-
-  // @dev Constructor for the DecisionToken.
-  // Initialise the trigger (the sale contract will init this to the expected end time)
-  function DecisionToken() MintableToken() {
-    owner = msg.sender;
-  }
-
-  // @title Transfer tokens.
-  // @dev This contract overrides the transfer() function to only work when released
-  function transfer(address _to, uint256 _value) onlyWhenReleased returns (bool) {
-    return super.transfer(_to, _value);
-  }
-
-  // @title Allow transfers from
-  // @dev This contract overrides the transferFrom() function to only work when released
-  function transferFrom(address _from, address _to, uint256 _value) onlyWhenReleased returns (bool) {
-    return super.transferFrom(_from, _to, _value);
-  }
-
-  // @title finish minting of the token.
-  // @dev This contract overrides the finishMinting function to trigger the token lock countdown
-  function finishMinting() onlyOwner returns (bool) {
-    require(triggerTime==0);
-    triggerTime = now.add(10 days);
-    return super.finishMinting();
-  }
-}
-
-/**
-* Horizon State Token Sale Contract
-*
-* Version 0.9
-*
-* @author Nimo Naamani
-*
-* This smart contract code is Copyright 2017 Horizon State (https://Horizonstate.com)
-*
-* Licensed under the Apache License, version 2.0: http://www.apache.org/licenses/LICENSE-2.0
-*
-*/
-
-// @title The DC Token Sale contract
-// @dev A crowdsale contract with stages of tokens-per-eth based on time elapsed
-// Capped by maximum number of tokens; Time constrained
-contract DecisionTokenSale is Claimable {
-  using SafeMath for uint256;
-
-  // Start timestamp where investments are open to the public.
-  // Before this timestamp - only whitelisted addresses allowed to buy.
-  uint256 public startTime;
-
-  // End time. investments can only go up to this timestamp.
-  // Note that the sale can end before that, if the token cap is reached.
-  uint256 public endTime;
-
-  // Presale (whitelist only) buyers receive this many tokens per ETH
-  uint256 public constant presaleTokenRate = 3750;
-
-  // 1st day buyers receive this many tokens per ETH
-  uint256 public constant earlyBirdTokenRate = 3500;
-
-  // Day 2-8 buyers receive this many tokens per ETH
-  uint256 public constant secondStageTokenRate = 3250;
-
-  // Day 9-16 buyers receive this many tokens per ETH
-  uint256 public constant thirdStageTokenRate = 3000;
-
-  // Maximum total number of tokens ever created, taking into account 18 decimals.
-  uint256 public constant tokenCap =  10**9 * 10**18;
-
-  // Initial HorizonState allocation (reserve), taking into account 18 decimals.
-  uint256 public constant tokenReserve = 4 * (10**8) * 10**18;
-
-  // The Decision Token that is sold with this token sale
-  DecisionToken public token;
-
-  // The address where the funds are kept
+  /* Wallet addresses - initially set to owner at deployment */
+  
   address public wallet;
+  address public adminWallet;
 
-  // Holds the addresses that are whitelisted to participate in the presale.
-  // Sales to these addresses are allowed before saleStart
-  mapping (address => bool) whiteListedForPresale;
+  /* ICO dates */
 
-  // @title Event for token purchase logging
-  event TokenPurchase(address indexed purchaser, uint256 value, uint256 amount);
+  uint public constant DATE_PRESALE_START = 1510153200; // 08-Nov-2017 15:00 UTC
+  uint public constant DATE_PRESALE_END   = 1510758000; // 15-Nov-2017 15:00 UTC
 
-  // @title Event to log user added to whitelist
-  event LogUserAddedToWhiteList(address indexed user);
+  uint public constant DATE_ICO_START = 1511967600; // 29-Nov-2017 15:00 UTC
+  uint public constant DATE_ICO_END   = 1513782000; // 20-Dec-2017 15:00 UTC
 
-  //@title Event to log user removed from whitelist
-  event LogUserUserRemovedFromWhiteList(address indexed user);
+  /* ICO tokens per ETH */
+  
+  uint public tokensPerEth = 3200 * E6; // rate during last ICO week
 
+  uint public constant BONUS_PRESALE      = 40;
+  uint public constant BONUS_ICO_WEEK_ONE = 20;
+  uint public constant BONUS_ICO_WEEK_TWO = 10;
 
-  // @title Constructor
-  // @param _startTime: A timestamp for when the sale is to start.
-  // @param _wallet - The wallet where the token sale proceeds are to be stored
-  function DecisionTokenSale(uint256 _startTime, address _wallet) {
-    require(_startTime >= now);
-    require(_wallet != 0x0);
-    startTime = _startTime;
-    endTime = startTime.add(14 days);
-    wallet = _wallet;
+  /* Other ICO parameters */  
+  
+  uint public constant TOKEN_SUPPLY_TOTAL = 400 * E6 * E6; // 400 mm tokens
+  uint public constant TOKEN_SUPPLY_ICO   = 320 * E6 * E6; // 320 mm tokens
+  uint public constant TOKEN_SUPPLY_MKT   =  80 * E6 * E6; //  80 mm tokens
 
-    // Create the token contract itself.
-    token = createTokenContract();
+  uint public constant PRESALE_ETH_CAP =  15000 ether;
 
-    // Mint the reserve tokens to the owner of the sale contract.
-    token.mint(owner, tokenReserve);
+  uint public constant MIN_FUNDING_GOAL =  40 * E6 * E6; // 40 mm tokens
+  
+  uint public constant MIN_CONTRIBUTION = 1 ether / 2; // 0.5 Ether
+  uint public constant MAX_CONTRIBUTION = 300 ether;
+
+  uint public constant COOLDOWN_PERIOD =  2 days;
+  uint public constant CLAWBACK_PERIOD = 90 days;
+
+  /* Crowdsale variables */
+
+  uint public icoEtherReceived = 0; // Ether actually received by the contract
+
+  uint public tokensIssuedIco   = 0;
+  uint public tokensIssuedMkt   = 0;
+  
+  uint public tokensClaimedAirdrop = 0;
+  
+  /* Keep track of Ether contributed and tokens received during Crowdsale */
+  
+  mapping(address => uint) public icoEtherContributed;
+  mapping(address => uint) public icoTokensReceived;
+
+  /* Keep track of participants who 
+  /* - have received their airdropped tokens after a successful ICO */
+  /* - or have reclaimed their contributions in case of failed Crowdsale */
+  /* - are locked */
+  
+  mapping(address => bool) public airdropClaimed;
+  mapping(address => bool) public refundClaimed;
+  mapping(address => bool) public locked;
+
+  // Events ---------------------------
+  
+  event WalletUpdated(address _newWallet);
+  event AdminWalletUpdated(address _newAdminWallet);
+  event TokensPerEthUpdated(uint _tokensPerEth);
+  event TokensMinted(address indexed _owner, uint _tokens, uint _balance);
+  event TokensIssued(address indexed _owner, uint _tokens, uint _balance, uint _etherContributed);
+  event Refund(address indexed _owner, uint _amount, uint _tokens);
+  event Airdrop(address indexed _owner, uint _amount, uint _balance);
+  event LockRemoved(address indexed _participant);
+
+  // Basic Functions ------------------
+
+  /* Initialize (owner is set to msg.sender by Owned.Owned() */
+
+  function IndaHashToken() {
+    require( TOKEN_SUPPLY_ICO + TOKEN_SUPPLY_MKT == TOKEN_SUPPLY_TOTAL );
+    wallet = owner;
+    adminWallet = owner;
   }
 
-  // @title Create the token contract from this sale
-  // @dev Creates the contract for token to be sold.
-  function createTokenContract() internal returns (DecisionToken) {
-    return new DecisionToken();
-  }
-
-  // @title Buy Decision Tokens
-  // @dev Use this function to buy tokens through the sale
-  function buyTokens() payable {
-    require(msg.sender != 0x0);
-    require(msg.value != 0);
-    require(whiteListedForPresale[msg.sender] || now >= startTime);
-    require(!hasEnded());
-
-    // Calculate token amount to be created
-    uint256 tokens = calculateTokenAmount(msg.value);
-
-    if (token.totalSupply().add(tokens) > tokenCap) {
-      revert();
-    }
-
-    // Add the new tokens to the beneficiary
-    token.mint(msg.sender, tokens);
-
-    // Notify that a token purchase was performed
-    TokenPurchase(msg.sender, msg.value, tokens);
-
-    // Put the funds in the token sale wallet
-    wallet.transfer(msg.value);
-  }
-
-  // @dev This is fallback function can be used to buy tokens
+  /* Fallback */
+  
   function () payable {
     buyTokens();
   }
+  
+  // Information functions ------------
+  
+  /* What time is it? */
+  
+  function atNow() constant returns (uint) {
+    return now;
+  }
+  
+  /* Has the minimum threshold been reached? */
+  
+  function icoThresholdReached() constant returns (bool thresholdReached) {
+     if (tokensIssuedIco < MIN_FUNDING_GOAL) return false;
+     return true;
+  }  
+  
+  /* Are tokens transferable? */
 
-  // @title Calculate how many tokens per Ether
-  // The token sale has different rates based on time of purchase, as per the token
-  // sale whitepaper and Horizon State's Token Sale page.
-  // Presale:  : 3750 tokens per Ether
-  // Day 1     : 3500 tokens per Ether
-  // Days 2-8  : 3250 tokens per Ether
-  // Days 9-16 : 3000 tokens per Ether
-  //
-  // A note for calculation: As the number of decimals on the token is 18, which
-  // is identical to the wei per eth - the calculation performed here can use the
-  // number of tokens per ETH with no further modification.
-  //
-  // @param _weiAmount : How much wei the buyer wants to spend on tokens
-  // @return the number of tokens for this purchase.
-  function calculateTokenAmount(uint256 _weiAmount) internal constant returns (uint256) {
-    if (now >= startTime + 8 days) {
-      return _weiAmount.mul(thirdStageTokenRate);
-    }
-    if (now >= startTime + 1 days) {
-      return _weiAmount.mul(secondStageTokenRate);
-    }
-    if (now >= startTime) {
-      return _weiAmount.mul(earlyBirdTokenRate);
-    }
-    return _weiAmount.mul(presaleTokenRate);
+  function isTransferable() constant returns (bool transferable) {
+     if ( !icoThresholdReached() ) return false;
+     if ( atNow() < DATE_ICO_END + COOLDOWN_PERIOD ) return false;
+     return true;
+  }
+  
+  // Lock functions -------------------
+
+  /* Manage locked */
+
+  function removeLock(address _participant) {
+    require( msg.sender == adminWallet || msg.sender == owner );
+    locked[_participant] = false;
+    LockRemoved(_participant);
   }
 
-  // @title Check whether this sale has ended.
-  // @dev This is a utility function to help consumers figure out whether the sale
-  // has already ended.
-  // The sale is considered done when the token's minting finished, or when the current
-  // time has passed the sale's end time
-  // @return true if crowdsale event has ended
-  function hasEnded() public constant returns (bool) {
-    return now > endTime;
-  }
-
-  // @title White list a buyer for the presale.
-  // @dev Allow the owner of this contract to whitelist a buyer.
-  // Whitelisted buyers may buy in the presale, i.e before the sale starts.
-  // @param _buyer : The buyer address to whitelist
-  function whiteListAddress(address _buyer) onlyOwner {
-    require(_buyer != 0x0);
-    whiteListedForPresale[_buyer] = true;
-    LogUserAddedToWhiteList(_buyer);
-  }
-
-  // @title Whitelist an list of buyers for the presale
-  // @dev Allow the owner of this contract to whitelist multiple buyers in batch.
-  // Whitelisted buyers may buy in the presale, i.e before the sale starts.
-  // @param _buyers : The buyer addresses to whitelist
-  function addWhiteListedAddressesInBatch(address[] _buyers) onlyOwner {
-    require(_buyers.length < 1000);
-    for (uint i = 0; i < _buyers.length; i++) {
-      whiteListAddress(_buyers[i]);
+  function removeLockMultiple(address[] _participants) {
+    require( msg.sender == adminWallet || msg.sender == owner );
+    for (uint i = 0; i < _participants.length; i++) {
+      locked[_participants[i]] = false;
+      LockRemoved(_participants[i]);
     }
   }
 
-  // @title Remove a buyer from the whitelist.
-  // @dev Allow the owner of this contract to remove a buyer from the white list.
-  // @param _buyer : The buyer address to remove from the whitelist
-  function removeWhiteListedAddress(address _buyer) onlyOwner {
-    whiteListedForPresale[_buyer] = false;
+  // Owner Functions ------------------
+  
+  /* Change the crowdsale wallet address */
+
+  function setWallet(address _wallet) onlyOwner {
+    require( _wallet != address(0x0) );
+    wallet = _wallet;
+    WalletUpdated(wallet);
   }
 
-  // @title Terminate the contract
-  // @dev Allow the owner of this contract to terminate it
-  // It also transfers the token ownership to the owner of the sale contract.
-  function destroy() onlyOwner {
-    token.finishMinting();
-    token.transferOwnership(msg.sender);
-    selfdestruct(owner);
+  /* Change the admin wallet address */
+
+  function setAdminWallet(address _wallet) onlyOwner {
+    require( _wallet != address(0x0) );
+    adminWallet = _wallet;
+    AdminWalletUpdated(adminWallet);
   }
+
+  /* Change tokensPerEth before ICO start */
+  
+  function updateTokensPerEth(uint _tokensPerEth) onlyOwner {
+    require( atNow() < DATE_PRESALE_START );
+    tokensPerEth = _tokensPerEth;
+    TokensPerEthUpdated(_tokensPerEth);
+  }
+
+  /* Minting of marketing tokens by owner */
+
+  function mintMarketing(address _participant, uint _tokens) onlyOwner {
+    // check amount
+    require( _tokens <= TOKEN_SUPPLY_MKT.sub(tokensIssuedMkt) );
+    
+    // update balances
+    balances[_participant] = balances[_participant].add(_tokens);
+    tokensIssuedMkt        = tokensIssuedMkt.add(_tokens);
+    tokensIssuedTotal      = tokensIssuedTotal.add(_tokens);
+    
+    // locked
+    locked[_participant] = true;
+    
+    // log the miniting
+    Transfer(0x0, _participant, _tokens);
+    TokensMinted(_participant, _tokens, balances[_participant]);
+  }
+
+  /* Owner clawback of remaining funds after clawback period */
+  /* (for use in case of a failed Crwodsale) */
+  
+  function ownerClawback() external onlyOwner {
+    require( atNow() > DATE_ICO_END + CLAWBACK_PERIOD );
+    wallet.transfer(this.balance);
+  }
+
+  /* Transfer out any accidentally sent ERC20 tokens */
+
+  function transferAnyERC20Token(address tokenAddress, uint amount) onlyOwner returns (bool success) {
+      return ERC20Interface(tokenAddress).transfer(owner, amount);
+  }
+
+  // Private functions ----------------
+
+  /* Accept ETH during crowdsale (called by default function) */
+
+  function buyTokens() private {
+    uint ts = atNow();
+    bool isPresale = false;
+    bool isIco = false;
+    uint tokens = 0;
+    
+    // minimum contribution
+    require( msg.value >= MIN_CONTRIBUTION );
+    
+    // one address transfer hard cap
+    require( icoEtherContributed[msg.sender].add(msg.value) <= MAX_CONTRIBUTION );
+
+    // check dates for presale or ICO
+    if (ts > DATE_PRESALE_START && ts < DATE_PRESALE_END) isPresale = true;  
+    if (ts > DATE_ICO_START && ts < DATE_ICO_END) isIco = true;  
+    require( isPresale || isIco );
+
+    // presale cap in Ether
+    if (isPresale) require( icoEtherReceived.add(msg.value) <= PRESALE_ETH_CAP );
+    
+    // get baseline number of tokens
+    tokens = tokensPerEth.mul(msg.value) / 1 ether;
+    
+    // apply bonuses (none for last week)
+    if (isPresale) {
+      tokens = tokens.mul(100 + BONUS_PRESALE) / 100;
+    } else if (ts < DATE_ICO_START + 7 days) {
+      // first week ico bonus
+      tokens = tokens.mul(100 + BONUS_ICO_WEEK_ONE) / 100;
+    } else if (ts < DATE_ICO_START + 14 days) {
+      // second week ico bonus
+      tokens = tokens.mul(100 + BONUS_ICO_WEEK_TWO) / 100;
+    }
+    
+    // ICO token volume cap
+    require( tokensIssuedIco.add(tokens) <= TOKEN_SUPPLY_ICO );
+
+    // register tokens
+    balances[msg.sender]          = balances[msg.sender].add(tokens);
+    icoTokensReceived[msg.sender] = icoTokensReceived[msg.sender].add(tokens);
+    tokensIssuedIco               = tokensIssuedIco.add(tokens);
+    tokensIssuedTotal             = tokensIssuedTotal.add(tokens);
+    
+    // register Ether
+    icoEtherReceived                = icoEtherReceived.add(msg.value);
+    icoEtherContributed[msg.sender] = icoEtherContributed[msg.sender].add(msg.value);
+    
+    // locked
+    locked[msg.sender] = true;
+    
+    // log token issuance
+    Transfer(0x0, msg.sender, tokens);
+    TokensIssued(msg.sender, tokens, balances[msg.sender], msg.value);
+
+    // transfer Ether if we're over the threshold
+    if ( icoThresholdReached() ) wallet.transfer(this.balance);
+  }
+  
+  // ERC20 functions ------------------
+
+  /* Override "transfer" (ERC20) */
+
+  function transfer(address _to, uint _amount) returns (bool success) {
+    require( isTransferable() );
+    require( locked[msg.sender] == false );
+    require( locked[_to] == false );
+    return super.transfer(_to, _amount);
+  }
+  
+  /* Override "transferFrom" (ERC20) */
+
+  function transferFrom(address _from, address _to, uint _amount) returns (bool success) {
+    require( isTransferable() );
+    require( locked[_from] == false );
+    require( locked[_to] == false );
+    return super.transferFrom(_from, _to, _amount);
+  }
+
+  // External functions ---------------
+
+  /* Reclaiming of funds by contributors in case of a failed crowdsale */
+  /* (it will fail if account is empty after ownerClawback) */
+
+  /* While there could not have been any token transfers yet, a contributor */
+  /* may have received minted tokens, so the token balance after a refund */ 
+  /* may still be positive */
+  
+  function reclaimFunds() external {
+    uint tokens; // tokens to destroy
+    uint amount; // refund amount
+    
+    // ico is finished and was not successful
+    require( atNow() > DATE_ICO_END && !icoThresholdReached() );
+    
+    // check if refund has already been claimed
+    require( !refundClaimed[msg.sender] );
+    
+    // check if there is anything to refund
+    require( icoEtherContributed[msg.sender] > 0 );
+    
+    // update variables affected by refund
+    tokens = icoTokensReceived[msg.sender];
+    amount = icoEtherContributed[msg.sender];
+
+    balances[msg.sender] = balances[msg.sender].sub(tokens);
+    tokensIssuedTotal    = tokensIssuedTotal.sub(tokens);
+    
+    refundClaimed[msg.sender] = true;
+    
+    // transfer out refund
+    msg.sender.transfer(amount);
+    
+    // log
+    Transfer(msg.sender, 0x0, tokens);
+    Refund(msg.sender, amount, tokens);
+  }
+
+  /* Claiming of "airdropped" tokens in case of successful crowdsale */
+  /* Can be done by token holder, or by adminWallet */ 
+
+  function claimAirdrop() external {
+    doAirdrop(msg.sender);
+  }
+
+  function adminClaimAirdrop(address _participant) external {
+    require( msg.sender == adminWallet );
+    doAirdrop(_participant);
+  }
+
+  function adminClaimAirdropMultiple(address[] _addresses) external {
+    require( msg.sender == adminWallet );
+    for (uint i = 0; i < _addresses.length; i++) doAirdrop(_addresses[i]);
+  }  
+  
+  function doAirdrop(address _participant) internal {
+    uint airdrop = computeAirdrop(_participant);
+
+    require( airdrop > 0 );
+
+    // update balances and token issue volume
+    airdropClaimed[_participant] = true;
+    balances[_participant] = balances[_participant].add(airdrop);
+    tokensIssuedTotal      = tokensIssuedTotal.add(airdrop);
+    tokensClaimedAirdrop   = tokensClaimedAirdrop.add(airdrop);
+    
+    // log
+    Airdrop(_participant, airdrop, balances[_participant]);
+    Transfer(0x0, _participant, airdrop);
+  }
+
+  /* Function to estimate airdrop amount. For some accounts, the value of */
+  /* tokens received by calling claimAirdrop() may be less than gas costs */
+  
+  /* If an account has tokens from the ico, the amount after the airdrop */
+  /* will be newBalance = tokens * TOKEN_SUPPLY_ICO / tokensIssuedIco */
+      
+  function computeAirdrop(address _participant) constant returns (uint airdrop) {
+    // return 0 if it's too early or ico was not successful
+    if ( atNow() < DATE_ICO_END || !icoThresholdReached() ) return 0;
+    
+    // return  0 is the airdrop was already claimed
+    if( airdropClaimed[_participant] ) return 0;
+
+    // return 0 if the account does not hold any crowdsale tokens
+    if( icoTokensReceived[_participant] == 0 ) return 0;
+    
+    // airdrop amount
+    uint tokens = icoTokensReceived[_participant];
+    uint newBalance = tokens.mul(TOKEN_SUPPLY_ICO) / tokensIssuedIco;
+    airdrop = newBalance - tokens;
+  }  
+
+  /* Multiple token transfers from one address to save gas */
+  /* (longer _amounts array not accepted = sanity check) */
+
+  function transferMultiple(address[] _addresses, uint[] _amounts) external {
+    require( isTransferable() );
+    require( locked[msg.sender] == false );
+    require( _addresses.length == _amounts.length );
+    for (uint i = 0; i < _addresses.length; i++) {
+      if (locked[_addresses[i]] == false) super.transfer(_addresses[i], _amounts[i]);
+    }
+  }  
+
 }
+https://etherscan.io/address/0x5136c98a80811c3f46bdda8b5c4555cfd9f812f0

@@ -1,474 +1,753 @@
 pragma solidity ^0.4.11;
 
-contract Safe {
-    // Check if it is safe to add two numbers
-    function safeAdd(uint a, uint b) internal returns (uint) {
-        uint c = a + b;
-        assert(c >= a && c >= b);
-        return c;
-    }
 
-    // Check if it is safe to subtract two numbers
-    function safeSubtract(uint a, uint b) internal returns (uint) {
-        uint c = a - b;
-        assert(b <= a && c <= a);
-        return c;
-    }
 
-    function safeMultiply(uint a, uint b) internal returns (uint) {
-        uint c = a * b;
-        assert(a == 0 || (c / a) == b);
-        return c;
-    }
-
-    function shrink128(uint a) internal returns (uint128) {
-        assert(a < 0x100000000000000000000000000000000);
-        return uint128(a);
-    }
-
-    // mitigate short address attack
-    modifier onlyPayloadSize(uint numWords) {
-        assert(msg.data.length == numWords * 32 + 4);
-        _;
-    }
-
-    // allow ether to be received
-    function () payable { }
-}
-
-// Class variables used both in NumeraireBackend and NumeraireDelegate
-
-contract NumeraireShared is Safe {
-
-    address public numerai = this;
-
-    // Cap the total supply and the weekly supply
-    uint256 public supply_cap = 21000000e18; // 21 million
-    uint256 public weekly_disbursement = 96153846153846153846153;
-
-    uint256 public initial_disbursement;
-    uint256 public deploy_time;
-
-    uint256 public total_minted;
-
-    // ERC20 requires totalSupply, balanceOf, and allowance
-    uint256 public totalSupply;
-    mapping (address => uint256) public balanceOf;
-    mapping (address => mapping (address => uint256)) public allowance;
-
-    mapping (uint => Tournament) public tournaments;  // tournamentID
-
-    struct Tournament {
-        uint256 creationTime;
-        uint256[] roundIDs;
-        mapping (uint256 => Round) rounds;  // roundID
-    } 
-
-    struct Round {
-        uint256 creationTime;
-        uint256 endTime;
-        uint256 resolutionTime;
-        mapping (address => mapping (bytes32 => Stake)) stakes;  // address of staker
-    }
-
-    // The order is important here because of its packing characteristics.
-    // Particularly, `amount` and `confidence` are in the *same* word, so
-    // Solidity can update both at the same time (if the optimizer can figure
-    // out that you're updating both).  This makes `stake()` cheap.
-    struct Stake {
-        uint128 amount; // Once the stake is resolved, this becomes 0
-        uint128 confidence;
-        bool successful;
-        bool resolved;
-    }
-
-    // Generates a public event on the blockchain to notify clients
-    event Mint(uint256 value);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-    event Staked(address indexed staker, bytes32 tag, uint256 totalAmountStaked, uint256 confidence, uint256 indexed tournamentID, uint256 indexed roundID);
-    event RoundCreated(uint256 indexed tournamentID, uint256 indexed roundID, uint256 endTime, uint256 resolutionTime);
-    event TournamentCreated(uint256 indexed tournamentID);
-    event StakeDestroyed(uint256 indexed tournamentID, uint256 indexed roundID, address indexed stakerAddress, bytes32 tag);
-    event StakeReleased(uint256 indexed tournamentID, uint256 indexed roundID, address indexed stakerAddress, bytes32 tag, uint256 etherReward);
-
-    // Calculate allowable disbursement
-    function getMintable() constant returns (uint256) {
-        return
-            safeSubtract(
-                safeAdd(initial_disbursement,
-                    safeMultiply(weekly_disbursement,
-                        safeSubtract(block.timestamp, deploy_time))
-                    / 1 weeks),
-                total_minted);
-    }
-}
-
-// From OpenZepplin: https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/ownership/Shareable.sol
-/*
- * Shareable
- * 
- * Effectively our multisig contract
- *
- * Based on https://github.com/ethereum/dapp-bin/blob/master/wallet/wallet.sol
- *
- * inheritable "property" contract that enables methods to be protected by requiring the acquiescence of either a single, or, crucially, each of a number of, designated owners.
- *
- * usage:
- * use modifiers onlyowner (just own owned) or onlymanyowners(hash), whereby the same hash must be provided by some number (specified in constructor) of the set of owners (specified in the constructor) before the interior is executed.
+/**
+ * Math operations with safety checks
  */
-contract Shareable {
-  // TYPES
+library SafeMath {
+  function mul(uint a, uint b) internal returns (uint) {
+    uint c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
 
-  // struct for the status of a pending operation.
-  struct PendingState {
-    uint yetNeeded;
-    uint ownersDone;
-    uint index;
+  function div(uint a, uint b) internal returns (uint) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    uint c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return c;
+  }
+
+  function sub(uint a, uint b) internal returns (uint) {
+    assert(b <= a);
+    return a - b;
+  }
+
+  function add(uint a, uint b) internal returns (uint) {
+    uint c = a + b;
+    assert(c >= a);
+    return c;
+  }
+
+  function max64(uint64 a, uint64 b) internal constant returns (uint64) {
+    return a >= b ? a : b;
+  }
+
+  function min64(uint64 a, uint64 b) internal constant returns (uint64) {
+    return a < b ? a : b;
+  }
+
+  function max256(uint256 a, uint256 b) internal constant returns (uint256) {
+    return a >= b ? a : b;
+  }
+
+  function min256(uint256 a, uint256 b) internal constant returns (uint256) {
+    return a < b ? a : b;
+  }
+
+  function assert(bool assertion) internal {
+    if (!assertion) {
+      throw;
+    }
+  }
+}
+
+
+/**
+ * @title ERC20Basic
+ * @dev Simpler version of ERC20 interface
+ * @dev see https://github.com/ethereum/EIPs/issues/20
+ */
+contract ERC20Basic {
+  uint public totalSupply;
+  function balanceOf(address who) constant returns (uint);
+  function transfer(address to, uint value);
+  event Transfer(address indexed from, address indexed to, uint value);
+}
+
+
+
+
+/**
+ * @title Basic token
+ * @dev Basic version of StandardToken, with no allowances. 
+ */
+contract BasicToken is ERC20Basic {
+  using SafeMath for uint;
+
+  mapping(address => uint) balances;
+
+  /**
+   * @dev Fix for the ERC20 short address attack.
+   */
+  modifier onlyPayloadSize(uint size) {
+     if(msg.data.length < size + 4) {
+       throw;
+     }
+     _;
+  }
+
+  /**
+  * @dev transfer token for a specified address
+  * @param _to The address to transfer to.
+  * @param _value The amount to be transferred.
+  */
+  function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+  }
+
+  /**
+  * @dev Gets the balance of the specified address.
+  * @param _owner The address to query the the balance of. 
+  * @return An uint representing the amount owned by the passed address.
+  */
+  function balanceOf(address _owner) constant returns (uint balance) {
+    return balances[_owner];
+  }
+
+}
+
+
+
+
+/**
+ * @title ERC20 interface
+ * @dev see https://github.com/ethereum/EIPs/issues/20
+ */
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) constant returns (uint);
+  function transferFrom(address from, address to, uint value);
+  function approve(address spender, uint value);
+  event Approval(address indexed owner, address indexed spender, uint value);
+}
+
+
+
+
+/**
+ * @title Standard ERC20 token
+ *
+ * @dev Implemantation of the basic standart token.
+ * @dev https://github.com/ethereum/EIPs/issues/20
+ * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
+ */
+contract StandardToken is BasicToken, ERC20 {
+
+  mapping (address => mapping (address => uint)) allowed;
+
+
+  /**
+   * @dev Transfer tokens from one address to another
+   * @param _from address The address which you want to send tokens from
+   * @param _to address The address which you want to transfer to
+   * @param _value uint the amout of tokens to be transfered
+   */
+  function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) {
+    var _allowance = allowed[_from][msg.sender];
+
+    // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
+    // if (_value > _allowance) throw;
+
+    balances[_to] = balances[_to].add(_value);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = _allowance.sub(_value);
+    Transfer(_from, _to, _value);
+  }
+
+  /**
+   * @dev Aprove the passed address to spend the specified amount of tokens on beahlf of msg.sender.
+   * @param _spender The address which will spend the funds.
+   * @param _value The amount of tokens to be spent.
+   */
+  function approve(address _spender, uint _value) {
+
+    // To change the approve amount you first have to reduce the addresses`
+    //  allowance to zero by calling `approve(_spender, 0)` if it is not
+    //  already 0 to mitigate the race condition described here:
+    //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+    if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
+
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+  }
+
+  /**
+   * @dev Function to check the amount of tokens than an owner allowed to a spender.
+   * @param _owner address The address which owns the funds.
+   * @param _spender address The address which will spend the funds.
+   * @return A uint specifing the amount of tokens still avaible for the spender.
+   */
+  function allowance(address _owner, address _spender) constant returns (uint remaining) {
+    return allowed[_owner][_spender];
+  }
+
+}
+
+
+/**
+ * @title LimitedTransferToken
+ * @dev LimitedTransferToken defines the generic interface and the implementation to limit token 
+ * transferability for different events. It is intended to be used as a base class for other token 
+ * contracts. 
+ * LimitedTransferToken has been designed to allow for different limiting factors,
+ * this can be achieved by recursively calling super.transferableTokens() until the base class is 
+ * hit. For example:
+ *     function transferableTokens(address holder, uint64 time) constant public returns (uint256) {
+ *       return min256(unlockedTokens, super.transferableTokens(holder, time));
+ *     }
+ * A working example is VestedToken.sol:
+ * https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/token/VestedToken.sol
+ */
+
+contract LimitedTransferToken is ERC20 {
+
+  /**
+   * @dev Checks whether it can transfer or otherwise throws.
+   */
+  modifier canTransfer(address _sender, uint _value) {
+   if (_value > transferableTokens(_sender, uint64(now))) throw;
+   _;
+  }
+
+  /**
+   * @dev Checks modifier and allows transfer if tokens are not locked.
+   * @param _to The address that will recieve the tokens.
+   * @param _value The amount of tokens to be transferred.
+   */
+  function transfer(address _to, uint _value) canTransfer(msg.sender, _value) {
+    super.transfer(_to, _value);
+  }
+
+  /**
+  * @dev Checks modifier and allows transfer if tokens are not locked.
+  * @param _from The address that will send the tokens.
+  * @param _to The address that will recieve the tokens.
+  * @param _value The amount of tokens to be transferred.
+  */
+  function transferFrom(address _from, address _to, uint _value) canTransfer(_from, _value) {
+    super.transferFrom(_from, _to, _value);
+  }
+
+  /**
+   * @dev Default transferable tokens function returns all tokens for a holder (no limit).
+   * @dev Overwriting transferableTokens(address holder, uint64 time) is the way to provide the 
+   * specific logic for limiting token transferability for a holder over time.
+   */
+  function transferableTokens(address holder, uint64 time) constant public returns (uint256) {
+    return balanceOf(holder);
+  }
+}
+
+
+/**
+ * @title Vested token
+ * @dev Tokens that can be vested for a group of addresses.
+ */
+contract VestedToken is StandardToken, LimitedTransferToken {
+
+  uint256 MAX_GRANTS_PER_ADDRESS = 20;
+
+  struct TokenGrant {
+    address granter;     // 20 bytes
+    uint256 value;       // 32 bytes
+    uint64 cliff;
+    uint64 vesting;
+    uint64 start;        // 3 * 8 = 24 bytes
+    bool revokable;
+    bool burnsOnRevoke;  // 2 * 1 = 2 bits? or 2 bytes?
+  } // total 78 bytes = 3 sstore per operation (32 per sstore)
+
+  mapping (address => TokenGrant[]) public grants;
+
+  event NewTokenGrant(address indexed from, address indexed to, uint256 value, uint256 grantId);
+
+  /**
+   * @dev Grant tokens to a specified address
+   * @param _to address The address which the tokens will be granted to.
+   * @param _value uint256 The amount of tokens to be granted.
+   * @param _start uint64 Time of the beginning of the grant.
+   * @param _cliff uint64 Time of the cliff period.
+   * @param _vesting uint64 The vesting period.
+   */
+  function grantVestedTokens(
+    address _to,
+    uint256 _value,
+    uint64 _start,
+    uint64 _cliff,
+    uint64 _vesting,
+    bool _revokable,
+    bool _burnsOnRevoke
+  ) public {
+
+    // Check for date inconsistencies that may cause unexpected behavior
+    if (_cliff < _start || _vesting < _cliff) {
+      throw;
+    }
+
+    if (tokenGrantsCount(_to) > MAX_GRANTS_PER_ADDRESS) throw;   // To prevent a user being spammed and have his balance locked (out of gas attack when calculating vesting).
+
+    uint count = grants[_to].push(
+                TokenGrant(
+                  _revokable ? msg.sender : 0, // avoid storing an extra 20 bytes when it is non-revokable
+                  _value,
+                  _cliff,
+                  _vesting,
+                  _start,
+                  _revokable,
+                  _burnsOnRevoke
+                )
+              );
+
+    transfer(_to, _value);
+
+    NewTokenGrant(msg.sender, _to, _value, count - 1);
+  }
+
+  /**
+   * @dev Revoke the grant of tokens of a specifed address.
+   * @param _holder The address which will have its tokens revoked.
+   * @param _grantId The id of the token grant.
+   */
+  function revokeTokenGrant(address _holder, uint _grantId) public {
+    TokenGrant grant = grants[_holder][_grantId];
+
+    if (!grant.revokable) { // Check if grant was revokable
+      throw;
+    }
+
+    if (grant.granter != msg.sender) { // Only granter can revoke it
+      throw;
+    }
+
+    address receiver = grant.burnsOnRevoke ? 0xdead : msg.sender;
+
+    uint256 nonVested = nonVestedTokens(grant, uint64(now));
+
+    // remove grant from array
+    delete grants[_holder][_grantId];
+    grants[_holder][_grantId] = grants[_holder][grants[_holder].length.sub(1)];
+    grants[_holder].length -= 1;
+
+    balances[receiver] = balances[receiver].add(nonVested);
+    balances[_holder] = balances[_holder].sub(nonVested);
+
+    Transfer(_holder, receiver, nonVested);
   }
 
 
-  // FIELDS
+  /**
+   * @dev Calculate the total amount of transferable tokens of a holder at a given time
+   * @param holder address The address of the holder
+   * @param time uint64 The specific time.
+   * @return An uint representing a holder's total amount of transferable tokens.
+   */
+  function transferableTokens(address holder, uint64 time) constant public returns (uint256) {
+    uint256 grantIndex = tokenGrantsCount(holder);
 
-  // the number of owners that must confirm the same operation before it is run.
-  uint public required;
+    if (grantIndex == 0) return balanceOf(holder); // shortcut for holder without grants
 
-  // list of owners
-  address[256] owners;
-  uint constant c_maxOwners = 250;
-  // index on the list of owners to allow reverse lookup
-  mapping(address => uint) ownerIndex;
-  // the ongoing operations.
-  mapping(bytes32 => PendingState) pendings;
-  bytes32[] pendingsIndex;
+    // Iterate through all the grants the holder has, and add all non-vested tokens
+    uint256 nonVested = 0;
+    for (uint256 i = 0; i < grantIndex; i++) {
+      nonVested = SafeMath.add(nonVested, nonVestedTokens(grants[holder][i], time));
+    }
+
+    // Balance - totalNonVested is the amount of tokens a holder can transfer at any given time
+    uint256 vestedTransferable = SafeMath.sub(balanceOf(holder), nonVested);
+
+    // Return the minimum of how many vested can transfer and other value
+    // in case there are other limiting transferability factors (default is balanceOf)
+    return SafeMath.min256(vestedTransferable, super.transferableTokens(holder, time));
+  }
+
+  /**
+   * @dev Check the amount of grants that an address has.
+   * @param _holder The holder of the grants.
+   * @return A uint representing the total amount of grants.
+   */
+  function tokenGrantsCount(address _holder) constant returns (uint index) {
+    return grants[_holder].length;
+  }
+
+  /**
+   * @dev Calculate amount of vested tokens at a specifc time.
+   * @param tokens uint256 The amount of tokens grantted.
+   * @param time uint64 The time to be checked
+   * @param start uint64 A time representing the begining of the grant
+   * @param cliff uint64 The cliff period.
+   * @param vesting uint64 The vesting period.
+   * @return An uint representing the amount of vested tokensof a specif grant.
+   *  transferableTokens
+   *   |                         _/--------   vestedTokens rect
+   *   |                       _/
+   *   |                     _/
+   *   |                   _/
+   *   |                 _/
+   *   |                /
+   *   |              .|
+   *   |            .  |
+   *   |          .    |
+   *   |        .      |
+   *   |      .        |
+   *   |    .          |
+   *   +===+===========+---------+----------> time
+   *      Start       Clift    Vesting
+   */
+  function calculateVestedTokens(
+    uint256 tokens,
+    uint256 time,
+    uint256 start,
+    uint256 cliff,
+    uint256 vesting) constant returns (uint256)
+    {
+      // Shortcuts for before cliff and after vesting cases.
+      if (time < cliff) return 0;
+      if (time >= vesting) return tokens;
+
+      // Interpolate all vested tokens.
+      // As before cliff the shortcut returns 0, we can use just calculate a value
+      // in the vesting rect (as shown in above's figure)
+
+      // vestedTokens = tokens * (time - start) / (vesting - start)
+      uint256 vestedTokens = SafeMath.div(
+                                    SafeMath.mul(
+                                      tokens,
+                                      SafeMath.sub(time, start)
+                                      ),
+                                    SafeMath.sub(vesting, start)
+                                    );
+
+      return vestedTokens;
+  }
+
+  /**
+   * @dev Get all information about a specifc grant.
+   * @param _holder The address which will have its tokens revoked.
+   * @param _grantId The id of the token grant.
+   * @return Returns all the values that represent a TokenGrant(address, value, start, cliff,
+   * revokability, burnsOnRevoke, and vesting) plus the vested value at the current time.
+   */
+  function tokenGrant(address _holder, uint _grantId) constant returns (address granter, uint256 value, uint256 vested, uint64 start, uint64 cliff, uint64 vesting, bool revokable, bool burnsOnRevoke) {
+    TokenGrant grant = grants[_holder][_grantId];
+
+    granter = grant.granter;
+    value = grant.value;
+    start = grant.start;
+    cliff = grant.cliff;
+    vesting = grant.vesting;
+    revokable = grant.revokable;
+    burnsOnRevoke = grant.burnsOnRevoke;
+
+    vested = vestedTokens(grant, uint64(now));
+  }
+
+  /**
+   * @dev Get the amount of vested tokens at a specific time.
+   * @param grant TokenGrant The grant to be checked.
+   * @param time The time to be checked
+   * @return An uint representing the amount of vested tokens of a specific grant at a specific time.
+   */
+  function vestedTokens(TokenGrant grant, uint64 time) private constant returns (uint256) {
+    return calculateVestedTokens(
+      grant.value,
+      uint256(time),
+      uint256(grant.start),
+      uint256(grant.cliff),
+      uint256(grant.vesting)
+    );
+  }
+
+  /**
+   * @dev Calculate the amount of non vested tokens at a specific time.
+   * @param grant TokenGrant The grant to be checked.
+   * @param time uint64 The time to be checked
+   * @return An uint representing the amount of non vested tokens of a specifc grant on the 
+   * passed time frame.
+   */
+  function nonVestedTokens(TokenGrant grant, uint64 time) private constant returns (uint256) {
+    return grant.value.sub(vestedTokens(grant, time));
+  }
+
+  /**
+   * @dev Calculate the date when the holder can trasfer all its tokens
+   * @param holder address The address of the holder
+   * @return An uint representing the date of the last transferable tokens.
+   */
+  function lastTokenIsTransferableDate(address holder) constant public returns (uint64 date) {
+    date = uint64(now);
+    uint256 grantIndex = grants[holder].length;
+    for (uint256 i = 0; i < grantIndex; i++) {
+      date = SafeMath.max64(grants[holder][i].vesting, date);
+    }
+  }
+}
+
+// QUESTIONS FOR AUDITORS:
+// - Considering we inherit from VestedToken, how much does that hit at our gas price?
+// - Ensure max supply is 100,000,000
+// - Ensure that even if not totalSupply is sold, tokens would still be transferrable after (we will up to totalSupply by creating adEx tokens)
+
+// vesting: 365 days, 365 days / 4 vesting
 
 
-  // EVENTS
+contract ADXToken is VestedToken {
+  //FIELDS
+  string public name = "AdEx";
+  string public symbol = "ADX";
+  uint public decimals = 4;
 
-  // this contract only has six types of events: it can accept a confirmation, in which case
-  // we record owner and operation (hash) alongside it.
-  event Confirmation(address owner, bytes32 operation);
-  event Revoke(address owner, bytes32 operation);
+  //CONSTANTS
+  //Time limits
+  uint public constant STAGE_ONE_TIME_END = 24 hours; // first day bonus
+  uint public constant STAGE_TWO_TIME_END = 1 weeks; // first week bonus
+  uint public constant STAGE_THREE_TIME_END = 4 weeks;
+  
+  // Multiplier for the decimals
+  uint private constant DECIMALS = 10000;
 
+  //Prices of ADX
+  uint public constant PRICE_STANDARD    = 900*DECIMALS; // ADX received per one ETH; MAX_SUPPLY / (valuation / ethPrice)
+  uint public constant PRICE_STAGE_ONE   = PRICE_STANDARD * 130/100; // 1ETH = 30% more ADX
+  uint public constant PRICE_STAGE_TWO   = PRICE_STANDARD * 115/100; // 1ETH = 15% more ADX
+  uint public constant PRICE_STAGE_THREE = PRICE_STANDARD;
+
+  //ADX Token Limits
+  uint public constant ALLOC_TEAM =         16000000*DECIMALS; // team + advisors
+  uint public constant ALLOC_BOUNTIES =      2000000*DECIMALS;
+  uint public constant ALLOC_WINGS =         2000000*DECIMALS;
+  uint public constant ALLOC_CROWDSALE =    80000000*DECIMALS;
+  uint public constant PREBUY_PORTION_MAX = 20000000*DECIMALS; // this is redundantly more than what will be pre-sold
+  
+  //ASSIGNED IN INITIALIZATION
+  //Start and end times
+  uint public publicStartTime; // Time in seconds public crowd fund starts.
+  uint public privateStartTime; // Time in seconds when pre-buy can purchase up to 31250 ETH worth of ADX;
+  uint public publicEndTime; // Time in seconds crowdsale ends
+  uint public hardcapInEth;
+
+  //Special Addresses
+  address public multisigAddress; // Address to which all ether flows.
+  address public adexTeamAddress; // Address to which ALLOC_TEAM, ALLOC_BOUNTIES, ALLOC_WINGS is (ultimately) sent to.
+  address public ownerAddress; // Address of the contract owner. Can halt the crowdsale.
+  address public preBuy1; // Address used by pre-buy
+  address public preBuy2; // Address used by pre-buy
+  address public preBuy3; // Address used by pre-buy
+  uint public preBuyPrice1; // price for pre-buy
+  uint public preBuyPrice2; // price for pre-buy
+  uint public preBuyPrice3; // price for pre-buy
+
+  //Running totals
+  uint public etherRaised; // Total Ether raised.
+  uint public ADXSold; // Total ADX created
+  uint public prebuyPortionTotal; // Total of Tokens purchased by pre-buy. Not to exceed PREBUY_PORTION_MAX.
+  
+  //booleans
+  bool public halted; // halts the crowd sale if true.
 
   // MODIFIERS
-
-  address thisContract = this;
-
-  // simple single-sig function modifier.
-  modifier onlyOwner {
-    if (isOwner(msg.sender))
-      _;
+  //Is currently in the period after the private start time and before the public start time.
+  modifier is_pre_crowdfund_period() {
+    if (now >= publicStartTime || now < privateStartTime) throw;
+    _;
   }
 
-  // multi-sig function modifier: the operation must have an intrinsic hash in order
-  // that later attempts can be realised as the same underlying operation and
-  // thus count as confirmations.
-  modifier onlyManyOwners(bytes32 _operation) {
-    if (confirmAndCheck(_operation))
-      _;
+  //Is currently the crowdfund period
+  modifier is_crowdfund_period() {
+    if (now < publicStartTime) throw;
+    if (isCrowdfundCompleted()) throw;
+    _;
   }
 
-
-  // CONSTRUCTOR
-
-  // constructor is given number of sigs required to do protected "onlymanyowners" transactions
-  // as well as the selection of addresses capable of confirming them.
-  function Shareable(address[] _owners, uint _required) {
-    owners[1] = msg.sender;
-    ownerIndex[msg.sender] = 1;
-    for (uint i = 0; i < _owners.length; ++i) {
-      owners[2 + i] = _owners[i];
-      ownerIndex[_owners[i]] = 2 + i;
-    }
-    if (required > owners.length) throw;
-    required = _required;
+  // Is completed
+  modifier is_crowdfund_completed() {
+    if (!isCrowdfundCompleted()) throw;
+    _;
+  }
+  function isCrowdfundCompleted() internal returns (bool) {
+    if (now > publicEndTime || ADXSold >= ALLOC_CROWDSALE || etherRaised >= hardcapInEth) return true;
+    return false;
   }
 
-
-  // new multisig is given number of sigs required to do protected "onlymanyowners" transactions
-  // as well as the selection of addresses capable of confirming them.
-  // take all new owners as an array
-  function changeShareable(address[] _owners, uint _required) onlyManyOwners(sha3(msg.data)) {
-    for (uint i = 0; i < _owners.length; ++i) {
-      owners[1 + i] = _owners[i];
-      ownerIndex[_owners[i]] = 1 + i;
-    }
-    if (required > owners.length) throw;
-    required = _required;
+  //May only be called by the owner address
+  modifier only_owner() {
+    if (msg.sender != ownerAddress) throw;
+    _;
   }
 
-  // METHODS
-
-  // Revokes a prior confirmation of the given operation
-  function revoke(bytes32 _operation) external {
-    uint index = ownerIndex[msg.sender];
-    // make sure they're an owner
-    if (index == 0) return;
-    uint ownerIndexBit = 2**index;
-    var pending = pendings[_operation];
-    if (pending.ownersDone & ownerIndexBit > 0) {
-      pending.yetNeeded++;
-      pending.ownersDone -= ownerIndexBit;
-      Revoke(msg.sender, _operation);
-    }
+  //May only be called if the crowdfund has not been halted
+  modifier is_not_halted() {
+    if (halted) throw;
+    _;
   }
 
-  // Gets an owner by 0-indexed position (using numOwners as the count)
-  function getOwner(uint ownerIndex) external constant returns (address) {
-    return address(owners[ownerIndex + 1]);
+  // EVENTS
+  event PreBuy(uint _amount);
+  event Buy(address indexed _recipient, uint _amount);
+
+  // Initialization contract assigns address of crowdfund contract and end time.
+  function ADXToken(
+    address _multisig,
+    address _adexTeam,
+    uint _publicStartTime,
+    uint _privateStartTime,
+    uint _hardcapInEth,
+    address _prebuy1, uint _preBuyPrice1,
+    address _prebuy2, uint _preBuyPrice2,
+    address _prebuy3, uint _preBuyPrice3
+  ) {
+    ownerAddress = msg.sender;
+    publicStartTime = _publicStartTime;
+    privateStartTime = _privateStartTime;
+    publicEndTime = _publicStartTime + 4 weeks;
+    multisigAddress = _multisig;
+    adexTeamAddress = _adexTeam;
+
+    hardcapInEth = _hardcapInEth;
+
+    preBuy1 = _prebuy1;
+    preBuyPrice1 = _preBuyPrice1;
+    preBuy2 = _prebuy2;
+    preBuyPrice2 = _preBuyPrice2;
+    preBuy3 = _prebuy3;
+    preBuyPrice3 = _preBuyPrice3;
+
+    balances[adexTeamAddress] += ALLOC_BOUNTIES;
+    balances[adexTeamAddress] += ALLOC_WINGS;
+
+    balances[ownerAddress] += ALLOC_TEAM;
+
+    balances[ownerAddress] += ALLOC_CROWDSALE;
   }
 
-  function isOwner(address _addr) constant returns (bool) {
-    return ownerIndex[_addr] > 0;
+  // Transfer amount of tokens from sender account to recipient.
+  // Only callable after the crowd fund is completed
+  function transfer(address _to, uint _value)
+  {
+    if (_to == msg.sender) return; // no-op, allow even during crowdsale, in order to work around using grantVestedTokens() while in crowdsale
+    if (!isCrowdfundCompleted()) throw;
+    super.transfer(_to, _value);
   }
 
-  function hasConfirmed(bytes32 _operation, address _owner) constant returns (bool) {
-    var pending = pendings[_operation];
-    uint index = ownerIndex[_owner];
-
-    // make sure they're an owner
-    if (index == 0) return false;
-
-    // determine the bit to set for this owner.
-    uint ownerIndexBit = 2**index;
-    return !(pending.ownersDone & ownerIndexBit == 0);
+  // Transfer amount of tokens from a specified address to a recipient.
+  // Transfer amount of tokens from sender account to recipient.
+  function transferFrom(address _from, address _to, uint _value)
+    is_crowdfund_completed
+  {
+    super.transferFrom(_from, _to, _value);
   }
 
-  // INTERNAL METHODS
+  //constant function returns the current ADX price.
+  function getPriceRate()
+      constant
+      returns (uint o_rate)
+  {
+      uint delta = SafeMath.sub(now, publicStartTime);
 
-  function confirmAndCheck(bytes32 _operation) internal returns (bool) {
-    // determine what index the present sender is:
-    uint index = ownerIndex[msg.sender];
-    // make sure they're an owner
-    if (index == 0) return;
+      if (delta > STAGE_TWO_TIME_END) return PRICE_STAGE_THREE;
+      if (delta > STAGE_ONE_TIME_END) return PRICE_STAGE_TWO;
 
-    var pending = pendings[_operation];
-    // if we're not yet working on this operation, switch over and reset the confirmation status.
-    if (pending.yetNeeded == 0) {
-      // reset count of confirmations needed.
-      pending.yetNeeded = required;
-      // reset which owners have confirmed (none) - set our bitmap to 0.
-      pending.ownersDone = 0;
-      pending.index = pendingsIndex.length++;
-      pendingsIndex[pending.index] = _operation;
-    }
-    // determine the bit to set for this owner.
-    uint ownerIndexBit = 2**index;
-    // make sure we (the message sender) haven't confirmed this operation previously.
-    if (pending.ownersDone & ownerIndexBit == 0) {
-      Confirmation(msg.sender, _operation);
-      // ok - check if count is enough to go ahead.
-      if (pending.yetNeeded <= 1) {
-        // enough confirmations: reset and run interior.
-        delete pendingsIndex[pendings[_operation].index];
-        delete pendings[_operation];
-        return true;
-      }
-      else
-        {
-          // not enough: record that this owner in particular confirmed.
-          pending.yetNeeded--;
-          pending.ownersDone |= ownerIndexBit;
-        }
-    }
+      return (PRICE_STAGE_ONE);
   }
 
-  function clearPending() internal {
-    uint length = pendingsIndex.length;
-    for (uint i = 0; i < length; ++i)
-    if (pendingsIndex[i] != 0)
-      delete pendings[pendingsIndex[i]];
-    delete pendingsIndex;
+  // calculates wmount of ADX we get, given the wei and the rates we've defined per 1 eth
+  function calcAmount(uint _wei, uint _rate) 
+    constant
+    returns (uint) 
+  {
+    return SafeMath.div(SafeMath.mul(_wei, _rate), 1 ether);
+  } 
+  
+  // Given the rate of a purchase and the remaining tokens in this tranche, it
+  // will throw if the sale would take it past the limit of the tranche.
+  // Returns `amount` in scope as the number of ADX tokens that it will purchase.
+  function processPurchase(uint _rate, uint _remaining)
+    internal
+    returns (uint o_amount)
+  {
+    o_amount = calcAmount(msg.value, _rate);
+
+    if (o_amount > _remaining) throw;
+    if (!multisigAddress.send(msg.value)) throw;
+
+    balances[ownerAddress] = balances[ownerAddress].sub(o_amount);
+    balances[msg.sender] = balances[msg.sender].add(o_amount);
+
+    ADXSold += o_amount;
+    etherRaised += msg.value;
+  }
+
+  //Special Function can only be called by pre-buy and only during the pre-crowdsale period.
+  function preBuy()
+    payable
+    is_pre_crowdfund_period
+    is_not_halted
+  {
+    // Pre-buy participants would get the first-day price, as well as a bonus of vested tokens
+    uint priceVested = 0;
+
+    if (msg.sender == preBuy1) priceVested = preBuyPrice1;
+    if (msg.sender == preBuy2) priceVested = preBuyPrice2;
+    if (msg.sender == preBuy3) priceVested = preBuyPrice3;
+
+    if (priceVested == 0) throw;
+
+    uint amount = processPurchase(PRICE_STAGE_ONE + priceVested, SafeMath.sub(PREBUY_PORTION_MAX, prebuyPortionTotal));
+    grantVestedTokens(msg.sender, calcAmount(msg.value, priceVested), 
+      uint64(now), uint64(now) + 91 days, uint64(now) + 365 days, 
+      false, false
+    );
+    prebuyPortionTotal += amount;
+    PreBuy(amount);
+  }
+
+  //Default function called by sending Ether to this address with no arguments.
+  //Results in creation of new ADX Tokens if transaction would not exceed hard limit of ADX Token.
+  function()
+    payable
+    is_crowdfund_period
+    is_not_halted
+  {
+    uint amount = processPurchase(getPriceRate(), SafeMath.sub(ALLOC_CROWDSALE, ADXSold));
+    Buy(msg.sender, amount);
+  }
+
+  // To be called at the end of crowdfund period
+  // WARNING: transfer(), which is called by grantVestedTokens(), wants a minimum message length
+  function grantVested(address _adexTeamAddress, address _adexFundAddress)
+    is_crowdfund_completed
+    only_owner
+    is_not_halted
+  {
+    // Grant tokens pre-allocated for the team
+    grantVestedTokens(
+      _adexTeamAddress, ALLOC_TEAM,
+      uint64(now), uint64(now) + 91 days , uint64(now) + 365 days, 
+      false, false
+    );
+
+    // Grant tokens that remain after crowdsale to the AdEx fund, vested for 2 years
+    grantVestedTokens(
+      _adexFundAddress, balances[ownerAddress],
+      uint64(now), uint64(now) + 182 days , uint64(now) + 730 days, 
+      false, false
+    );
+  }
+
+  //May be used by owner of contract to halt crowdsale and no longer except ether.
+  function toggleHalt(bool _halted)
+    only_owner
+  {
+    halted = _halted;
+  }
+
+  //failsafe drain
+  function drain()
+    only_owner
+  {
+    if (!ownerAddress.send(this.balance)) throw;
   }
 }
-
-// From OpenZepplin: https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/lifecycle/Pausable.sol
-/*
- * Stoppable
- * Abstract contract that allows children to implement an
- * emergency stop mechanism.
- */
-contract StoppableShareable is Shareable {
-  bool public stopped;
-  bool public stoppable = true;
-
-  modifier stopInEmergency { if (!stopped) _; }
-  modifier onlyInEmergency { if (stopped) _; }
-
-  function StoppableShareable(address[] _owners, uint _required) Shareable(_owners, _required) {
-  }
-
-  // called by the owner on emergency, triggers stopped state
-  function emergencyStop() external onlyOwner {
-    assert(stoppable);
-    stopped = true;
-  }
-
-  // called by the owners on end of emergency, returns to normal state
-  function release() external onlyManyOwners(sha3(msg.data)) {
-    assert(stoppable);
-    stopped = false;
-  }
-
-  // called by the owners to disable ability to begin or end an emergency stop
-  function disableStopping() external onlyManyOwners(sha3(msg.data)) {
-    stoppable = false;
-  }
-}
-
-// This is the contract that will be unchangeable once deployed.  It will call delegate functions in another contract to change state.  The delegate contract is upgradable.
-
-contract NumeraireBackend is StoppableShareable, NumeraireShared {
-
-    address public delegateContract;
-    bool public contractUpgradable = true;
-    address[] public previousDelegates;
-
-    string public standard = "ERC20";
-
-    // ERC20 requires name, symbol, and decimals
-    string public name = "Numeraire";
-    string public symbol = "NMR";
-    uint256 public decimals = 18;
-
-    event DelegateChanged(address oldAddress, address newAddress);
-
-    function NumeraireBackend(address[] _owners, uint256 _num_required, uint256 _initial_disbursement) StoppableShareable(_owners, _num_required) {
-        totalSupply = 0;
-        total_minted = 0;
-
-        initial_disbursement = _initial_disbursement;
-        deploy_time = block.timestamp;
-    }
-
-    function disableContractUpgradability() onlyManyOwners(sha3(msg.data)) returns (bool) {
-        assert(contractUpgradable);
-        contractUpgradable = false;
-    }
-
-    function changeDelegate(address _newDelegate) onlyManyOwners(sha3(msg.data)) returns (bool) {
-        assert(contractUpgradable);
-
-        if (_newDelegate != delegateContract) {
-            previousDelegates.push(delegateContract);
-            var oldDelegate = delegateContract;
-            delegateContract = _newDelegate;
-            DelegateChanged(oldDelegate, _newDelegate);
-            return true;
-        }
-
-        return false;
-    }
-
-    function claimTokens(address _token) onlyOwner {
-        assert(_token != numerai);
-        if (_token == 0x0) {
-            msg.sender.transfer(this.balance);
-            return;
-        }
-
-        NumeraireBackend token = NumeraireBackend(_token);
-        uint256 balance = token.balanceOf(this);
-        token.transfer(msg.sender, balance);
-    }
-
-    function mint(uint256 _value) stopInEmergency returns (bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("mint(uint256)")), _value);
-    }
-
-    function stake(uint256 _value, bytes32 _tag, uint256 _tournamentID, uint256 _roundID, uint256 _confidence) stopInEmergency returns (bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("stake(uint256,bytes32,uint256,uint256,uint256)")), _value, _tag, _tournamentID, _roundID, _confidence);
-    }
-
-    function stakeOnBehalf(address _staker, uint256 _value, bytes32 _tag, uint256 _tournamentID, uint256 _roundID, uint256 _confidence) stopInEmergency onlyPayloadSize(6) returns (bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("stakeOnBehalf(address,uint256,bytes32,uint256,uint256,uint256)")), _staker, _value, _tag, _tournamentID, _roundID, _confidence);
-    }
-
-    function releaseStake(address _staker, bytes32 _tag, uint256 _etherValue, uint256 _tournamentID, uint256 _roundID, bool _successful) stopInEmergency onlyPayloadSize(6) returns (bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("releaseStake(address,bytes32,uint256,uint256,uint256,bool)")), _staker, _tag, _etherValue, _tournamentID, _roundID, _successful);
-    }
-
-    function destroyStake(address _staker, bytes32 _tag, uint256 _tournamentID, uint256 _roundID) stopInEmergency onlyPayloadSize(4) returns (bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("destroyStake(address,bytes32,uint256,uint256)")), _staker, _tag, _tournamentID, _roundID);
-    }
-
-    function numeraiTransfer(address _to, uint256 _value) onlyPayloadSize(2) returns(bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("numeraiTransfer(address,uint256)")), _to, _value);
-    }
-
-    function withdraw(address _from, address _to, uint256 _value) onlyPayloadSize(3) returns(bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("withdraw(address,address,uint256)")), _from, _to, _value);
-    }
-
-    function createTournament(uint256 _tournamentID) returns (bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("createTournament(uint256)")), _tournamentID);
-    }
-
-    function createRound(uint256 _tournamentID, uint256 _roundID, uint256 _endTime, uint256 _resolutionTime) returns (bool ok) {
-        return delegateContract.delegatecall(bytes4(sha3("createRound(uint256,uint256,uint256,uint256)")), _tournamentID, _roundID, _endTime, _resolutionTime);
-    }
-
-    function getTournament(uint256 _tournamentID) constant returns (uint256, uint256[]) {
-        var tournament = tournaments[_tournamentID];
-        return (tournament.creationTime, tournament.roundIDs);
-    }
-
-    function getRound(uint256 _tournamentID, uint256 _roundID) constant returns (uint256, uint256, uint256) {
-        var round = tournaments[_tournamentID].rounds[_roundID];
-        return (round.creationTime, round.endTime, round.resolutionTime);
-    }
-
-    function getStake(uint256 _tournamentID, uint256 _roundID, address _staker, bytes32 _tag) constant returns (uint256, uint256, bool, bool) {
-        var stake = tournaments[_tournamentID].rounds[_roundID].stakes[_staker][_tag];
-        return (stake.confidence, stake.amount, stake.successful, stake.resolved);
-    }
-
-    // ERC20: Send from a contract
-    function transferFrom(address _from, address _to, uint256 _value) stopInEmergency onlyPayloadSize(3) returns (bool ok) {
-        require(!isOwner(_from) && _from != numerai); // Transfering from Numerai can only be done with the numeraiTransfer function
-
-        // Check for sufficient funds.
-        require(balanceOf[_from] >= _value);
-        // Check for authorization to spend.
-        require(allowance[_from][msg.sender] >= _value);
-
-        balanceOf[_from] = safeSubtract(balanceOf[_from], _value);
-        allowance[_from][msg.sender] = safeSubtract(allowance[_from][msg.sender], _value);
-        balanceOf[_to] = safeAdd(balanceOf[_to], _value);
-
-        // Notify anyone listening.
-        Transfer(_from, _to, _value);
-
-        return true;
-    }
-
-    // ERC20: Anyone with NMR can transfer NMR
-    function transfer(address _to, uint256 _value) stopInEmergency onlyPayloadSize(2) returns (bool ok) {
-        // Check for sufficient funds.
-        require(balanceOf[msg.sender] >= _value);
-
-        balanceOf[msg.sender] = safeSubtract(balanceOf[msg.sender], _value);
-        balanceOf[_to] = safeAdd(balanceOf[_to], _value);
-
-        // Notify anyone listening.
-        Transfer(msg.sender, _to, _value);
-
-        return true;
-    }
-
-    // ERC20: Allow other contracts to spend on sender's behalf
-    function approve(address _spender, uint256 _value) stopInEmergency onlyPayloadSize(2) returns (bool ok) {
-        require((_value == 0) || (allowance[msg.sender][_spender] == 0));
-        allowance[msg.sender][_spender] = _value;
-        Approval(msg.sender, _spender, _value);
-        return true;
-    }
-
-    function changeApproval(address _spender, uint256 _oldValue, uint256 _newValue) stopInEmergency onlyPayloadSize(3) returns (bool ok) {
-        require(allowance[msg.sender][_spender] == _oldValue);
-        allowance[msg.sender][_spender] = _newValue;
-        Approval(msg.sender, _spender, _newValue);
-        return true;
-    }
-}
+https://etherscan.io/address/0x4470BB87d77b963A013DB939BE332f927f2b992e

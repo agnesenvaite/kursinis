@@ -1,657 +1,678 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.13;
 
-/*
-    Owned contract interface
-*/
-contract IOwned {
-    // this function isn't abstract since the compiler emits automatically generated getter functions as external
-    function owner() public constant returns (address) { owner; }
-
-    function transferOwnership(address _newOwner) public;
-    function acceptOwnership() public;
+contract ERC20Basic {
+  function totalSupply() public view returns (uint256);
+  function balanceOf(address who) public view returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
+  event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
-/*
-    Provides support and utilities for contract ownership
-*/
-contract Owned is IOwned {
-    address public owner;
-    address public newOwner;
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) public view returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
 
-    event OwnerUpdate(address _prevOwner, address _newOwner);
+contract BasicToken is ERC20Basic {
+  using SafeMath for uint256;
 
-    /**
-        @dev constructor
-    */
-    function Owned() {
-        owner = msg.sender;
+  mapping(address => uint256) balances;
+
+  uint256 totalSupply_;
+
+  /**
+  * @dev total number of tokens in existence
+  */
+  function totalSupply() public view returns (uint256) {
+    return totalSupply_;
+  }
+
+  /**
+  * @dev transfer token for a specified address
+  * @param _to The address to transfer to.
+  * @param _value The amount to be transferred.
+  */
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+
+    // SafeMath.sub will throw if there is not enough balance.
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+
+  /**
+  * @dev Gets the balance of the specified address.
+  * @param _owner The address to query the the balance of.
+  * @return An uint256 representing the amount owned by the passed address.
+  */
+  function balanceOf(address _owner) public view returns (uint256 balance) {
+    return balances[_owner];
+  }
+
+}
+
+contract StandardToken is ERC20, BasicToken {
+
+  mapping (address => mapping (address => uint256)) internal allowed;
+
+
+  /**
+   * @dev Transfer tokens from one address to another
+   * @param _from address The address which you want to send tokens from
+   * @param _to address The address which you want to transfer to
+   * @param _value uint256 the amount of tokens to be transferred
+   */
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+  }
+
+  /**
+   * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
+   *
+   * Beware that changing an allowance with this method brings the risk that someone may use both the old
+   * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
+   * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
+   * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+   * @param _spender The address which will spend the funds.
+   * @param _value The amount of tokens to be spent.
+   */
+  function approve(address _spender, uint256 _value) public returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+
+  /**
+   * @dev Function to check the amount of tokens that an owner allowed to a spender.
+   * @param _owner address The address which owns the funds.
+   * @param _spender address The address which will spend the funds.
+   * @return A uint256 specifying the amount of tokens still available for the spender.
+   */
+  function allowance(address _owner, address _spender) public view returns (uint256) {
+    return allowed[_owner][_spender];
+  }
+
+  /**
+   * @dev Increase the amount of tokens that an owner allowed to a spender.
+   *
+   * approve should be called when allowed[_spender] == 0. To increment
+   * allowed value is better to use this function to avoid 2 calls (and wait until
+   * the first transaction is mined)
+   * From MonolithDAO Token.sol
+   * @param _spender The address which will spend the funds.
+   * @param _addedValue The amount of tokens to increase the allowance by.
+   */
+  function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
+    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }
+
+  /**
+   * @dev Decrease the amount of tokens that an owner allowed to a spender.
+   *
+   * approve should be called when allowed[_spender] == 0. To decrement
+   * allowed value is better to use this function to avoid 2 calls (and wait until
+   * the first transaction is mined)
+   * From MonolithDAO Token.sol
+   * @param _spender The address which will spend the funds.
+   * @param _subtractedValue The amount of tokens to decrease the allowance by.
+   */
+  function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
+    uint oldValue = allowed[msg.sender][_spender];
+    if (_subtractedValue > oldValue) {
+      allowed[msg.sender][_spender] = 0;
+    } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
     }
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }
 
-    // allows execution by the owner only
-    modifier ownerOnly {
-        assert(msg.sender == owner);
+}
+
+library SafeMath {
+
+  /**
+  * @dev Multiplies two numbers, throws on overflow.
+  */
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    if (a == 0) {
+      return 0;
+    }
+    uint256 c = a * b;
+    assert(c / a == b);
+    return c;
+  }
+
+  /**
+  * @dev Integer division of two numbers, truncating the quotient.
+  */
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return c;
+  }
+
+  /**
+  * @dev Substracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
+  */
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+
+  /**
+  * @dev Adds two numbers, throws on overflow.
+  */
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }
+}
+
+contract Ownable {
+  address public owner;
+
+
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+
+  /**
+   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+   * account.
+   */
+  function Ownable() public {
+    owner = msg.sender;
+  }
+
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(msg.sender == owner);
+    _;
+  }
+
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0));
+    OwnershipTransferred(owner, newOwner);
+    owner = newOwner;
+  }
+
+}
+
+contract MintableToken is StandardToken, Ownable {
+  event Mint(address indexed to, uint256 amount);
+  event MintFinished();
+
+  bool public mintingFinished = false;
+
+
+  modifier canMint() {
+    require(!mintingFinished);
+    _;
+  }
+
+  /**
+   * @dev Function to mint tokens
+   * @param _to The address that will receive the minted tokens.
+   * @param _amount The amount of tokens to mint.
+   * @return A boolean that indicates if the operation was successful.
+   */
+  function mint(address _to, uint256 _amount) onlyOwner canMint public returns (bool) {
+    totalSupply_ = totalSupply_.add(_amount);
+    balances[_to] = balances[_to].add(_amount);
+    Mint(_to, _amount);
+    Transfer(address(0), _to, _amount);
+    return true;
+  }
+
+  /**
+   * @dev Function to stop minting new tokens.
+   * @return True if the operation was successful.
+   */
+  function finishMinting() onlyOwner canMint public returns (bool) {
+    mintingFinished = true;
+    MintFinished();
+    return true;
+  }
+}
+
+contract NectarToken is MintableToken {
+    string public name = "Nectar";
+    string public symbol = "NCT";
+    uint8 public decimals = 18;
+
+    bool public transfersEnabled = false;
+    event TransfersEnabled();
+
+    // Disable transfers until after the sale
+    modifier whenTransfersEnabled() {
+        require(transfersEnabled);
         _;
     }
 
-    /**
-        @dev allows transferring the contract ownership
-        the new owner still needs to accept the transfer
-        can only be called by the contract owner
-
-        @param _newOwner    new contract owner
-    */
-    function transferOwnership(address _newOwner) public ownerOnly {
-        require(_newOwner != owner);
-        newOwner = _newOwner;
-    }
-
-    /**
-        @dev used by a new owner to accept an ownership transfer
-    */
-    function acceptOwnership() public {
-        require(msg.sender == newOwner);
-        OwnerUpdate(owner, newOwner);
-        owner = newOwner;
-        newOwner = 0x0;
-    }
-}
-
-/*
-    Utilities & Common Modifiers
-*/
-contract Utils {
-    /**
-        constructor
-    */
-    function Utils() {
-    }
-
-    // validates an address - currently only checks that it isn't null
-    modifier validAddress(address _address) {
-        require(_address != 0x0);
+    modifier whenTransfersNotEnabled() {
+        require(!transfersEnabled);
         _;
     }
 
-    // verifies that the address is different than this contract address
-    modifier notThis(address _address) {
-        require(_address != address(this));
-        _;
+    function enableTransfers() onlyOwner whenTransfersNotEnabled public {
+        transfersEnabled = true;
+        TransfersEnabled();
     }
 
-    // Overflow protected math functions
-
-    /**
-        @dev returns the sum of _x and _y, asserts if the calculation overflows
-
-        @param _x   value 1
-        @param _y   value 2
-
-        @return sum
-    */
-    function safeAdd(uint256 _x, uint256 _y) internal returns (uint256) {
-        uint256 z = _x + _y;
-        assert(z >= _x);
-        return z;
+    function transfer(address to, uint256 value) public whenTransfersEnabled returns (bool) {
+        return super.transfer(to, value);
     }
 
-    /**
-        @dev returns the difference of _x minus _y, asserts if the subtraction results in a negative number
-
-        @param _x   minuend
-        @param _y   subtrahend
-
-        @return difference
-    */
-    function safeSub(uint256 _x, uint256 _y) internal returns (uint256) {
-        assert(_x >= _y);
-        return _x - _y;
+    function transferFrom(address from, address to, uint256 value) public whenTransfersEnabled returns (bool) {
+        return super.transferFrom(from, to, value);
     }
 
-    /**
-        @dev returns the product of multiplying _x by _y, asserts if the calculation overflows
-
-        @param _x   factor 1
-        @param _y   factor 2
-
-        @return product
-    */
-    function safeMul(uint256 _x, uint256 _y) internal returns (uint256) {
-        uint256 z = _x * _y;
-        assert(_x == 0 || z / _x == _y);
-        return z;
-    }
-}
-
-/*
-    ERC20 Standard Token interface
-*/
-contract IERC20Token {
-    // these functions aren't abstract since the compiler emits automatically generated getter functions as external
-    function name() public constant returns (string) { name; }
-    function symbol() public constant returns (string) { symbol; }
-    function decimals() public constant returns (uint8) { decimals; }
-    function totalSupply() public constant returns (uint256) { totalSupply; }
-    function balanceOf(address _owner) public constant returns (uint256 balance) { _owner; balance; }
-    function allowance(address _owner, address _spender) public constant returns (uint256 remaining) { _owner; _spender; remaining; }
-
-    function transfer(address _to, uint256 _value) public returns (bool success);
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
-    function approve(address _spender, uint256 _value) public returns (bool success);
-}
-
-/*
-    Token Holder interface
-*/
-contract ITokenHolder is IOwned {
-    function withdrawTokens(IERC20Token _token, address _to, uint256 _amount) public;
-}
-
-/*
-    We consider every contract to be a 'token holder' since it's currently not possible
-    for a contract to deny receiving tokens.
-
-    The TokenHolder's contract sole purpose is to provide a safety mechanism that allows
-    the owner to send tokens that were sent to the contract by mistake back to their sender.
-*/
-contract TokenHolder is ITokenHolder, Owned, Utils {
-    /**
-        @dev constructor
-    */
-    function TokenHolder() {
-    }
-
-    /**
-        @dev withdraws tokens held by the contract and sends them to an account
-        can only be called by the owner
-
-        @param _token   ERC20 token contract address
-        @param _to      account to receive the new amount
-        @param _amount  amount to withdraw
-    */
-    function withdrawTokens(IERC20Token _token, address _to, uint256 _amount)
-        public
-        ownerOnly
-        validAddress(_token)
-        validAddress(_to)
-        notThis(_to)
-    {
-        assert(_token.transfer(_to, _amount));
-    }
-}
-
-/**
-    ERC20 Standard Token implementation
-*/
-contract ERC20Token is IERC20Token, Utils {
-    string public standard = "Token 0.1";
-    string public name = "";
-    string public symbol = "";
-    uint8 public decimals = 0;
-    uint256 public totalSupply = 0;
-    mapping (address => uint256) public balanceOf;
-    mapping (address => mapping (address => uint256)) public allowance;
-
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
-    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-
-    /**
-        @dev constructor
-
-        @param _name        token name
-        @param _symbol      token symbol
-        @param _decimals    decimal points, for display purposes
-    */
-    function ERC20Token(string _name, string _symbol, uint8 _decimals) {
-        require(bytes(_name).length > 0 && bytes(_symbol).length > 0); // validate input
-
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
-    }
-
-    /**
-        @dev send coins
-        throws on any error rather then return a false flag to minimize user errors
-
-        @param _to      target address
-        @param _value   transfer amount
-
-        @return true if the transfer was successful, false if it wasn't
-    */
-    function transfer(address _to, uint256 _value)
-        public
-        validAddress(_to)
-        returns (bool success)
-    {
-        balanceOf[msg.sender] = safeSub(balanceOf[msg.sender], _value);
-        balanceOf[_to] = safeAdd(balanceOf[_to], _value);
-        Transfer(msg.sender, _to, _value);
-        return true;
-    }
-
-    /**
-        @dev an account/contract attempts to get the coins
-        throws on any error rather then return a false flag to minimize user errors
-
-        @param _from    source address
-        @param _to      target address
-        @param _value   transfer amount
-
-        @return true if the transfer was successful, false if it wasn't
-    */
-    function transferFrom(address _from, address _to, uint256 _value)
-        public
-        validAddress(_from)
-        validAddress(_to)
-        returns (bool success)
-    {
-        allowance[_from][msg.sender] = safeSub(allowance[_from][msg.sender], _value);
-        balanceOf[_from] = safeSub(balanceOf[_from], _value);
-        balanceOf[_to] = safeAdd(balanceOf[_to], _value);
-        Transfer(_from, _to, _value);
-        return true;
-    }
-
-    /**
-        @dev allow another account/contract to spend some tokens on your behalf
-        throws on any error rather then return a false flag to minimize user errors
-
-        also, to minimize the risk of the approve/transferFrom attack vector
-        (see https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM/), approve has to be called twice
-        in 2 separate transactions - once to change the allowance to 0 and secondly to change it to the new allowance value
-
-        @param _spender approved address
-        @param _value   allowance amount
-
-        @return true if the approval was successful, false if it wasn't
-    */
-    function approve(address _spender, uint256 _value)
-        public
-        validAddress(_spender)
-        returns (bool success)
-    {
-        // if the allowance isn't 0, it can only be updated to 0 to prevent an allowance change immediately after withdrawal
-        require(_value == 0 || allowance[msg.sender][_spender] == 0);
-
-        allowance[msg.sender][_spender] = _value;
+    // Approves and then calls the receiving contract
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
+
+        // call the receiveApproval function on the contract you want to be notified. This crafts the function signature manually so one doesn't have to include a contract in here just for this.
+        // receiveApproval(address _from, uint256 _value, address _tokenContract, bytes _extraData)
+        // it is assumed that when does this that the call *should* succeed, otherwise one would use vanilla approve instead.
+
+        // solium-disable-next-line security/no-low-level-calls
+        require(_spender.call(bytes4(bytes32(keccak256("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData));
         return true;
     }
 }
 
-contract ENJToken is ERC20Token, TokenHolder {
+contract Pausable is Ownable {
+  event Pause();
+  event Unpause();
 
-///////////////////////////////////////// VARIABLE INITIALIZATION /////////////////////////////////////////
+  bool public paused = false;
 
-    uint256 constant public ENJ_UNIT = 10 ** 18;
-    uint256 public totalSupply = 1 * (10**9) * ENJ_UNIT;
 
-    //  Constants 
-    uint256 constant public maxPresaleSupply = 600 * 10**6 * ENJ_UNIT;           // Total presale supply at max bonus
-    uint256 constant public minCrowdsaleAllocation = 200 * 10**6 * ENJ_UNIT;     // Min amount for crowdsale
-    uint256 constant public incentivisationAllocation = 100 * 10**6 * ENJ_UNIT;  // Incentivisation Allocation
-    uint256 constant public advisorsAllocation = 26 * 10**6 * ENJ_UNIT;          // Advisors Allocation
-    uint256 constant public enjinTeamAllocation = 74 * 10**6 * ENJ_UNIT;         // Enjin Team allocation
+  /**
+   * @dev Modifier to make a function callable only when the contract is not paused.
+   */
+  modifier whenNotPaused() {
+    require(!paused);
+    _;
+  }
 
-    address public crowdFundAddress;                                             // Address of the crowdfund
-    address public advisorAddress;                                               // Enjin advisor's address
-    address public incentivisationFundAddress;                                   // Address that holds the incentivization funds
-    address public enjinTeamAddress;                                             // Enjin Team address
+  /**
+   * @dev Modifier to make a function callable only when the contract is paused.
+   */
+  modifier whenPaused() {
+    require(paused);
+    _;
+  }
 
-    //  Variables
+  /**
+   * @dev called by the owner to pause, triggers stopped state
+   */
+  function pause() onlyOwner whenNotPaused public {
+    paused = true;
+    Pause();
+  }
 
-    uint256 public totalAllocatedToAdvisors = 0;                                 // Counter to keep track of advisor token allocation
-    uint256 public totalAllocatedToTeam = 0;                                     // Counter to keep track of team token allocation
-    uint256 public totalAllocated = 0;                                           // Counter to keep track of overall token allocation
-    uint256 constant public endTime = 1509494340;                                // 10/31/2017 @ 11:59pm (UTC) crowdsale end time (in seconds)
-
-    bool internal isReleasedToPublic = false;                         // Flag to allow transfer/transferFrom before the end of the crowdfund
-
-    uint256 internal teamTranchesReleased = 0;                          // Track how many tranches (allocations of 12.5% team tokens) have been released
-    uint256 internal maxTeamTranches = 8;                               // The number of tranches allowed to the team until depleted
-
-///////////////////////////////////////// MODIFIERS /////////////////////////////////////////
-
-    // Enjin Team timelock    
-    modifier safeTimelock() {
-        require(now >= endTime + 6 * 4 weeks);
-        _;
-    }
-
-    // Advisor Team timelock    
-    modifier advisorTimelock() {
-        require(now >= endTime + 2 * 4 weeks);
-        _;
-    }
-
-    // Function only accessible by the Crowdfund contract
-    modifier crowdfundOnly() {
-        require(msg.sender == crowdFundAddress);
-        _;
-    }
-
-    ///////////////////////////////////////// CONSTRUCTOR /////////////////////////////////////////
-
-    /**
-        @dev constructor
-        @param _crowdFundAddress   Crowdfund address
-        @param _advisorAddress     Advisor address
-    */
-    function ENJToken(address _crowdFundAddress, address _advisorAddress, address _incentivisationFundAddress, address _enjinTeamAddress)
-    ERC20Token("Enjin Coin", "ENJ", 18)
-     {
-        crowdFundAddress = _crowdFundAddress;
-        advisorAddress = _advisorAddress;
-        enjinTeamAddress = _enjinTeamAddress;
-        incentivisationFundAddress = _incentivisationFundAddress;
-        balanceOf[_crowdFundAddress] = minCrowdsaleAllocation + maxPresaleSupply; // Total presale + crowdfund tokens
-        balanceOf[_incentivisationFundAddress] = incentivisationAllocation;       // 10% Allocated for Marketing and Incentivisation
-        totalAllocated += incentivisationAllocation;                              // Add to total Allocated funds
-    }
-
-///////////////////////////////////////// ERC20 OVERRIDE /////////////////////////////////////////
-
-    /**
-        @dev send coins
-        throws on any error rather then return a false flag to minimize user errors
-        in addition to the standard checks, the function throws if transfers are disabled
-
-        @param _to      target address
-        @param _value   transfer amount
-
-        @return true if the transfer was successful, throws if it wasn't
-    */
-    function transfer(address _to, uint256 _value) public returns (bool success) {
-        if (isTransferAllowed() == true || msg.sender == crowdFundAddress || msg.sender == incentivisationFundAddress) {
-            assert(super.transfer(_to, _value));
-            return true;
-        }
-        revert();        
-    }
-
-    /**
-        @dev an account/contract attempts to get the coins
-        throws on any error rather then return a false flag to minimize user errors
-        in addition to the standard checks, the function throws if transfers are disabled
-
-        @param _from    source address
-        @param _to      target address
-        @param _value   transfer amount
-
-        @return true if the transfer was successful, throws if it wasn't
-    */
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-        if (isTransferAllowed() == true || msg.sender == crowdFundAddress || msg.sender == incentivisationFundAddress) {        
-            assert(super.transferFrom(_from, _to, _value));
-            return true;
-        }
-        revert();
-    }
-
-///////////////////////////////////////// ALLOCATION FUNCTIONS /////////////////////////////////////////
-
-    /**
-        @dev Release one single tranche of the Enjin Team Token allocation
-        throws if before timelock (6 months) ends and if not initiated by the owner of the contract
-        returns true if valid
-        Schedule goes as follows:
-        3 months: 12.5% (this tranche can only be released after the initial 6 months has passed)
-        6 months: 12.5%
-        9 months: 12.5%
-        12 months: 12.5%
-        15 months: 12.5%
-        18 months: 12.5%
-        21 months: 12.5%
-        24 months: 12.5%
-        @return true if successful, throws if not
-    */
-    function releaseEnjinTeamTokens() safeTimelock ownerOnly returns(bool success) {
-        require(totalAllocatedToTeam < enjinTeamAllocation);
-
-        uint256 enjinTeamAlloc = enjinTeamAllocation / 1000;
-        uint256 currentTranche = uint256(now - endTime) / 12 weeks;     // "months" after crowdsale end time (division floored)
-
-        if(teamTranchesReleased < maxTeamTranches && currentTranche > teamTranchesReleased) {
-            teamTranchesReleased++;
-
-            uint256 amount = safeMul(enjinTeamAlloc, 125);
-            balanceOf[enjinTeamAddress] = safeAdd(balanceOf[enjinTeamAddress], amount);
-            Transfer(0x0, enjinTeamAddress, amount);
-            totalAllocated = safeAdd(totalAllocated, amount);
-            totalAllocatedToTeam = safeAdd(totalAllocatedToTeam, amount);
-            return true;
-        }
-        revert();
-    }
-
-    /**
-        @dev release Advisors Token allocation
-        throws if before timelock (2 months) ends or if no initiated by the advisors address
-        or if there is no more allocation to give out
-        returns true if valid
-
-        @return true if successful, throws if not
-    */
-    function releaseAdvisorTokens() advisorTimelock ownerOnly returns(bool success) {
-        require(totalAllocatedToAdvisors == 0);
-        balanceOf[advisorAddress] = safeAdd(balanceOf[advisorAddress], advisorsAllocation);
-        totalAllocated = safeAdd(totalAllocated, advisorsAllocation);
-        totalAllocatedToAdvisors = advisorsAllocation;
-        Transfer(0x0, advisorAddress, advisorsAllocation);
-        return true;
-    }
-
-    /**
-        @dev Retrieve unsold tokens from the crowdfund
-        throws if before timelock (6 months from end of Crowdfund) ends and if no initiated by the owner of the contract
-        returns true if valid
-
-        @return true if successful, throws if not
-    */
-    function retrieveUnsoldTokens() safeTimelock ownerOnly returns(bool success) {
-        uint256 amountOfTokens = balanceOf[crowdFundAddress];
-        balanceOf[crowdFundAddress] = 0;
-        balanceOf[incentivisationFundAddress] = safeAdd(balanceOf[incentivisationFundAddress], amountOfTokens);
-        totalAllocated = safeAdd(totalAllocated, amountOfTokens);
-        Transfer(crowdFundAddress, incentivisationFundAddress, amountOfTokens);
-        return true;
-    }
-
-    /**
-        @dev Keep track of token allocations
-        can only be called by the crowdfund contract
-    */
-    function addToAllocation(uint256 _amount) crowdfundOnly {
-        totalAllocated = safeAdd(totalAllocated, _amount);
-    }
-
-    /**
-        @dev Function to allow transfers
-        can only be called by the owner of the contract
-        Transfers will be allowed regardless after the crowdfund end time.
-    */
-    function allowTransfers() ownerOnly {
-        isReleasedToPublic = true;
-    } 
-
-    /**
-        @dev User transfers are allowed/rejected
-        Transfers are forbidden before the end of the crowdfund
-    */
-    function isTransferAllowed() internal constant returns(bool) {
-        if (now > endTime || isReleasedToPublic == true) {
-            return true;
-        }
-        return false;
-    }
+  /**
+   * @dev called by the owner to unpause, returns to normal state
+   */
+  function unpause() onlyOwner whenPaused public {
+    paused = false;
+    Unpause();
+  }
 }
 
-contract ENJCrowdfund is TokenHolder {
+contract NectarCrowdsale is Ownable, Pausable {
+    using SafeMath for uint256;
 
-///////////////////////////////////////// VARIABLE INITIALIZATION /////////////////////////////////////////
+    /** Maximum amount to raise in USD based on initial exchange rate */
+    uint256 constant maxCapUsd = 50000000;
+    /** Minumum amount per purchase in USD based on initial exchange rate*/
+    uint256 constant minimumPurchaseUsd = 100;
 
-    uint256 constant public startTime = 1507032000;                // 10/03/2017 @ 12:00pm (UTC) crowdsale start time (in seconds)
-    uint256 constant public endTime = 1509494340;                  // 10/31/2017 @ 11:59pm (UTC) crowdsale end time (in seconds)
-    uint256 constant internal week2Start = startTime + (7 days);   // 10/10/2017 @ 12:00pm (UTC) week 2 price begins
-    uint256 constant internal week3Start = week2Start + (7 days);  // 10/17/2017 @ 12:00pm (UTC) week 3 price begins
-    uint256 constant internal week4Start = week3Start + (7 days);  // 10/25/2017 @ 12:00pm (UTC) week 4 price begins
+    /** Tranche parameters */
+    uint256 constant tranche1ThresholdUsd = 5000000;
+    uint256 constant tranche1Rate = 37604;
+    uint256 constant tranche2ThresholdUsd = 10000000;
+    uint256 constant tranche2Rate = 36038;
+    uint256 constant tranche3ThresholdUsd = 15000000;
+    uint256 constant tranche3Rate = 34471;
+    uint256 constant tranche4ThresholdUsd = 20000000;
+    uint256 constant tranche4Rate = 32904;
+    uint256 constant standardTrancheRate= 31337;
 
-    uint256 public totalPresaleTokensYetToAllocate;     // Counter that keeps track of presale tokens yet to allocate
-    address public beneficiary = 0x0;                   // address to receive all ether contributions
-    address public tokenAddress = 0x0;                  // address of the token itself
+    /** The token being sold */
+    NectarToken public token;
 
-    ENJToken token;                                     // ENJ Token interface
+    /** Start timestamp when token purchases are allowed, inclusive */
+    uint256 public startTime;
 
-///////////////////////////////////////// EVENTS /////////////////////////////////////////
+    /** End timestamp when token purchases are allowed, inclusive */
+    uint256 public endTime;
 
-    event CrowdsaleContribution(address indexed _contributor, uint256 _amount, uint256 _return);
-    event PresaleContribution(address indexed _contributor, uint256 _amountOfTokens);
+    /** Set value of wei/usd used in cap and minimum purchase calculation */
+    uint256 public weiUsdExchangeRate;
 
-///////////////////////////////////////// CONSTRUCTOR /////////////////////////////////////////
+    /** Address where funds are collected */
+    address public wallet;
+
+    /** Address used to sign purchase authorizations */
+    address public purchaseAuthorizer;
+
+    /** Total amount of raised money in wei */
+    uint256 public weiRaised;
+
+    /** Cap in USD */
+    uint256 public capUsd;
+
+    /** Maximum amount of raised money in wei */
+    uint256 public cap;
+
+    /** Minumum amount of wei per purchase */
+    uint256 public minimumPurchase;
+
+    /** Have we canceled the sale? */
+    bool public isCanceled;
+
+    /** have we finalized the sale? */
+    bool public isFinalized;
+
+    /** Record of nonces -> purchases */
+    mapping (uint256 => bool) public purchases;
 
     /**
-        @dev constructor
-        @param _totalPresaleTokensYetToAllocate     Total amount of presale tokens sold
-        @param _beneficiary                         Address that will be receiving the ETH contributed
-    */
-    function ENJCrowdfund(uint256 _totalPresaleTokensYetToAllocate, address _beneficiary) 
-    validAddress(_beneficiary) 
+     * Event triggered on presale minting
+     * @param purchaser who paid for the tokens
+     * @param amount amount of tokens minted
+     */
+    event PreSaleMinting(address indexed purchaser, uint256 amount);
+
+    /**
+     * Event triggered on token purchase
+     * @param purchaser who paid for the tokens
+     * @param value wei paid for purchase
+     * @param amount amount of tokens purchased
+     */
+    event TokenPurchase(address indexed purchaser, uint256 value, uint256 amount);
+
+    /** Event triggered on sale cancelation */
+    event Canceled();
+
+    /** Event triggered on sale finalization */
+    event Finalized();
+
+    /**
+     * NectarCrowdsale constructor
+     * @param _startTime start timestamp when purchases are allowed, inclusive
+     * @param _endTime end timestamp when purchases are allowed, inclusive
+     * @param _initialWeiUsdExchangeRate initial rate of wei/usd used in cap and minimum purchase calculation
+     * @param _wallet wallet in which to collect the funds
+     * @param _purchaseAuthorizer address to verify purchase authorizations from
+     */
+    function NectarCrowdsale(
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _initialWeiUsdExchangeRate,
+        address _wallet,
+        address _purchaseAuthorizer
+    )
+        public
     {
-        totalPresaleTokensYetToAllocate = _totalPresaleTokensYetToAllocate;
-        beneficiary = _beneficiary;
+        require(_startTime >= now);
+        require(_endTime >= _startTime);
+        require(_initialWeiUsdExchangeRate > 0);
+        require(_wallet != address(0));
+        require(_purchaseAuthorizer != address(0));
+
+        token = createTokenContract();
+        startTime = _startTime;
+        endTime = _endTime;
+        weiUsdExchangeRate = _initialWeiUsdExchangeRate;
+        wallet = _wallet;
+        purchaseAuthorizer = _purchaseAuthorizer;
+
+        capUsd = maxCapUsd;
+
+        // Updates cap and minimumPurchase based on capUsd and weiUsdExchangeRate
+        updateCapAndExchangeRate();
+
+        isCanceled = false;
+        isFinalized = false;
     }
 
-///////////////////////////////////////// MODIFIERS /////////////////////////////////////////
-
-    // Ensures that the current time is between startTime (inclusive) and endTime (exclusive)
-    modifier between() {
-        assert(now >= startTime && now < endTime);
-        _;
+    /** Disable usage of the fallback function, only accept eth from buyTokens */
+    function () external payable {
+        revert();
     }
 
-    // Ensures the Token address is set
-    modifier tokenIsSet() {
-        require(tokenAddress != 0x0);
-        _;
-    }
-
-///////////////////////////////////////// OWNER FUNCTIONS /////////////////////////////////////////
-
-    /**
-        @dev Sets the ENJ Token address
-        Can only be called once by the owner
-        @param _tokenAddress    ENJ Token Address
-    */
-    function setToken(address _tokenAddress) validAddress(_tokenAddress) ownerOnly {
-        require(tokenAddress == 0x0);
-        tokenAddress = _tokenAddress;
-        token = ENJToken(_tokenAddress);
-    }
-
-    /**
-        @dev Sets a new Beneficiary address
-        Can only be called by the owner
-        @param _newBeneficiary    Beneficiary Address
-    */
-    function changeBeneficiary(address _newBeneficiary) validAddress(_newBeneficiary) ownerOnly {
-        beneficiary = _newBeneficiary;
-    }
-
-    /**
-        @dev Function to send ENJ to presale investors
-        Can only be called while the presale is not over.
-        @param _batchOfAddresses list of addresses
-        @param _amountofENJ matching list of address balances
-    */
-    function deliverPresaleTokens(address[] _batchOfAddresses, uint256[] _amountofENJ) external tokenIsSet ownerOnly returns (bool success) {
+    /** Only allow before the sale period */
+    modifier onlyPreSale() {
         require(now < startTime);
-        for (uint256 i = 0; i < _batchOfAddresses.length; i++) {
-            deliverPresaleTokenToClient(_batchOfAddresses[i], _amountofENJ[i]);            
-        }
-        return true;
+        _;
     }
 
     /**
-        @dev Logic to transfer presale tokens
-        Can only be called while the there are leftover presale tokens to allocate. Any multiple contribution from 
-        the same address will be aggregated.
-        @param _accountHolder user address
-        @param _amountofENJ balance to send out
-    */
-    function deliverPresaleTokenToClient(address _accountHolder, uint256 _amountofENJ) internal ownerOnly {
-        require(totalPresaleTokensYetToAllocate > 0);
-        token.transfer(_accountHolder, _amountofENJ);
-        token.addToAllocation(_amountofENJ);
-        totalPresaleTokensYetToAllocate = safeSub(totalPresaleTokensYetToAllocate, _amountofENJ);
-        PresaleContribution(_accountHolder, _amountofENJ);
-    }
+     * Directly mint tokens and assign to presale buyers
+     * @param purchaser Address to assign to
+     * @param tokenAmount amount of tokens to mint
+     */
+    function mintPreSale(address purchaser, uint256 tokenAmount) public onlyOwner onlyPreSale {
+        require(purchaser != address(0));
+        require(tokenAmount > 0);
 
-///////////////////////////////////////// PUBLIC FUNCTIONS /////////////////////////////////////////
-    /**
-        @dev ETH contribution function
-        Can only be called during the crowdsale. Also allows a person to buy tokens for another address
-
-        @return tokens issued in return
-    */
-    function contributeETH(address _to) public validAddress(_to) between tokenIsSet payable returns (uint256 amount) {
-        return processContribution(_to);
+        token.mint(purchaser, tokenAmount);
+        PreSaleMinting(purchaser, tokenAmount);
     }
 
     /**
-        @dev handles contribution logic
-        note that the Contribution event is triggered using the sender as the contributor, regardless of the actual contributor
+     * Buy tokens once authorized by the frontend
+     * @param nonce nonce parameter generated by the frontend
+     * @param authorizedAmount maximum purchase amount authorized for this transaction
+     * @param sig the signature generated by the frontned
+     */
+    function buyTokens(uint256 authorizedAmount, uint256 nonce, bytes sig) public payable whenNotPaused {
+        require(msg.sender != address(0));
+        require(validPurchase(authorizedAmount, nonce, sig));
 
-        @return tokens issued in return
-    */
-    function processContribution(address _to) private returns (uint256 amount) {
+        uint256 weiAmount = msg.value;
 
-        uint256 tokenAmount = getTotalAmountOfTokens(msg.value);
-        beneficiary.transfer(msg.value);
-        token.transfer(_to, tokenAmount);
-        token.addToAllocation(tokenAmount);
-        CrowdsaleContribution(_to, msg.value, tokenAmount);
-        return tokenAmount;
+        // calculate token amount to be created
+        uint256 rate = currentTranche();
+        uint256 tokens = weiAmount.mul(rate);
+
+        // update state
+        weiRaised = weiRaised.add(weiAmount);
+        purchases[nonce] = true;
+
+        token.mint(msg.sender, tokens);
+        TokenPurchase(msg.sender, weiAmount, tokens);
+
+        forwardFunds();
     }
 
+    /** Cancel the sale */
+    function cancel() public onlyOwner {
+        require(!isCanceled);
+        require(!hasEnded());
 
-
-///////////////////////////////////////// CONSTANT FUNCTIONS /////////////////////////////////////////
-    
-    /**
-        @dev Returns total tokens allocated so far
-        Constant function that simply returns a number
-
-        @return total tokens allocated so far
-    */
-    function totalEnjSold() public constant returns(uint256 total) {
-        return token.totalAllocated();
+        Canceled();
+        isCanceled = true;
     }
-    
+
+    /** Finalize the sale */
+    function finalize() public onlyOwner {
+        require(!isFinalized);
+        require(hasEnded());
+
+        finalization();
+        Finalized();
+
+        isFinalized = true;
+    }
+
     /**
-        @dev computes the number of tokens that should be issued for a given contribution
-        @param _contribution    contribution amount
-        @return computed number of tokens
-    */
-    function getTotalAmountOfTokens(uint256 _contribution) public constant returns (uint256 amountOfTokens) {
-        uint256 currentTokenRate = 0;
-        if (now < week2Start) {
-            return currentTokenRate = safeMul(_contribution, 6000);
-        } else if (now < week3Start) {
-            return currentTokenRate = safeMul(_contribution, 5000);
-        } else if (now < week4Start) {
-            return currentTokenRate = safeMul(_contribution, 4000);
+     * Set exchange rate before sale
+     * @param _weiUsdExchangeRate rate of wei/usd used in cap and minimum purchase calculation
+     */
+    function setExchangeRate(uint256 _weiUsdExchangeRate) public onlyOwner onlyPreSale {
+        require(_weiUsdExchangeRate > 0);
+
+        weiUsdExchangeRate = _weiUsdExchangeRate;
+        updateCapAndExchangeRate();
+    }
+
+    /**
+     * Set exchange rate before sale
+     * @param _capUsd new cap in USD
+     */
+    function setCapUsd(uint256 _capUsd) public onlyOwner onlyPreSale {
+        require(_capUsd <= maxCapUsd);
+
+        capUsd = _capUsd;
+        updateCapAndExchangeRate();
+    }
+
+    /** Enable token sales once sale is completed */
+    function enableTransfers() public onlyOwner {
+        require(isFinalized);
+        require(hasEnded());
+
+        token.enableTransfers();
+    }
+
+    /**
+     * Get the rate of tokens/wei in the current tranche
+     * @return the current tokens/wei rate
+     */
+    function currentTranche() public view returns (uint256) {
+        uint256 currentFundingUsd = weiRaised.div(weiUsdExchangeRate);
+        if (currentFundingUsd <= tranche1ThresholdUsd) {
+            return tranche1Rate;
+        } else if (currentFundingUsd <= tranche2ThresholdUsd) {
+            return tranche2Rate;
+        } else if (currentFundingUsd <= tranche3ThresholdUsd) {
+            return tranche3Rate;
+        } else if (currentFundingUsd <= tranche4ThresholdUsd) {
+            return tranche4Rate;
         } else {
-            return currentTokenRate = safeMul(_contribution, 3000);
+            return standardTrancheRate;
         }
-        
+    }
+
+    /** @return true if crowdsale event has ended */
+    function hasEnded() public view returns (bool) {
+        bool afterEnd = now > endTime;
+        bool capMet = weiRaised >= cap;
+        return afterEnd || capMet || isCanceled;
+    }
+
+    /** Get the amount collected in USD, needed for WINGS calculation. */
+    function totalCollected() public view returns (uint256) {
+        uint256 presale = maxCapUsd.sub(capUsd);
+        uint256 crowdsale = weiRaised.div(weiUsdExchangeRate);
+        return presale.add(crowdsale);
+    }
+
+    /** Creates the token to be sold. */
+    function createTokenContract() internal returns (NectarToken) {
+        return new NectarToken();
+    }
+
+    /** Create the 30% extra token supply at the end of the sale */
+    function finalization() internal {
+        // Create 30% NCT for company use
+        uint256 tokens = token.totalSupply().mul(3).div(10);
+        token.mint(wallet, tokens);
+    }
+
+    /** Forward ether to the fund collection wallet */
+    function forwardFunds() internal {
+        wallet.transfer(msg.value);
+    }
+
+    /** Update parameters dependant on capUsd and eiUsdEchangeRate */
+    function updateCapAndExchangeRate() internal {
+        cap = capUsd.mul(weiUsdExchangeRate);
+        minimumPurchase = minimumPurchaseUsd.mul(weiUsdExchangeRate);
     }
 
     /**
-        @dev Fallback function
-        Main entry to buy into the crowdfund, all you need to do is send a value transaction
-        to this contract address. Please include at least 100 000 gas in the transaction.
-    */
-    function() payable {
-        contributeETH(msg.sender);
+     * Is a purchase transaction valid?
+     * @return true if the transaction can buy tokens
+     */
+    function validPurchase(uint256 authorizedAmount, uint256 nonce, bytes sig) internal view returns (bool) {
+        // 84 = 20 byte address + 32 byte authorized amount + 32 byte nonce
+        bytes memory prefix = "\x19Ethereum Signed Message:\n84";
+        bytes32 hash = keccak256(prefix, msg.sender, authorizedAmount, nonce);
+        bool validAuthorization = ECRecovery.recover(hash, sig) == purchaseAuthorizer;
+
+        bool validNonce = !purchases[nonce];
+        bool withinPeriod = now >= startTime && now <= endTime;
+        bool aboveMinimum = msg.value >= minimumPurchase;
+        bool belowAuthorized = msg.value <= authorizedAmount;
+        bool belowCap = weiRaised.add(msg.value) <= cap;
+        return validAuthorization && validNonce && withinPeriod && aboveMinimum && belowAuthorized && belowCap;
     }
 }
+
+library ECRecovery {
+
+  /**
+   * @dev Recover signer address from a message by using his signature
+   * @param hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
+   * @param sig bytes signature, the signature is generated using web3.eth.sign()
+   */
+  function recover(bytes32 hash, bytes sig) public pure returns (address) {
+    bytes32 r;
+    bytes32 s;
+    uint8 v;
+
+    //Check the signature length
+    if (sig.length != 65) {
+      return (address(0));
+    }
+
+    // Divide the signature in r, s and v variables
+    assembly {
+      r := mload(add(sig, 32))
+      s := mload(add(sig, 64))
+      v := byte(0, mload(add(sig, 96)))
+    }
+
+    // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
+    if (v < 27) {
+      v += 27;
+    }
+
+    // If the version is correct return the signer address
+    if (v != 27 && v != 28) {
+      return (address(0));
+    } else {
+      return ecrecover(hash, v, r, s);
+    }
+  }
+
+}
+https://etherscan.io/address/0x4a089c689894bde6a67625488c64a5e16e1cbeba

@@ -1,336 +1,315 @@
-pragma solidity ^0.4.13;
-    
-   // ----------------------------------------------------------------------------------------------
-   // Developer Nechesov Andrey: Facebook.com/Nechesov   
-   // Enjoy. (c) PRCR.org ICO Platform 2017. The PRCR Licence.
-   // ----------------------------------------------------------------------------------------------
-    
-   // ERC Token Standard #20 Interface
-   // https://github.com/ethereum/EIPs/issues/20
-  contract ERC20Interface {
-      // Get the total token supply
-      function totalSupply() constant returns (uint256 totalSupply);
-   
-      // Get the account balance of another account with address _owner
-      function balanceOf(address _owner) constant returns (uint256 balance);
-   
-      // Send _value amount of tokens to address _to
-      function transfer(address _to, uint256 _value) returns (bool success);
-   
-      // Send _value amount of tokens from address _from to address _to
-      function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
-   
-      // Allow _spender to withdraw from your account, multiple times, up to the _value amount.
-      // If this function is called again it overwrites the current allowance with _value.
-      // this function is required for some DEX functionality
-      function approve(address _spender, uint256 _value) returns (bool success);
-   
-      // Returns the amount which _spender is still allowed to withdraw from _owner
-      function allowance(address _owner, address _spender) constant returns (uint256 remaining);
-   
-      // Triggered when tokens are transferred.
-      event Transfer(address indexed _from, address indexed _to, uint256 _value);
-   
-      // Triggered whenever approve(address _spender, uint256 _value) is called.
-      event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-  }  
-   
-  contract CentraToken is ERC20Interface {
+pragma solidity ^0.4.2;
 
-      string public constant symbol = "Centra";
-      string public constant name = "Centra token";
-      uint8 public constant decimals = 18; 
-           
-      uint256 public constant maxTokens = 100000000*10**18; 
-      uint256 public constant ownerSupply = maxTokens*32/100;
-      uint256 _totalSupply = ownerSupply;  
 
-      uint256 public constant token_price = 1/400*10**18; 
-      uint public constant ico_start = 1501891200;
-      uint public constant ico_finish = 1507248000; 
-      uint public constant minValuePre = 1/10*10**18; 
-      uint public constant minValue = 1/10*10**18; 
-      uint public constant maxValue = 3000*10**18;       
+contract owned {
+	address public owner;
+	address public server;
 
-      uint public constant card_gold_minamount  = 30*10**18;
-      uint public constant card_gold_first = 1000;
-      mapping(address => uint) cards_gold_check; 
-      address[] public cards_gold;
+	function owned() {
+		owner = msg.sender;
+		server = msg.sender;
+	}
 
-      uint public constant card_black_minamount = 100*10**18;
-      uint public constant card_black_first = 500;
-      mapping(address => uint) public cards_black_check; 
-      address[] public cards_black;
+	function changeOwner(address newOwner) onlyOwner {
+		owner = newOwner;
+	}
 
-      uint public constant card_titanium_minamount  = 500*10**18;
-      uint public constant card_titanium_first = 200;
-      mapping(address => uint) cards_titanium_check; 
-      address[] public cards_titanium;
+	function changeServer(address newServer) onlyOwner {
+		server = newServer;
+	}
 
-      uint public constant card_blue_minamount  = 5/10*10**18;
-      uint public constant card_blue_first = 100000000;
-      mapping(address => uint) cards_blue_check; 
-      address[] public cards_blue;
+	modifier onlyOwner {
+		require(msg.sender == owner);
+		_;
+	}
 
-      uint public constant card_start_minamount  = 1/10*10**18;
-      uint public constant card_start_first = 100000000;
-      mapping(address => uint) cards_start_check; 
-      address[] public cards_start;
+	modifier onlyServer {
+		require(msg.sender == server);
+		_;
+	}
+}
 
-      using SafeMath for uint;      
-      
-      // Owner of this contract
-      address public owner;
-   
-      // Balances for each account
-      mapping(address => uint256) balances;
-   
-      // Owner of account approves the transfer of an amount to another account
-      mapping(address => mapping (address => uint256)) allowed;
-   
-      // Functions with this modifier can only be executed by the owner
-      modifier onlyOwner() {
-          if (msg.sender != owner) {
-              throw;
-          }
-          _;
-      }      
-   
-      // Constructor
-      function CentraToken() {
-          owner = msg.sender;
-          balances[owner] = ownerSupply;
-      }
-      
-      //default function for buy tokens      
-      function() payable {        
-          tokens_buy();        
-      }
-      
-      function totalSupply() constant returns (uint256 totalSupply) {
-          totalSupply = _totalSupply;
-      }
 
-      //Withdraw money from contract balance to owner
-      function withdraw() onlyOwner returns (bool result) {
-          owner.send(this.balance);
-          return true;
-      }
-   
-      // What is the balance of a particular account?
-      function balanceOf(address _owner) constant returns (uint256 balance) {
-          return balances[_owner];
-      }
-   
-      // Transfer the balance from owner's account to another account
-      function transfer(address _to, uint256 _amount) returns (bool success) {
+contract tokenRecipient {function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData);}
 
-          if(now < ico_start) throw;
 
-          if (balances[msg.sender] >= _amount 
-              && _amount > 0
-              && balances[_to] + _amount > balances[_to]) {
-              balances[msg.sender] -= _amount;
-              balances[_to] += _amount;
-              Transfer(msg.sender, _to, _amount);
-              return true;
-          } else {
-              return false;
-          }
-      }
-   
-      // Send _value amount of tokens from address _from to address _to
-      // The transferFrom method is used for a withdraw workflow, allowing contracts to send
-      // tokens on your behalf, for example to "deposit" to a contract address and/or to charge
-      // fees in sub-currencies; the command should fail unless the _from account has
-      // deliberately authorized the sender of the message via some mechanism; we propose
-      // these standardized APIs for approval:
-      function transferFrom(
-          address _from,
-          address _to,
-          uint256 _amount
-     ) returns (bool success) {
+contract CSToken is owned {uint8 public decimals;
 
-         if(now < ico_start) throw;
+	uint[] public agingTimes;
 
-         if (balances[_from] >= _amount
-             && allowed[_from][msg.sender] >= _amount
-             && _amount > 0
-             && balances[_to] + _amount > balances[_to]) {
-             balances[_from] -= _amount;
-             allowed[_from][msg.sender] -= _amount;
-             balances[_to] += _amount;
-             Transfer(_from, _to, _amount);
-             return true;
-         } else {
-             return false;
-         }
-     }
-  
-     // Allow _spender to withdraw from your account, multiple times, up to the _value amount.
-     // If this function is called again it overwrites the current allowance with _value.
-     function approve(address _spender, uint256 _amount) returns (bool success) {
-         allowed[msg.sender][_spender] = _amount;
-         Approval(msg.sender, _spender, _amount);
-         return true;
-     }
-  
-     function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
-         return allowed[_owner][_spender];
-     }
-     //get total black cards
-    function cards_black_total() constant returns (uint) { 
-      return cards_black.length;
-    }
-    //get total gold cards
-    function cards_gold_total() constant returns (uint) { 
-      return cards_gold.length;
-    }    
-    //get total titanium cards
-    function cards_titanium_total() constant returns (uint) { 
-      return cards_titanium.length;
-    }
-    //get total blue cards
-    function cards_blue_total() constant returns (uint) { 
-      return cards_blue.length;
-    }
+	address[] public addressByIndex;
 
-    //get total start cards
-    function cards_start_total() constant returns (uint) { 
-      return cards_start.length;
-    }
+	function balanceOf(address _owner) constant returns (uint256 balance);
 
-      /**
-      * Buy tokens pre-sale and sale 
-      */
-      function tokens_buy() payable returns (bool) { 
+	function mintToken(address target, uint256 mintedAmount, uint agingTime);
 
-        uint tnow = now;
-        
-        if(tnow > ico_finish) throw;        
-        if(_totalSupply >= maxTokens) throw;
-        if(!(msg.value >= token_price)) throw;
-        if(!(msg.value >= minValue)) throw;
-        if(msg.value > maxValue) throw;
+	function addAgingTime(uint time);
 
-        uint tokens_buy = msg.value/token_price*10**18;
+	function allAgingTimesAdded();
 
-        if(!(tokens_buy > 0)) throw;   
+	function addAgingTimesForPool(address poolAddress, uint agingTime);
 
-        if(tnow < ico_start){
-          if(!(msg.value >= minValuePre)) throw;
-          tokens_buy = tokens_buy*125/100;
-        } 
-        if((ico_start + 86400*0 <= tnow)&&(tnow < ico_start + 86400*2)){
-          tokens_buy = tokens_buy*120/100;
-        } 
-        if((ico_start + 86400*2 <= tnow)&&(tnow < ico_start + 86400*7)){
-          tokens_buy = tokens_buy*110/100;        
-        } 
-        if((ico_start + 86400*7 <= tnow)&&(tnow < ico_start + 86400*14)){
-          tokens_buy = tokens_buy*105/100;        
-        }         
+	function countAddresses() constant returns (uint256 length);
+}
 
-        if(_totalSupply.add(tokens_buy) > maxTokens) throw;
-        _totalSupply = _totalSupply.add(tokens_buy);
-        balances[msg.sender] = balances[msg.sender].add(tokens_buy); 
 
-        if((msg.value >= card_gold_minamount)
-          &&(msg.value < card_black_minamount)
-          &&(cards_gold.length < card_gold_first)
-          &&(cards_gold_check[msg.sender] != 1)
-          ) {
-          cards_gold.push(msg.sender);
-          cards_gold_check[msg.sender] = 1;
-        }       
+contract KickicoCrowdsale is owned {
+	uint[] public IcoStagePeriod;
 
-        if((msg.value >= card_black_minamount)
-          &&(msg.value < card_titanium_minamount)
-          &&(cards_black.length < card_black_first)
-          &&(cards_black_check[msg.sender] != 1)
-          ) {
-          cards_black.push(msg.sender);
-          cards_black_check[msg.sender] = 1;
-        }        
+	bool public IcoClosedManually = false;
 
-        if((msg.value >= card_titanium_minamount)
-          &&(cards_titanium.length < card_titanium_first)
-          &&(cards_titanium_check[msg.sender] != 1)
-          ) {
-          cards_titanium.push(msg.sender);
-          cards_titanium_check[msg.sender] = 1;
-        }
+	uint public threshold = 160000 ether;
+	uint public goal = 15500 ether;
 
-        if((msg.value >= card_blue_minamount)
-          &&(msg.value < card_gold_minamount)
-          &&(cards_blue.length < card_blue_first)
-          &&(cards_blue_check[msg.sender] != 1)
-          ) {
-          cards_blue.push(msg.sender);
-          cards_blue_check[msg.sender] = 1;
-        }
+	uint public totalCollected = 0;
 
-        if((msg.value >= card_start_minamount)
-          &&(msg.value < card_blue_minamount)
-          &&(cards_start.length < card_start_first)
-          &&(cards_start_check[msg.sender] != 1)
-          ) {
-          cards_start.push(msg.sender);
-          cards_start_check[msg.sender] = 1;
-        }
+	uint public pricePerTokenInWei = 3333333;
 
-        return true;
-      }
-      
- }
+	uint public agingTime = 1539594000;
 
- /**
-   * Math operations with safety checks
-   */
-  library SafeMath {
-    function mul(uint a, uint b) internal returns (uint) {
-      uint c = a * b;
-      assert(a == 0 || c / a == b);
-      return c;
-    }
+	uint prPoolAgingTime = 1513242000;
 
-    function div(uint a, uint b) internal returns (uint) {
-      // assert(b > 0); // Solidity automatically throws when dividing by 0
-      uint c = a / b;
-      // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-      return c;
-    }
+	uint advisoryPoolAgingTime = 1535533200;
 
-    function sub(uint a, uint b) internal returns (uint) {
-      assert(b <= a);
-      return a - b;
-    }
+	uint bountiesPoolAgingTime = 1510736400;
 
-    function add(uint a, uint b) internal returns (uint) {
-      uint c = a + b;
-      assert(c >= a);
-      return c;
-    }
+	uint lotteryPoolAgingTime = 1512118800;
 
-    function max64(uint64 a, uint64 b) internal constant returns (uint64) {
-      return a >= b ? a : b;
-    }
+	uint angelInvestorsPoolAgingTime = 1506848400;
 
-    function min64(uint64 a, uint64 b) internal constant returns (uint64) {
-      return a < b ? a : b;
-    }
+	uint foundersPoolAgingTime = 1535533200;
 
-    function max256(uint256 a, uint256 b) internal constant returns (uint256) {
-      return a >= b ? a : b;
-    }
+	uint chinaPoolAgingTime = 1509526800;
 
-    function min256(uint256 a, uint256 b) internal constant returns (uint256) {
-      return a < b ? a : b;
-    }
+	uint[] public bonuses;
 
-    function assert(bool assertion) internal {
-      if (!assertion) {
-        throw;
-      }
-    }
-  }
+	uint[] public bonusesAfterClose;
+
+	address public prPool;
+
+	address public founders;
+
+	address public advisory;
+
+	address public bounties;
+
+	address public lottery;
+
+	address public angelInvestors;
+
+	address public china;
+
+	uint tokenMultiplier = 10;
+
+	CSToken public tokenReward;
+	CSToken public oldTokenReward;
+
+	mapping (address => uint256) public balanceOf;
+
+	event FundTransfer(address backer, uint amount, bool isContribution);
+
+	bool parametersHaveBeenSet = false;
+
+	function KickicoCrowdsale(address _tokenAddress, address _prPool, address _founders, address _advisory, address _bounties, address _lottery, address _angelInvestors, address _china, address _oldTokenAddress) {
+		tokenReward = CSToken(_tokenAddress);
+		oldTokenReward = CSToken(_oldTokenAddress);
+
+		tokenMultiplier = tokenMultiplier ** tokenReward.decimals();
+
+		// bind pools
+		prPool = _prPool;
+		founders = _founders;
+		advisory = _advisory;
+		bounties = _bounties;
+		lottery = _lottery;
+		angelInvestors = _angelInvestors;
+		china = _china;
+	}
+
+	function setParams() onlyOwner {
+		require(!parametersHaveBeenSet);
+
+		parametersHaveBeenSet = true;
+
+		tokenReward.addAgingTimesForPool(prPool, prPoolAgingTime);
+		tokenReward.addAgingTimesForPool(advisory, advisoryPoolAgingTime);
+		tokenReward.addAgingTimesForPool(bounties, bountiesPoolAgingTime);
+		tokenReward.addAgingTimesForPool(lottery, lotteryPoolAgingTime);
+		tokenReward.addAgingTimesForPool(angelInvestors, angelInvestorsPoolAgingTime);
+
+		// mint to pools
+		tokenReward.mintToken(advisory, 10000000 * tokenMultiplier, 0);
+		tokenReward.mintToken(bounties, 25000000 * tokenMultiplier, 0);
+		tokenReward.mintToken(lottery, 1000000 * tokenMultiplier, 0);
+		tokenReward.mintToken(angelInvestors, 30000000 * tokenMultiplier, 0);
+		tokenReward.mintToken(prPool, 23000000 * tokenMultiplier, 0);
+		tokenReward.mintToken(china, 8000000 * tokenMultiplier, 0);
+		tokenReward.mintToken(founders, 5000000 * tokenMultiplier, 0);
+
+		tokenReward.addAgingTime(agingTime);
+		tokenReward.addAgingTime(prPoolAgingTime);
+		tokenReward.addAgingTime(advisoryPoolAgingTime);
+		tokenReward.addAgingTime(bountiesPoolAgingTime);
+		tokenReward.addAgingTime(lotteryPoolAgingTime);
+		tokenReward.addAgingTime(angelInvestorsPoolAgingTime);
+		tokenReward.addAgingTime(foundersPoolAgingTime);
+		tokenReward.addAgingTime(chinaPoolAgingTime);
+		tokenReward.allAgingTimesAdded();
+
+		IcoStagePeriod.push(1504011600);
+		IcoStagePeriod.push(1506718800);
+
+		bonuses.push(1990 finney);
+		bonuses.push(2990 finney);
+		bonuses.push(4990 finney);
+		bonuses.push(6990 finney);
+		bonuses.push(9500 finney);
+		bonuses.push(14500 finney);
+		bonuses.push(19500 finney);
+		bonuses.push(29500 finney);
+		bonuses.push(49500 finney);
+		bonuses.push(74500 finney);
+		bonuses.push(99 ether);
+		bonuses.push(149 ether);
+		bonuses.push(199 ether);
+		bonuses.push(299 ether);
+		bonuses.push(499 ether);
+		bonuses.push(749 ether);
+		bonuses.push(999 ether);
+		bonuses.push(1499 ether);
+		bonuses.push(1999 ether);
+		bonuses.push(2999 ether);
+		bonuses.push(4999 ether);
+		bonuses.push(7499 ether);
+		bonuses.push(9999 ether);
+		bonuses.push(14999 ether);
+		bonuses.push(19999 ether);
+		bonuses.push(49999 ether);
+		bonuses.push(99999 ether);
+
+		bonusesAfterClose.push(200);
+		bonusesAfterClose.push(100);
+		bonusesAfterClose.push(75);
+		bonusesAfterClose.push(50);
+		bonusesAfterClose.push(25);
+	}
+
+	function mint(uint amount, uint tokens, address sender) internal {
+		balanceOf[sender] += amount;
+		totalCollected += amount;
+		tokenReward.mintToken(sender, tokens, agingTime);
+		tokenReward.mintToken(founders, tokens / 10, foundersPoolAgingTime);
+	}
+
+	function contractBalance() constant returns (uint256 balance) {
+		return this.balance;
+	}
+
+	function processPayment(address from, uint amount, bool isCustom) internal {
+		if(!isCustom)
+		FundTransfer(from, amount, true);
+		uint original = amount;
+
+		uint _price = pricePerTokenInWei;
+		uint remain = threshold - totalCollected;
+		if (remain < amount) {
+			amount = remain;
+		}
+
+		for (uint i = 0; i < bonuses.length; i++) {
+			if (amount < bonuses[i]) break;
+
+			if (amount >= bonuses[i] && (i == bonuses.length - 1 || amount < bonuses[i + 1])) {
+				if (i < 15) {
+					_price = _price * 1000 / (1000 + ((i + 1 + (i > 11 ? 1 : 0)) * 5));
+				}
+				else {
+					_price = _price * 1000 / (1000 + ((8 + i - 14) * 10));
+				}
+			}
+		}
+
+		uint tokenAmount = amount / _price;
+		uint currentAmount = tokenAmount * _price;
+		mint(currentAmount, tokenAmount + tokenAmount * getBonusByRaised() / 1000, from);
+		uint change = original - currentAmount;
+		if (change > 0 && !isCustom) {
+			if (from.send(change)) {
+				FundTransfer(from, change, false);
+			}
+			else revert();
+		}
+	}
+
+	function getBonusByRaised() internal returns (uint256) {
+		return 0;
+	}
+
+	function closeICO() onlyOwner {
+		require(now >= IcoStagePeriod[0] && now < IcoStagePeriod[1] && !IcoClosedManually);
+		IcoClosedManually = true;
+	}
+
+	function safeWithdrawal(uint amount) onlyOwner {
+		require(this.balance >= amount);
+
+		// lock withdraw if stage not closed
+		if (now >= IcoStagePeriod[0] && now < IcoStagePeriod[1])
+		require(IcoClosedManually || isReachedThreshold());
+
+		if (owner.send(amount)) {
+			FundTransfer(msg.sender, amount, false);
+		}
+	}
+
+	function isReachedThreshold() internal returns (bool reached) {
+		return pricePerTokenInWei > (threshold - totalCollected);
+	}
+
+	function isIcoClosed() constant returns (bool closed) {
+		return (now >= IcoStagePeriod[1] || IcoClosedManually || isReachedThreshold());
+	}
+
+	bool public allowManuallyMintTokens = true;
+	function mintTokens(address[] recipients) onlyServer {
+		require(allowManuallyMintTokens);
+		for(uint i = 0; i < recipients.length; i++) {
+			tokenReward.mintToken(recipients[i], oldTokenReward.balanceOf(recipients[i]), 1538902800);
+		}
+	}
+
+	function disableManuallyMintTokens() onlyOwner {
+		allowManuallyMintTokens = false;
+	}
+
+	function() payable {
+		require(parametersHaveBeenSet);
+		require(msg.value >= 50 finney);
+
+		// validate by stage periods
+		require(now >= IcoStagePeriod[0] && now < IcoStagePeriod[1]);
+		// validate if closed manually or reached the threshold
+		require(!IcoClosedManually);
+		require(!isReachedThreshold());
+
+		processPayment(msg.sender, msg.value, false);
+	}
+
+	function changeTokenOwner(address _owner) onlyOwner {
+		tokenReward.changeOwner(_owner);
+	}
+
+	function changeOldTokenReward(address _token) onlyOwner {
+		oldTokenReward = CSToken(_token);
+	}
+
+	function kill() onlyOwner {
+		require(isIcoClosed());
+		if(this.balance > 0) {
+			owner.transfer(this.balance);
+		}
+		changeTokenOwner(owner);
+		selfdestruct(owner);
+	}
+}
+https://etherscan.io/address/0x3aa5fa4fbf18d19548680a5f2bba061b18fed26b

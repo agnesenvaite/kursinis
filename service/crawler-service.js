@@ -5,21 +5,32 @@ const FileWriterService = require ('./file-writer-service');
 
 module.exports = {
     crawEtherscan () {
-        let counter = 0;
+        let counter = 129;
         let crawler = new Crawler({
 
-            maxConnections : 200,
+            maxConnections : 10000,
             // This will be called for each crawled page
             callback : function (error, result, $) {
                if (result) {
-                   let $ = result.$;
+                   // console.log(result.$);
+                    let $ = result.$;
                    //deletes useless start
                    let code = ($("#dividcode").text()).substring (61);
-                   //deletes useless end
-                   code = code.split('var editor = ace.edit("editor");')[0];
-                   FileWriterService.write('./res/contracts/contract' + counter + ".sol", code) ;
-                   counter ++;
+                   if (code === "") {
+                       console.log("restart " + counter + " " + result.request.uri.href);
+                       crawler.queue(result.request.uri.href);
+                       return;
                    }
+                   //deletes useless end
+                    code = code.split('var editor = ace.edit("editor");')[0];
+                   code += "\n" + result.request.uri.href;
+                   FileWriterService.write('./res/contracts/contract' + counter + ".sol", code) ;
+
+                   counter ++;
+
+               }else {
+                    console.log(counter);
+               }
             }
         });
 
@@ -63,7 +74,7 @@ module.exports = {
         crawler.queue('https://etherscan.io/address/0xee74792bd15d23a63e5357f599cbe1ec2f898bbc');
         crawler.queue('https://etherscan.io/address/0xaaab2ec23dd5dd9602e631b8399fa94c9d134b3a');
         crawler.queue('https://etherscan.io/address/0x07c7b4f49c2f549a71e3928da317a1caf86a2788');
-        crawler.queue('https://etherscan.io/address/0x8ba7408497883d3a569066fa3a331aa892138868');
+
         crawler.queue('https://etherscan.io/address/0x57ccee9100daa272b962c48543460a8e3ac6f674');
         crawler.queue('https://etherscan.io/address/0xEF68e7C694F40c8202821eDF525dE3782458639f');
         crawler.queue('https://etherscan.io/address/0x5d65d971895edc438f465c17db6992698a52318d');
@@ -78,7 +89,6 @@ module.exports = {
         crawler.queue('https://etherscan.io/address/0xd4c435f5b09f855c3317c8524cb1f586e42795fa');
         crawler.queue('https://etherscan.io/address/0xe3818504c1b32bf1557b16c238b2e01fd3149c17');
         crawler.queue('https://etherscan.io/address/0x1844b21593262668b7248d0f57a220caaba46ab9');
-        crawler.queue('https://etherscan.io/address/0xaf518d65f84e4695a4da0450ec02c1248f56b668');
         crawler.queue('https://etherscan.io/address/0xf46ede17c0bab20d87cd079a2632f71433a407b9');
         crawler.queue('https://etherscan.io/address/0x0ceb0d54a7e87dfa16ddf7656858cf7e29851fd7');
         crawler.queue('https://etherscan.io/address/0x2097175d0abb8258f2468e3487f8db776e29d076');
@@ -105,7 +115,6 @@ module.exports = {
         crawler.queue('https://etherscan.io/address/0x3aa5fa4fbf18d19548680a5f2bba061b18fed26b');
         crawler.queue('https://etherscan.io/address/0x5136c98a80811c3f46bdda8b5c4555cfd9f812f0');
         crawler.queue('https://etherscan.io/address/0x96A65609a7B84E8842732DEB08f56C3E21aC6f8a');
-        crawler.queue('https://etherscan.io/address/0x16fa565b6b61248a5807c3af14f0005b383c4214');
         crawler.queue('https://etherscan.io/address/0x9e88613418cf03dca54d6a2cf6ad934a78c7a17a');
         crawler.queue('https://etherscan.io/address/0xdf6ef343350780bf8c3410bf062e0c015b1dd671');
         crawler.queue('https://etherscan.io/address/0x741fc999f5b62c80831cf659aed04c64ac8ef24e');
@@ -149,7 +158,6 @@ module.exports = {
         crawler.queue('https://etherscan.io/address/0xd6a81d7a8b4d1cc947138d9e4aca5d3cde33a170');
         crawler.queue('https://etherscan.io/address/0x26d08b9d227933a85e855656dc46ab889e183c88');
         crawler.queue('https://etherscan.io/address/0xf2Fbb2939981594e25d93e6226231FcC1b01718e');
-        crawler.queue('https://etherscan.io/address/0x31703401Aea648C30Ab29Fa2a01eAE02527EDD19');
         crawler.queue('https://etherscan.io/address/0x4C5651c4f59B3E92E67d993b7B969F9aF861380f');
         crawler.queue('https://etherscan.io/address/0xeb7c20027172e5d143fb030d50f91cece2d1485d');
         crawler.queue('https://etherscan.io/address/0x71e774fd3e3948cfb6fcb1aaff4bb906858fba3a');

@@ -1,28 +1,40 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.8;
+
+contract ERC20 {
+  function totalSupply() constant returns (uint);
+  function balanceOf(address who) constant returns (uint);
+  function allowance(address owner, address spender) constant returns (uint);
+
+  function transfer(address to, uint value) returns (bool ok);
+  function transferFrom(address from, address to, uint value) returns (bool ok);
+  function approve(address spender, uint value) returns (bool ok);
+  event Transfer(address indexed from, address indexed to, uint value);
+  event Approval(address indexed owner, address indexed spender, uint value);
+}
 
 
-library SafeMath {
-  function mul(uint a, uint b) internal returns (uint) {
+contract SafeMath {
+  function safeMul(uint a, uint b) internal returns (uint) {
     uint c = a * b;
     assert(a == 0 || c / a == b);
     return c;
   }
 
-  function div(uint a, uint b) internal returns (uint) {
-    // assert(b > 0); // Solidity automatically throws when dividing by 0
+  function safeDiv(uint a, uint b) internal returns (uint) {
+    assert(b > 0);
     uint c = a / b;
-    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    assert(a == b * c + a % b);
     return c;
   }
 
-  function sub(uint a, uint b) internal returns (uint) {
+  function safeSub(uint a, uint b) internal returns (uint) {
     assert(b <= a);
     return a - b;
   }
 
-  function add(uint a, uint b) internal returns (uint) {
+  function safeAdd(uint a, uint b) internal returns (uint) {
     uint c = a + b;
-    assert(c >= a);
+    assert(c>=a && c>=b);
     return c;
   }
 
@@ -48,124 +60,8 @@ library SafeMath {
     }
   }
 }
-
-contract Ownable {
-
-    /// @dev `owner` is the only address that can call a function with this
-    /// modifier
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
-    address public owner;
-
-    /// @notice The Constructor assigns the message sender to be `owner`
-    function Ownable() {
-        owner = msg.sender;
-    }
-
-    address public newOwner;
-
-    /// @notice `owner` can step down and assign some other address to this role
-    /// @param _newOwner The address of the new owner.
-    function changeOwner(address _newOwner) onlyOwner {
-        newOwner = _newOwner;
-    }
-
-
-    function acceptOwnership() {
-        if (msg.sender == newOwner) {
-            owner = newOwner;
-        }
-    }
-}
-
-contract Pausable is Ownable {
-  bool public stopped;
-  event onEmergencyChanged(bool isStopped);
-
-  modifier stopInEmergency {
-    if (stopped) {
-      throw;
-    }
-    _;
-  }
-
-  modifier onlyInEmergency {
-    if (!stopped) {
-      throw;
-    }
-    _;
-  }
-
-  // called by the owner on emergency, triggers stopped state
-  function emergencyStop() external onlyOwner {
-    stopped = true;
-    onEmergencyChanged(stopped);
-  }
-
-  // called by the owner on end of emergency, returns to normal state
-  function release() external onlyOwner onlyInEmergency {
-    stopped = false;
-    onEmergencyChanged(stopped);
-  }
-
-}
-
-contract ERC20Basic {
-  function totalSupply() constant returns (uint);
-  function balanceOf(address who) constant returns (uint);
-  function transfer(address to, uint value) returns (bool);
-  event Transfer(address indexed from, address indexed to, uint value);
-}
-
-contract ERC20 is ERC20Basic {
-
-  mapping(address => uint) balances;
-
-  function allowance(address owner, address spender) constant returns (uint);
-  function transferFrom(address from, address to, uint value) returns (bool);
-  function approve(address spender, uint value) returns (bool);
-  function approveAndCall(address spender, uint256 value, bytes extraData) returns (bool);
-  event Approval(address indexed owner, address indexed spender, uint value);
-
-  function doTransfer(address _from, address _to, uint _amount) internal returns(bool);
-}
-
-contract GrantsControlled {
-    modifier onlyGrantsController { if (msg.sender != grantsController) throw; _; }
-
-    address public grantsController;
-
-    function GrantsControlled() { grantsController = msg.sender;}
-
-    function changeGrantsController(address _newController) onlyGrantsController {
-        grantsController = _newController;
-    }
-}
-
-contract LimitedTransferToken is ERC20 {
-  // Checks whether it can transfer or otherwise throws.
-  modifier canTransfer(address _sender, uint _value) {
-   if (_value > transferableTokens(_sender, uint64(now))) throw;
-   _;
-  }
-
-  // Checks modifier and allows transfer if tokens are not locked.
-  function transfer(address _to, uint _value) canTransfer(msg.sender, _value) returns (bool) {
-   return super.transfer(_to, _value);
-  }
-
-  // Checks modifier and allows transfer if tokens are not locked.
-  function transferFrom(address _from, address _to, uint _value) canTransfer(_from, _value) returns (bool) {
-   return super.transferFrom(_from, _to, _value);
-  }
-
-  // Default transferable tokens function returns all tokens for a holder (no limit).
-  function transferableTokens(address holder, uint64 time) constant public returns (uint256) {
-    return balanceOf(holder);
-  }
+contract ApproveAndCallReceiver {
+    function receiveApproval(address _from, uint256 _amount, address _token, bytes _data);
 }
 
 contract Controlled {
@@ -183,10 +79,98 @@ contract Controlled {
         controller = _newController;
     }
 }
+contract AbstractSale {
+  function saleFinalized() constant returns (bool);
+}
+
+contract SaleWallet {
+  // Public variables
+  address public multisig;
+  uint public finalBlock;
+  AbstractSale public tokenSale;
+
+  // @dev Constructor initializes public variables
+  // @param _multisig The address of the multisig that will receive the funds
+  // @param _finalBlock Block after which the multisig can request the funds
+  function SaleWallet(address _multisig, uint _finalBlock, address _tokenSale) {
+    multisig = _multisig;
+    finalBlock = _finalBlock;
+    tokenSale = AbstractSale(_tokenSale);
+  }
+
+  // @dev Receive all sent funds without any further logic
+  function () public payable {}
+
+  // @dev Withdraw function sends all the funds to the wallet if conditions are correct
+  function withdraw() public {
+    if (msg.sender != multisig) throw;                       // Only the multisig can request it
+    if (block.number > finalBlock) return doWithdraw();      // Allow after the final block
+    if (tokenSale.saleFinalized()) return doWithdraw();      // Allow when sale is finalized
+  }
+
+  function doWithdraw() internal {
+    if (!multisig.send(this.balance)) throw;
+  }
+}
+
+contract Controller {
+    /// @notice Called when `_owner` sends ether to the MiniMe Token contract
+    /// @param _owner The address that sent the ether to create tokens
+    /// @return True if the ether is accepted, false if it throws
+    function proxyPayment(address _owner) payable returns(bool);
+
+    /// @notice Notifies the controller about a token transfer allowing the
+    ///  controller to react if desired
+    /// @param _from The origin of the transfer
+    /// @param _to The destination of the transfer
+    /// @param _amount The amount of the transfer
+    /// @return False if the controller does not authorize the transfer
+    function onTransfer(address _from, address _to, uint _amount) returns(bool);
+
+    /// @notice Notifies the controller about an approval allowing the
+    ///  controller to react if desired
+    /// @param _owner The address that calls `approve()`
+    /// @param _spender The spender in the `approve()` call
+    /// @param _amount The amount in the `approve()` call
+    /// @return False if the controller does not authorize the approval
+    function onApprove(address _owner, address _spender, uint _amount)
+        returns(bool);
+}
+
+contract ANPlaceholder is Controller {
+  address public sale;
+  ANT public token;
+
+  function ANPlaceholder(address _sale, address _ant) {
+    sale = _sale;
+    token = ANT(_ant);
+  }
+
+  function changeController(address network) public {
+    if (msg.sender != sale) throw;
+    token.changeController(network);
+    suicide(network);
+  }
+
+  // In between the sale and the network. Default settings for allowing token transfers.
+  function proxyPayment(address _owner) payable public returns (bool) {
+    throw;
+    return false;
+  }
+
+  function onTransfer(address _from, address _to, uint _amount) public returns (bool) {
+    return true;
+  }
+
+  function onApprove(address _owner, address _spender, uint _amount) public returns (bool) {
+    return true;
+  }
+}
+
+
+
 
 contract MiniMeToken is ERC20, Controlled {
-    using SafeMath for uint;
-
     string public name;                //The Token's name: e.g. DigixDAO Tokens
     uint8 public decimals;             //Number of decimals of the smallest unit
     string public symbol;              //An identifier: e.g. REP
@@ -300,8 +284,8 @@ contract MiniMeToken is ERC20, Controlled {
             if (!transfersEnabled) throw;
 
             // The standard ERC 20 transferFrom functionality
-            if (allowed[_from][msg.sender] < _amount) return false;
-            allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+            if (allowed[_from][msg.sender] < _amount) throw;
+            allowed[_from][msg.sender] -= _amount;
         }
         return doTransfer(_from, _to, _amount);
     }
@@ -319,8 +303,6 @@ contract MiniMeToken is ERC20, Controlled {
                return true;
            }
 
-           if (parentSnapShotBlock >= block.number) throw;
-
            // Do not allow transfer to 0x0 or the token contract itself
            if ((_to == 0) || (_to == address(this))) throw;
 
@@ -328,23 +310,23 @@ contract MiniMeToken is ERC20, Controlled {
            //  account the transfer returns false
            var previousBalanceFrom = balanceOfAt(_from, block.number);
            if (previousBalanceFrom < _amount) {
-               return false;
+               throw;
            }
 
            // Alerts the token controller of the transfer
            if (isContract(controller)) {
-               if (!TokenController(controller).onTransfer(_from, _to, _amount))
-               throw;
+               if (!Controller(controller).onTransfer(_from, _to, _amount)) throw;
            }
 
            // First update the balance array with the new value for the address
            //  sending the tokens
-           updateValueAtNow(balances[_from], previousBalanceFrom.sub(_amount));
+           updateValueAtNow(balances[_from], previousBalanceFrom - _amount);
 
            // Then update the balance array with the new value for the address
            //  receiving the tokens
            var previousBalanceTo = balanceOfAt(_to, block.number);
-           updateValueAtNow(balances[_to], previousBalanceTo.add(_amount));
+           if (previousBalanceTo + _amount < previousBalanceTo) throw; // Check for overflow
+           updateValueAtNow(balances[_to], previousBalanceTo + _amount);
 
            // An event to make the transfer easy to find on the blockchain
            Transfer(_from, _to, _amount);
@@ -367,7 +349,7 @@ contract MiniMeToken is ERC20, Controlled {
     function approve(address _spender, uint256 _amount) returns (bool success) {
         if (!transfersEnabled) throw;
 
-        // To change the approve amount you first have to reduce the addresses`
+        // To change the approve amount you first have to reduce the addresses´
         //  allowance to zero by calling `approve(_spender,0)` if it is not
         //  already 0 to mitigate the race condition described here:
         //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
@@ -375,7 +357,7 @@ contract MiniMeToken is ERC20, Controlled {
 
         // Alerts the token controller of the approve function call
         if (isContract(controller)) {
-            if (!TokenController(controller).onApprove(msg.sender, _spender, _amount))
+            if (!Controller(controller).onApprove(msg.sender, _spender, _amount))
                 throw;
         }
 
@@ -403,15 +385,20 @@ contract MiniMeToken is ERC20, Controlled {
     /// @return True if the function call was successful
     function approveAndCall(address _spender, uint256 _amount, bytes _extraData
     ) returns (bool success) {
-        if (!approve(_spender, _amount)) throw;
+        approve(_spender, _amount);
 
-        ApproveAndCallFallBack(_spender).receiveApproval(
-            msg.sender,
-            _amount,
-            this,
-            _extraData
+        // This portion is copied from ConsenSys's Standard Token Contract. It
+        //  calls the receiveApproval function that is part of the contract that
+        //  is being approved (`_spender`). The function should look like:
+        //  `receiveApproval(address _from, uint256 _amount, address
+        //  _tokenContract, bytes _extraData)` It is assumed that the call
+        //  *should* succeed, otherwise the plain vanilla approve would be used
+        ApproveAndCallReceiver(_spender).receiveApproval(
+           msg.sender,
+           _amount,
+           this,
+           _extraData
         );
-
         return true;
     }
 
@@ -477,6 +464,10 @@ contract MiniMeToken is ERC20, Controlled {
         }
     }
 
+    function min(uint a, uint b) internal returns (uint) {
+      return a < b ? a : b;
+    }
+
 ////////////////
 // Clone Token Method
 ////////////////
@@ -488,7 +479,7 @@ contract MiniMeToken is ERC20, Controlled {
     /// @param _cloneTokenSymbol Symbol of the clone token
     /// @param _snapshotBlock Block when the distribution of the parent token is
     ///  copied to set the initial distribution of the new clone token;
-    ///  if the block is zero than the actual block, the current block is used
+    ///  if the block is higher than the actual block, the current block is used
     /// @param _transfersEnabled True if transfers are allowed in the clone
     /// @return The address of the new MiniMeToken Contract
     function createCloneToken(
@@ -498,7 +489,7 @@ contract MiniMeToken is ERC20, Controlled {
         uint _snapshotBlock,
         bool _transfersEnabled
         ) returns(address) {
-        if (_snapshotBlock == 0) _snapshotBlock = block.number;
+        if (_snapshotBlock > block.number) _snapshotBlock = block.number;
         MiniMeToken cloneToken = tokenFactory.createCloneToken(
             this,
             _snapshotBlock,
@@ -526,9 +517,11 @@ contract MiniMeToken is ERC20, Controlled {
     function generateTokens(address _owner, uint _amount
     ) onlyController returns (bool) {
         uint curTotalSupply = getValueAt(totalSupplyHistory, block.number);
-        updateValueAtNow(totalSupplyHistory, curTotalSupply.add(_amount));
+        if (curTotalSupply + _amount < curTotalSupply) throw; // Check for overflow
+        updateValueAtNow(totalSupplyHistory, curTotalSupply + _amount);
         var previousBalanceTo = balanceOf(_owner);
-        updateValueAtNow(balances[_owner], previousBalanceTo.add(_amount));
+        if (previousBalanceTo + _amount < previousBalanceTo) throw; // Check for overflow
+        updateValueAtNow(balances[_owner], previousBalanceTo + _amount);
         Transfer(0, _owner, _amount);
         return true;
     }
@@ -542,10 +535,10 @@ contract MiniMeToken is ERC20, Controlled {
     ) onlyController returns (bool) {
         uint curTotalSupply = getValueAt(totalSupplyHistory, block.number);
         if (curTotalSupply < _amount) throw;
-        updateValueAtNow(totalSupplyHistory, curTotalSupply.sub(_amount));
+        updateValueAtNow(totalSupplyHistory, curTotalSupply - _amount);
         var previousBalanceFrom = balanceOf(_owner);
         if (previousBalanceFrom < _amount) throw;
-        updateValueAtNow(balances[_owner], previousBalanceFrom.sub(_amount));
+        updateValueAtNow(balances[_owner], previousBalanceFrom - _amount);
         Transfer(_owner, 0, _amount);
         return true;
     }
@@ -621,57 +614,23 @@ contract MiniMeToken is ERC20, Controlled {
         return size>0;
     }
 
-    /// @dev Helper function to return a min betwen the two uints
-    function min(uint a, uint b) internal returns (uint) {
-        return a < b ? a : b;
-    }
-
     /// @notice The fallback function: If the contract's controller has not been
     ///  set to 0, then the `proxyPayment` method is called which relays the
     ///  ether and creates tokens as described in the token controller contract
     function ()  payable {
         if (isContract(controller)) {
-            if (! TokenController(controller).proxyPayment.value(msg.value)(msg.sender))
+            if (! Controller(controller).proxyPayment.value(msg.value)(msg.sender))
                 throw;
         } else {
             throw;
         }
     }
 
-    //////////
-    // Safety Methods
-    //////////
-
-    /// @notice This method can be used by the controller to extract mistakenly
-    ///  sent tokens to this contract.
-    /// @param _token The address of the token contract that you want to recover
-    ///  set to 0 in case you want to extract ether.
-    /// @param _claimer Address that tokens will be send to
-    function claimTokens(address _token, address _claimer) onlyController {
-        if (_token == 0x0) {
-            _claimer.transfer(this.balance);
-            return;
-        }
-
-        ERC20Basic token = ERC20Basic(_token);
-        uint balance = token.balanceOf(this);
-        token.transfer(_claimer, balance);
-        ClaimedTokens(_token, _claimer, balance);
-    }
-
 
 ////////////////
 // Events
 ////////////////
-    event ClaimedTokens(address indexed _token, address indexed _claimer, uint _amount);
-    event Transfer(address indexed _from, address indexed _to, uint256 _amount);
     event NewCloneToken(address indexed _cloneToken, uint _snapshotBlock);
-    event Approval(
-        address indexed _owner,
-        address indexed _spender,
-        uint256 _amount
-        );
-
 }
 
 
@@ -717,203 +676,133 @@ contract MiniMeTokenFactory {
     }
 }
 
-contract VestedToken is LimitedTransferToken, GrantsControlled {
-  using SafeMath for uint;
 
-  uint256 MAX_GRANTS_PER_ADDRESS = 20;
+/*
+    Copyright 2017, Jorge Izquierdo (Aragon Foundation)
 
+    Based on VestedToken.sol from https://github.com/OpenZeppelin/zeppelin-solidity
+
+    SafeMath – Copyright (c) 2016 Smart Contract Solutions, Inc.
+    MiniMeToken – Copyright 2017, Jordi Baylina (Giveth)
+ */
+
+// @dev MiniMeIrrevocableVestedToken is a derived version of MiniMeToken adding the
+// ability to createTokenGrants which are basically a transfer that limits the
+// receiver of the tokens how can he spend them over time.
+
+// For simplicity, token grants are not saved in MiniMe type checkpoints.
+// Vanilla cloning ANT will clone it into a MiniMeToken without vesting.
+// More complex cloning could account for past vesting calendars.
+
+contract MiniMeIrrevocableVestedToken is MiniMeToken, SafeMath {
+  // Keep the struct at 2 sstores (1 slot for value + 64 * 3 (dates) + 20 (address) = 2 slots (2nd slot is 212 bytes, lower than 256))
   struct TokenGrant {
-    address granter;     // 20 bytes
-    uint256 value;       // 32 bytes
+    address granter;
+    uint256 value;
     uint64 cliff;
     uint64 vesting;
-    uint64 start;        // 3 * 8 = 24 bytes
-    bool revokable;
-    bool burnsOnRevoke;  // 2 * 1 = 2 bits? or 2 bytes?
-  } // total 78 bytes = 3 sstore per operation (32 per sstore)
+    uint64 start;
+  }
+
+  event NewTokenGrant(address indexed from, address indexed to, uint256 value, uint64 start, uint64 cliff, uint64 vesting);
 
   mapping (address => TokenGrant[]) public grants;
 
-  event NewTokenGrant(address indexed from, address indexed to, uint256 value, uint256 grantId);
+  mapping (address => bool) canCreateGrants;
+  address vestingWhitelister;
 
-  /**
-   * @dev Grant tokens to a specified address
-   * @param _to address The address which the tokens will be granted to.
-   * @param _value uint256 The amount of tokens to be granted.
-   * @param _start uint64 Time of the beginning of the grant.
-   * @param _cliff uint64 Time of the cliff period.
-   * @param _vesting uint64 The vesting period.
-   */
+  modifier canTransfer(address _sender, uint _value) {
+    if (_value > spendableBalanceOf(_sender)) throw;
+    _;
+  }
+
+  modifier onlyVestingWhitelister {
+    if (msg.sender != vestingWhitelister) throw;
+    _;
+  }
+
+  function MiniMeIrrevocableVestedToken (
+      address _tokenFactory,
+      address _parentToken,
+      uint _parentSnapShotBlock,
+      string _tokenName,
+      uint8 _decimalUnits,
+      string _tokenSymbol,
+      bool _transfersEnabled
+  ) MiniMeToken(_tokenFactory, _parentToken, _parentSnapShotBlock, _tokenName, _decimalUnits, _tokenSymbol, _transfersEnabled) {
+    vestingWhitelister = msg.sender;
+    doSetCanCreateGrants(vestingWhitelister, true);
+  }
+
+  // @dev Add canTransfer modifier before allowing transfer and transferFrom to go through
+  function transfer(address _to, uint _value)
+           canTransfer(msg.sender, _value)
+           public
+           returns (bool success) {
+    return super.transfer(_to, _value);
+  }
+
+  function transferFrom(address _from, address _to, uint _value)
+           canTransfer(_from, _value)
+           public
+           returns (bool success) {
+    return super.transferFrom(_from, _to, _value);
+  }
+
+  function spendableBalanceOf(address _holder) constant public returns (uint) {
+    return transferableTokens(_holder, uint64(now));
+  }
+
   function grantVestedTokens(
     address _to,
     uint256 _value,
     uint64 _start,
     uint64 _cliff,
-    uint64 _vesting,
-    bool _revokable,
-    bool _burnsOnRevoke
-  ) onlyGrantsController public {
+    uint64 _vesting) public {
 
-    // Check for date inconsistencies that may cause unexpected behavior
-    if (_cliff < _start || _vesting < _cliff) {
-      throw;
-    }
+    // Check start, cliff and vesting are properly order to ensure correct functionality of the formula.
+    if (_cliff < _start) throw;
+    if (_vesting < _start) throw;
+    if (_vesting < _cliff) throw;
 
-    if (tokenGrantsCount(_to) > MAX_GRANTS_PER_ADDRESS) throw;   // To prevent a user being spammed and have his balance locked (out of gas attack when calculating vesting).
+    if (!canCreateGrants[msg.sender]) throw;
+    if (tokenGrantsCount(_to) > 20) throw;   // To prevent a user being spammed and have his balance locked (out of gas attack when calculating vesting).
 
-    uint count = grants[_to].push(
-                TokenGrant(
-                  _revokable ? msg.sender : 0, // avoid storing an extra 20 bytes when it is non-revokable
-                  _value,
-                  _cliff,
-                  _vesting,
-                  _start,
-                  _revokable,
-                  _burnsOnRevoke
-                )
-              );
+    TokenGrant memory grant = TokenGrant(msg.sender, _value, _cliff, _vesting, _start);
+    grants[_to].push(grant);
 
-    transfer(_to, _value);
+    if (!transfer(_to, _value)) throw;
 
-    NewTokenGrant(msg.sender, _to, _value, count - 1);
+    NewTokenGrant(msg.sender, _to, _value, _cliff, _vesting, _start);
   }
 
-  /**
-   * @dev Revoke the grant of tokens of a specifed address.
-   * @param _holder The address which will have its tokens revoked.
-   * @param _grantId The id of the token grant.
-   */
+  function setCanCreateGrants(address _addr, bool _allowed)
+           onlyVestingWhitelister public {
+    doSetCanCreateGrants(_addr, _allowed);
+  }
+
+  function doSetCanCreateGrants(address _addr, bool _allowed)
+           internal {
+    canCreateGrants[_addr] = _allowed;
+  }
+
+  function changeVestingWhitelister(address _newWhitelister) onlyVestingWhitelister public {
+    doSetCanCreateGrants(vestingWhitelister, false);
+    vestingWhitelister = _newWhitelister;
+    doSetCanCreateGrants(vestingWhitelister, true);
+  }
+
+  // @dev Not allow token grants
   function revokeTokenGrant(address _holder, uint _grantId) public {
-    TokenGrant grant = grants[_holder][_grantId];
-
-    if (!grant.revokable) { // Check if grant was revokable
-      throw;
-    }
-
-    if (grant.granter != msg.sender) { // Only granter can revoke it
-      throw;
-    }
-
-    address receiver = grant.burnsOnRevoke ? 0xdead : msg.sender;
-
-    uint256 nonVested = nonVestedTokens(grant, uint64(now));
-
-    // remove grant from array
-    delete grants[_holder][_grantId];
-    grants[_holder][_grantId] = grants[_holder][grants[_holder].length.sub(1)];
-    grants[_holder].length -= 1;
-
-    // This will call MiniMe's doTransfer method, so token is transferred according to
-    // MiniMe Token logic
-    doTransfer(_holder, receiver, nonVested);
-
-    Transfer(_holder, receiver, nonVested);
+    throw;
   }
 
-  /**
-   * @dev Revoke all grants of tokens of a specifed address.
-   * @param _holder The address which will have its tokens revoked.
-   */
-    function revokeAllTokenGrants(address _holder) {
-        var grandsCount = tokenGrantsCount(_holder);
-        for (uint i = 0; i < grandsCount; i++) {
-          revokeTokenGrant(_holder, 0);
-        }
-    }
-
-  /**
-   * @dev Calculate the total amount of transferable tokens of a holder at a given time
-   * @param holder address The address of the holder
-   * @param time uint64 The specific time.
-   * @return An uint representing a holder's total amount of transferable tokens.
-   */
-  function transferableTokens(address holder, uint64 time) constant public returns (uint256) {
-    uint256 grantIndex = tokenGrantsCount(holder);
-
-    if (grantIndex == 0) return balanceOf(holder); // shortcut for holder without grants
-
-    // Iterate through all the grants the holder has, and add all non-vested tokens
-    uint256 nonVested = 0;
-    for (uint256 i = 0; i < grantIndex; i++) {
-      nonVested = SafeMath.add(nonVested, nonVestedTokens(grants[holder][i], time));
-    }
-
-    // Balance - totalNonVested is the amount of tokens a holder can transfer at any given time
-    uint256 vestedTransferable = SafeMath.sub(balanceOf(holder), nonVested);
-
-    // Return the minimum of how many vested can transfer and other value
-    // in case there are other limiting transferability factors (default is balanceOf)
-    return SafeMath.min256(vestedTransferable, super.transferableTokens(holder, time));
-  }
-
-  /**
-   * @dev Check the amount of grants that an address has.
-   * @param _holder The holder of the grants.
-   * @return A uint representing the total amount of grants.
-   */
-  function tokenGrantsCount(address _holder) constant returns (uint index) {
+  //
+  function tokenGrantsCount(address _holder) constant public returns (uint index) {
     return grants[_holder].length;
   }
 
-  /**
-   * @dev Calculate amount of vested tokens at a specifc time.
-   * @param tokens uint256 The amount of tokens grantted.
-   * @param time uint64 The time to be checked
-   * @param start uint64 A time representing the begining of the grant
-   * @param cliff uint64 The cliff period.
-   * @param vesting uint64 The vesting period.
-   * @return An uint representing the amount of vested tokensof a specif grant.
-   *  transferableTokens
-   *   |                         _/--------   vestedTokens rect
-   *   |                       _/
-   *   |                     _/
-   *   |                   _/
-   *   |                 _/
-   *   |                /
-   *   |              .|
-   *   |            .  |
-   *   |          .    |
-   *   |        .      |
-   *   |      .        |
-   *   |    .          |
-   *   +===+===========+---------+----------> time
-   *      Start       Clift    Vesting
-   */
-  function calculateVestedTokens(
-    uint256 tokens,
-    uint256 time,
-    uint256 start,
-    uint256 cliff,
-    uint256 vesting) constant returns (uint256)
-    {
-      // Shortcuts for before cliff and after vesting cases.
-      if (time < cliff) return 0;
-      if (time >= vesting) return tokens;
-
-      // Interpolate all vested tokens.
-      // As before cliff the shortcut returns 0, we can use just calculate a value
-      // in the vesting rect (as shown in above's figure)
-
-      // vestedTokens = tokens * (time - start) / (vesting - start)
-      uint256 vestedTokens = SafeMath.div(
-                                    SafeMath.mul(
-                                      tokens,
-                                      SafeMath.sub(time, start)
-                                      ),
-                                    SafeMath.sub(vesting, start)
-                                    );
-
-      return vestedTokens;
-  }
-
-  /**
-   * @dev Get all information about a specifc grant.
-   * @param _holder The address which will have its tokens revoked.
-   * @param _grantId The id of the token grant.
-   * @return Returns all the values that represent a TokenGrant(address, value, start, cliff,
-   * revokability, burnsOnRevoke, and vesting) plus the vested value at the current time.
-   */
-  function tokenGrant(address _holder, uint _grantId) constant returns (address granter, uint256 value, uint256 vested, uint64 start, uint64 cliff, uint64 vesting, bool revokable, bool burnsOnRevoke) {
+  function tokenGrant(address _holder, uint _grantId) constant public returns (address granter, uint256 value, uint256 vested, uint64 start, uint64 cliff, uint64 vesting) {
     TokenGrant grant = grants[_holder][_grantId];
 
     granter = grant.granter;
@@ -921,19 +810,11 @@ contract VestedToken is LimitedTransferToken, GrantsControlled {
     start = grant.start;
     cliff = grant.cliff;
     vesting = grant.vesting;
-    revokable = grant.revokable;
-    burnsOnRevoke = grant.burnsOnRevoke;
 
     vested = vestedTokens(grant, uint64(now));
   }
 
-  /**
-   * @dev Get the amount of vested tokens at a specific time.
-   * @param grant TokenGrant The grant to be checked.
-   * @param time The time to be checked
-   * @return An uint representing the amount of vested tokens of a specific grant at a specific time.
-   */
-  function vestedTokens(TokenGrant grant, uint64 time) private constant returns (uint256) {
+  function vestedTokens(TokenGrant grant, uint64 time) internal constant returns (uint256) {
     return calculateVestedTokens(
       grant.value,
       uint256(time),
@@ -943,540 +824,537 @@ contract VestedToken is LimitedTransferToken, GrantsControlled {
     );
   }
 
-  /**
-   * @dev Calculate the amount of non vested tokens at a specific time.
-   * @param grant TokenGrant The grant to be checked.
-   * @param time uint64 The time to be checked
-   * @return An uint representing the amount of non vested tokens of a specifc grant on the
-   * passed time frame.
-   */
-  function nonVestedTokens(TokenGrant grant, uint64 time) private constant returns (uint256) {
-    return grant.value.sub(vestedTokens(grant, time));
+  //  transferableTokens
+  //   |                         _/--------   NonVestedTokens
+  //   |                       _/
+  //   |                     _/
+  //   |                   _/
+  //   |                 _/
+  //   |                /
+  //   |              .|
+  //   |            .  |
+  //   |          .    |
+  //   |        .      |
+  //   |      .        |
+  //   |    .          |
+  //   +===+===========+---------+----------> time
+  //      Start       Clift    Vesting
+
+  function calculateVestedTokens(
+    uint256 tokens,
+    uint256 time,
+    uint256 start,
+    uint256 cliff,
+    uint256 vesting) internal constant returns (uint256)
+    {
+
+    // Shortcuts for before cliff and after vesting cases.
+    if (time < cliff) return 0;
+    if (time >= vesting) return tokens;
+
+    // Interpolate all vested tokens.
+    // As before cliff the shortcut returns 0, we can use just this function to
+    // calculate it.
+
+    // vestedTokens = tokens * (time - start) / (vesting - start)
+    uint256 vestedTokens = safeDiv(
+                                  safeMul(
+                                    tokens,
+                                    safeSub(time, start)
+                                    ),
+                                  safeSub(vesting, start)
+                                  );
+
+    return vestedTokens;
   }
 
-  /**
-   * @dev Calculate the date when the holder can trasfer all its tokens
-   * @param holder address The address of the holder
-   * @return An uint representing the date of the last transferable tokens.
-   */
+  function nonVestedTokens(TokenGrant grant, uint64 time) internal constant returns (uint256) {
+    // Of all the tokens of the grant, how many of them are not vested?
+    // grantValue - vestedTokens
+    return safeSub(grant.value, vestedTokens(grant, time));
+  }
+
+  // @dev The date in which all tokens are transferable for the holder
+  // Useful for displaying purposes (not used in any logic calculations)
   function lastTokenIsTransferableDate(address holder) constant public returns (uint64 date) {
     date = uint64(now);
-    uint256 grantIndex = grants[holder].length;
+    uint256 grantIndex = tokenGrantsCount(holder);
     for (uint256 i = 0; i < grantIndex; i++) {
-      date = SafeMath.max64(grants[holder][i].vesting, date);
+      date = max64(grants[holder][i].vesting, date);
     }
+    return date;
+  }
+
+  // @dev How many tokens can a holder transfer at a point in time
+  function transferableTokens(address holder, uint64 time) constant public returns (uint256) {
+    uint256 grantIndex = tokenGrantsCount(holder);
+
+    if (grantIndex == 0) return balanceOf(holder); // shortcut for holder without grants
+
+    // Iterate through all the grants the holder has, and add all non-vested tokens
+    uint256 nonVested = 0;
+    for (uint256 i = 0; i < grantIndex; i++) {
+      nonVested = safeAdd(nonVested, nonVestedTokens(grants[holder][i], time));
+    }
+
+    // Balance - totalNonVested is the amount of tokens a holder can transfer at any given time
+    return safeSub(balanceOf(holder), nonVested);
   }
 }
 
-contract ApproveAndCallFallBack {
-    function receiveApproval(address from, uint256 _amount, address _token, bytes _data);
+/*
+    Copyright 2017, Jorge Izquierdo (Aragon Foundation)
+*/
+
+contract ANT is MiniMeIrrevocableVestedToken {
+  // @dev ANT constructor just parametrizes the MiniMeIrrevocableVestedToken constructor
+  function ANT(
+    address _tokenFactory
+  ) MiniMeIrrevocableVestedToken(
+    _tokenFactory,
+    0x0,                    // no parent token
+    0,                      // no snapshot block number from parent
+    "Aragon Network Token", // Token name
+    18,                     // Decimals
+    "ANT",                  // Symbol
+    true                    // Enable transfers
+    ) {}
 }
 
 
-contract TokenController {
-    /// @notice Called when `_owner` sends ether to the MiniMe Token contract
-    /// @param _owner The address that sent the ether to create tokens
-    /// @return True if the ether is accepted, false if it throws
-    function proxyPayment(address _owner) payable returns(bool);
 
-    /// @notice Notifies the controller about a token transfer allowing the
-    ///  controller to react if desired
-    /// @param _from The origin of the transfer
-    /// @param _to The destination of the transfer
-    /// @param _amount The amount of the transfer
-    /// @return False if the controller does not authorize the transfer
-    function onTransfer(address _from, address _to, uint _amount) returns(bool);
+/*
+    Copyright 2017, Jorge Izquierdo (Aragon Foundation)
+    Copyright 2017, Jordi Baylina (Giveth)
 
-    /// @notice Notifies the controller about an approval allowing the
-    ///  controller to react if desired
-    /// @param _owner The address that calls `approve()`
-    /// @param _spender The spender in the `approve()` call
-    /// @param _amount The amount in the `approve()` call
-    /// @return False if the controller does not authorize the approval
-    function onApprove(address _owner, address _spender, uint _amount)
-        returns(bool);
-}
+    Based on SampleCampaign-TokenController.sol from https://github.com/Giveth/minime
+ */
 
-contract District0xNetworkToken is MiniMeToken, VestedToken {
-    function District0xNetworkToken(address _controller, address _tokenFactory)
-        MiniMeToken(
-            _tokenFactory,
-            0x0,                        // no parent token
-            0,                          // no snapshot block number from parent
-            "district0x Network Token", // Token name
-            18,                         // Decimals
-            "DNT",                      // Symbol
-            true                        // Enable transfers
-            )
-    {
-        changeController(_controller);
-        changeGrantsController(_controller);
-    }
-}
+contract AragonTokenSale is Controller, SafeMath {
+    uint public initialBlock;             // Block number in which the sale starts. Inclusive. sale will be opened at initial block.
+    uint public finalBlock;               // Block number in which the sale end. Exclusive, sale will be closed at ends block.
+    uint public initialPrice;             // Number of wei-ANT tokens for 1 wei, at the start of the sale (18 decimals)
+    uint public finalPrice;               // Number of wei-ANT tokens for 1 wei, at the end of the sale
+    uint8 public priceStages;             // Number of different price stages for interpolating between initialPrice and finalPrice
+    address public aragonDevMultisig;     // The address to hold the funds donated
+    address public communityMultisig;     // Community trusted multisig to deploy network
+    bytes32 public capCommitment;
 
-contract HasNoTokens is Ownable {
+    uint public totalCollected = 0;               // In wei
+    bool public saleStopped = false;              // Has Aragon Dev stopped the sale?
+    bool public saleFinalized = false;            // Has Aragon Dev finalized the sale?
 
-  District0xNetworkToken public district0xNetworkToken;
+    mapping (address => bool) public activated;   // Address confirmates that wants to activate the sale
 
- /**
-  * @dev Reject all ERC23 compatible tokens
-  * @param from_ address The address that is transferring the tokens
-  * @param value_ uint256 the amount of the specified token
-  * @param data_ Bytes The data passed from the caller.
-  */
-  function tokenFallback(address from_, uint256 value_, bytes data_) external {
-    throw;
+    ANT public token;                             // The token
+    ANPlaceholder public networkPlaceholder;      // The network placeholder
+    SaleWallet public saleWallet;                    // Wallet that receives all sale funds
+
+    uint constant public dust = 1 finney;         // Minimum investment
+    uint public hardCap = 1000000 ether;          // Hard cap to protect the ETH network from a really high raise
+
+    event NewPresaleAllocation(address indexed holder, uint256 antAmount);
+    event NewBuyer(address indexed holder, uint256 antAmount, uint256 etherAmount);
+    event CapRevealed(uint value, uint secret, address revealer);
+/// @dev There are several checks to make sure the parameters are acceptable
+/// @param _initialBlock The Block number in which the sale starts
+/// @param _finalBlock The Block number in which the sale ends
+/// @param _aragonDevMultisig The address that will store the donated funds and manager
+/// for the sale
+/// @param _initialPrice The price for the first stage of the sale. Price in wei-ANT per wei.
+/// @param _finalPrice The price for the final stage of the sale. Price in wei-ANT per wei.
+/// @param _priceStages The number of price stages. The price for every middle stage
+/// will be linearly interpolated.
+/*
+ price
+        ^
+        |
+Initial |       s = 0
+price   |      +------+
+        |      |      | s = 1
+        |      |      +------+
+        |      |             | s = 2
+        |      |             +------+
+        |      |                    | s = 3
+Final   |      |                    +------+
+price   |      |                           |
+        |      |    for priceStages = 4    |
+        +------+---------------------------+-------->
+          Initial                     Final       time
+          block                       block
+
+
+Every stage is the same time length.
+Price increases by the same delta in every stage change
+
+*/
+
+  function AragonTokenSale (
+      uint _initialBlock,
+      uint _finalBlock,
+      address _aragonDevMultisig,
+      address _communityMultisig,
+      uint256 _initialPrice,
+      uint256 _finalPrice,
+      uint8 _priceStages,
+      bytes32 _capCommitment
+  )
+      non_zero_address(_aragonDevMultisig)
+      non_zero_address(_communityMultisig)
+  {
+      if (_initialBlock < getBlockNumber()) throw;
+      if (_initialBlock >= _finalBlock) throw;
+      if (_initialPrice <= _finalPrice) throw;
+      if (_priceStages < 2) throw;
+      if (_priceStages > _initialPrice - _finalPrice) throw;
+      if (uint(_capCommitment) == 0) throw;
+
+      // Save constructor arguments as global variables
+      initialBlock = _initialBlock;
+      finalBlock = _finalBlock;
+      aragonDevMultisig = _aragonDevMultisig;
+      communityMultisig = _communityMultisig;
+      initialPrice = _initialPrice;
+      finalPrice = _finalPrice;
+      priceStages = _priceStages;
+      capCommitment = _capCommitment;
   }
 
-  function isTokenSaleToken(address tokenAddr) returns(bool);
+  // @notice Deploy ANT is called only once to setup all the needed contracts.
+  // @param _token: Address of an instance of the ANT token
+  // @param _networkPlaceholder: Address of an instance of ANPlaceholder
+  // @param _saleWallet: Address of the wallet receiving the funds of the sale
 
-  /**
-   * @dev Reclaim all ERC20Basic compatible tokens
-   * @param tokenAddr address The address of the token contract
-   */
-  function reclaimToken(address tokenAddr) external onlyOwner {
-    require(!isTokenSaleToken(tokenAddr));
-    ERC20Basic tokenInst = ERC20Basic(tokenAddr);
-    uint256 balance = tokenInst.balanceOf(this);
-    tokenInst.transfer(msg.sender, balance);
+  function setANT(address _token, address _networkPlaceholder, address _saleWallet)
+           non_zero_address(_token)
+           non_zero_address(_networkPlaceholder)
+           non_zero_address(_saleWallet)
+           only(aragonDevMultisig)
+           public {
+
+    // Assert that the function hasn't been called before, as activate will happen at the end
+    if (activated[this]) throw;
+
+    token = ANT(_token);
+    networkPlaceholder = ANPlaceholder(_networkPlaceholder);
+    saleWallet = SaleWallet(_saleWallet);
+
+    if (token.controller() != address(this)) throw; // sale is controller
+    if (networkPlaceholder.sale() != address(this)) throw; // placeholder has reference to Sale
+    if (networkPlaceholder.token() != address(token)) throw; // placeholder has reference to ANT
+    if (token.totalSupply() > 0) throw; // token is empty
+    if (saleWallet.finalBlock() != finalBlock) throw; // final blocks must match
+    if (saleWallet.multisig() != aragonDevMultisig) throw; // receiving wallet must match
+    if (saleWallet.tokenSale() != address(this)) throw; // watched token sale must be self
+
+    // Contract activates sale as all requirements are ready
+    doActivateSale(this);
+  }
+
+  // @notice Certain addresses need to call the activate function prior to the sale opening block.
+  // This proves that they have checked the sale contract is legit, as well as proving
+  // the capability for those addresses to interact with the contract.
+  function activateSale()
+           public {
+    doActivateSale(msg.sender);
+  }
+
+  function doActivateSale(address _entity)
+    non_zero_address(token)               // cannot activate before setting token
+    only_before_sale
+    private {
+    activated[_entity] = true;
+  }
+
+  // @notice Whether the needed accounts have activated the sale.
+  // @return Is sale activated
+  function isActivated() constant public returns (bool) {
+    return activated[this] && activated[aragonDevMultisig] && activated[communityMultisig];
+  }
+
+  // @notice Get the price for a ANT token at any given block number
+  // @param _blockNumber the block for which the price is requested
+  // @return Number of wei-ANT for 1 wei
+  // If sale isn't ongoing for that block, returns 0.
+  function getPrice(uint _blockNumber) constant public returns (uint256) {
+    if (_blockNumber < initialBlock || _blockNumber >= finalBlock) return 0;
+
+    return priceForStage(stageForBlock(_blockNumber));
+  }
+
+  // @notice Get what the stage is for a given blockNumber
+  // @param _blockNumber: Block number
+  // @return The sale stage for that block. Stage is between 0 and (priceStages - 1)
+  function stageForBlock(uint _blockNumber) constant internal returns (uint8) {
+    uint blockN = safeSub(_blockNumber, initialBlock);
+    uint totalBlocks = safeSub(finalBlock, initialBlock);
+
+    return uint8(safeDiv(safeMul(priceStages, blockN), totalBlocks));
+  }
+
+  // @notice Get what the price is for a given stage
+  // @param _stage: Stage number
+  // @return Price in wei for that stage.
+  // If sale stage doesn't exist, returns 0.
+  function priceForStage(uint8 _stage) constant internal returns (uint256) {
+    if (_stage >= priceStages) return 0;
+    uint priceDifference = safeSub(initialPrice, finalPrice);
+    uint stageDelta = safeDiv(priceDifference, uint(priceStages - 1));
+    return safeSub(initialPrice, safeMul(uint256(_stage), stageDelta));
+  }
+
+  // @notice Aragon Dev needs to make initial token allocations for presale partners
+  // This allocation has to be made before the sale is activated. Activating the sale means no more
+  // arbitrary allocations are possible and expresses conformity.
+  // @param _receiver: The receiver of the tokens
+  // @param _amount: Amount of tokens allocated for receiver.
+  function allocatePresaleTokens(address _receiver, uint _amount, uint64 cliffDate, uint64 vestingDate)
+           only_before_sale_activation
+           only_before_sale
+           non_zero_address(_receiver)
+           only(aragonDevMultisig)
+           public {
+
+    if (_amount > 10 ** 24) throw; // 1 million ANT. No presale partner will have more than this allocated. Prevent overflows.
+
+    if (!token.generateTokens(address(this), _amount)) throw;
+    token.grantVestedTokens(_receiver, _amount, uint64(now), cliffDate, vestingDate);
+
+    NewPresaleAllocation(_receiver, _amount);
+  }
+
+/// @dev The fallback function is called when ether is sent to the contract, it
+/// simply calls `doPayment()` with the address that sent the ether as the
+/// `_owner`. Payable is a required solidity modifier for functions to receive
+/// ether, without this modifier functions will throw if ether is sent to them
+
+  function () public payable {
+    return doPayment(msg.sender);
+  }
+
+/////////////////
+// Controller interface
+/////////////////
+
+/// @notice `proxyPayment()` allows the caller to send ether to the Token directly and
+/// have the tokens created in an address of their choosing
+/// @param _owner The address that will hold the newly created tokens
+
+  function proxyPayment(address _owner) payable public returns (bool) {
+    doPayment(_owner);
+    return true;
+  }
+
+/// @notice Notifies the controller about a transfer, for this sale all
+///  transfers are allowed by default and no extra notifications are needed
+/// @param _from The origin of the transfer
+/// @param _to The destination of the transfer
+/// @param _amount The amount of the transfer
+/// @return False if the controller does not authorize the transfer
+  function onTransfer(address _from, address _to, uint _amount) public returns (bool) {
+    // Until the sale is finalized, only allows transfers originated by the sale contract.
+    // When finalizeSale is called, this function will stop being called and will always be true.
+    return _from == address(this);
+  }
+
+/// @notice Notifies the controller about an approval, for this sale all
+///  approvals are allowed by default and no extra notifications are needed
+/// @param _owner The address that calls `approve()`
+/// @param _spender The spender in the `approve()` call
+/// @param _amount The amount in the `approve()` call
+/// @return False if the controller does not authorize the approval
+  function onApprove(address _owner, address _spender, uint _amount) public returns (bool) {
+    // No approve/transferFrom during the sale
+    return false;
+  }
+
+/// @dev `doPayment()` is an internal function that sends the ether that this
+///  contract receives to the aragonDevMultisig and creates tokens in the address of the
+/// @param _owner The address that will hold the newly created tokens
+
+  function doPayment(address _owner)
+           only_during_sale_period
+           only_sale_not_stopped
+           only_sale_activated
+           non_zero_address(_owner)
+           minimum_value(dust)
+           internal {
+
+    if (totalCollected + msg.value > hardCap) throw; // If past hard cap, throw
+
+    uint256 boughtTokens = safeMul(msg.value, getPrice(getBlockNumber())); // Calculate how many tokens bought
+
+    if (!saleWallet.send(msg.value)) throw; // Send funds to multisig
+    if (!token.generateTokens(_owner, boughtTokens)) throw; // Allocate tokens. This will fail after sale is finalized in case it is hidden cap finalized.
+
+    totalCollected = safeAdd(totalCollected, msg.value); // Save total collected amount
+
+    NewBuyer(_owner, boughtTokens, msg.value);
+  }
+
+  // @notice Function to stop sale for an emergency.
+  // @dev Only Aragon Dev can do it after it has been activated.
+  function emergencyStopSale()
+           only_sale_activated
+           only_sale_not_stopped
+           only(aragonDevMultisig)
+           public {
+
+    saleStopped = true;
+  }
+
+  // @notice Function to restart stopped sale.
+  // @dev Only Aragon Dev can do it after it has been disabled and sale is ongoing.
+  function restartSale()
+           only_during_sale_period
+           only_sale_stopped
+           only(aragonDevMultisig)
+           public {
+
+    saleStopped = false;
+  }
+
+  function revealCap(uint256 _cap, uint256 _cap_secure)
+           only_during_sale_period
+           only_sale_activated
+           verify_cap(_cap, _cap_secure)
+           public {
+
+    if (_cap > hardCap) throw;
+
+    hardCap = _cap;
+    CapRevealed(_cap, _cap_secure, msg.sender);
+
+    if (totalCollected + dust >= hardCap) {
+      doFinalizeSale(_cap, _cap_secure);
+    }
+  }
+
+  // @notice Finalizes sale generating the tokens for Aragon Dev.
+  // @dev Transfers the token controller power to the ANPlaceholder.
+  function finalizeSale(uint256 _cap, uint256 _cap_secure)
+           only_after_sale
+           only(aragonDevMultisig)
+           public {
+
+    doFinalizeSale(_cap, _cap_secure);
+  }
+
+  function doFinalizeSale(uint256 _cap, uint256 _cap_secure)
+           verify_cap(_cap, _cap_secure)
+           internal {
+    // Doesn't check if saleStopped is false, because sale could end in a emergency stop.
+    // This function cannot be successfully called twice, because it will top being the controller,
+    // and the generateTokens call will fail if called again.
+
+    // Aragon Dev owns 30% of the total number of emitted tokens at the end of the sale.
+    uint256 aragonTokens = token.totalSupply() * 3 / 7;
+    if (!token.generateTokens(aragonDevMultisig, aragonTokens)) throw;
+    token.changeController(networkPlaceholder); // Sale loses token controller power in favor of network placeholder
+
+    saleFinalized = true;  // Set stop is true which will enable network deployment
+    saleStopped = true;
+  }
+
+  // @notice Deploy Aragon Network contract.
+  // @param networkAddress: The address the network was deployed at.
+  function deployNetwork(address networkAddress)
+           only_finalized_sale
+           non_zero_address(networkAddress)
+           only(communityMultisig)
+           public {
+
+    networkPlaceholder.changeController(networkAddress);
+  }
+
+  function setAragonDevMultisig(address _newMultisig)
+           non_zero_address(_newMultisig)
+           only(aragonDevMultisig)
+           public {
+
+    aragonDevMultisig = _newMultisig;
+  }
+
+  function setCommunityMultisig(address _newMultisig)
+           non_zero_address(_newMultisig)
+           only(communityMultisig)
+           public {
+
+    communityMultisig = _newMultisig;
+  }
+
+  function getBlockNumber() constant internal returns (uint) {
+    return block.number;
+  }
+
+  function computeCap(uint256 _cap, uint256 _cap_secure) constant public returns (bytes32) {
+    return sha3(_cap, _cap_secure);
+  }
+
+  function isValidCap(uint256 _cap, uint256 _cap_secure) constant public returns (bool) {
+    return computeCap(_cap, _cap_secure) == capCommitment;
+  }
+
+  modifier only(address x) {
+    if (msg.sender != x) throw;
+    _;
+  }
+
+  modifier verify_cap(uint256 _cap, uint256 _cap_secure) {
+    if (!isValidCap(_cap, _cap_secure)) throw;
+    _;
+  }
+
+  modifier only_before_sale {
+    if (getBlockNumber() >= initialBlock) throw;
+    _;
+  }
+
+  modifier only_during_sale_period {
+    if (getBlockNumber() < initialBlock) throw;
+    if (getBlockNumber() >= finalBlock) throw;
+    _;
+  }
+
+  modifier only_after_sale {
+    if (getBlockNumber() < finalBlock) throw;
+    _;
+  }
+
+  modifier only_sale_stopped {
+    if (!saleStopped) throw;
+    _;
+  }
+
+  modifier only_sale_not_stopped {
+    if (saleStopped) throw;
+    _;
+  }
+
+  modifier only_before_sale_activation {
+    if (isActivated()) throw;
+    _;
+  }
+
+  modifier only_sale_activated {
+    if (!isActivated()) throw;
+    _;
+  }
+
+  modifier only_finalized_sale {
+    if (getBlockNumber() < finalBlock) throw;
+    if (!saleFinalized) throw;
+    _;
+  }
+
+  modifier non_zero_address(address x) {
+    if (x == 0) throw;
+    _;
+  }
+
+  modifier minimum_value(uint256 x) {
+    if (msg.value < x) throw;
+    _;
   }
 }
-
-
-contract District0xContribution is Pausable, HasNoTokens, TokenController {
-    using SafeMath for uint;
-
-    District0xNetworkToken public district0xNetworkToken;
-    address public multisigWallet;                                      // Wallet that receives all sale funds
-    address public founder1;                                            // Wallet of founder 1
-    address public founder2;                                            // Wallet of founder 2
-    address public earlySponsor;                                        // Wallet of early sponsor
-    address[] public advisers;                                          // 4 Wallets of advisors
-
-    uint public constant FOUNDER1_STAKE = 119000000 ether;              // 119M DNT
-    uint public constant FOUNDER2_STAKE = 79000000 ether;               // 79M  DNT
-    uint public constant EARLY_CONTRIBUTOR_STAKE = 5000000 ether;       // 5M   DNT
-    uint public constant ADVISER_STAKE = 5000000 ether;                 // 5M   DNT
-    uint public constant ADVISER_STAKE2 = 1000000 ether;                // 1M   DNT
-    uint public constant COMMUNITY_ADVISERS_STAKE = 5000000 ether;      // 5M   DNT
-    uint public constant CONTRIB_PERIOD1_STAKE = 600000000 ether;       // 600M DNT
-    uint public constant CONTRIB_PERIOD2_STAKE = 140000000 ether;       // 140M DNT
-    uint public constant CONTRIB_PERIOD3_STAKE = 40000000 ether;        // 40M  DNT
-
-    uint public minContribAmount = 0.01 ether;                          // 0.01 ether
-    uint public maxGasPrice = 50000000000;                              // 50 GWei
-
-    uint public constant TEAM_VESTING_CLIFF = 24 weeks;                 // 6 months vesting cliff for founders and advisors, except community advisors
-    uint public constant TEAM_VESTING_PERIOD = 96 weeks;                // 2 years vesting period for founders and advisors, except community advisors
-
-    uint public constant EARLY_CONTRIBUTOR_VESTING_CLIFF = 12 weeks;    // 3 months vesting cliff for early sponsor
-    uint public constant EARLY_CONTRIBUTOR_VESTING_PERIOD = 24 weeks;   // 6 months vesting cliff for early sponsor
-
-    bool public tokenTransfersEnabled = false;                          // DNT token transfers will be enabled manually
-                                                                        // after first contribution period
-                                                                        // Can't be disabled back
-    struct Contributor {
-        uint amount;                        // Amount of ETH contributed by an address in given contribution period
-        bool isCompensated;                 // Whether this contributor received DNT token for ETH contribution
-        uint amountCompensated;             // Amount of DNT received. Not really needed to store,
-                                            // but stored for accounting and security purposes
-    }
-
-    uint public softCapAmount;                                 // Soft cap of contribution period in wei
-    uint public afterSoftCapDuration;                          // Number of seconds to the end of sale from the moment of reaching soft cap (unless reaching hardcap)
-    uint public hardCapAmount;                                 // When reached this amount of wei, the contribution will end instantly
-    uint public startTime;                                     // Start time of contribution period in UNIX time
-    uint public endTime;                                       // End time of contribution period in UNIX time
-    bool public isEnabled;                                     // If contribution period was enabled by multisignature
-    bool public softCapReached;                                // If soft cap was reached
-    bool public hardCapReached;                                // If hard cap was reached
-    uint public totalContributed;                              // Total amount of ETH contributed in given period
-    address[] public contributorsKeys;                         // Addresses of all contributors in given contribution period
-    mapping (address => Contributor) public contributors;
-
-    event onContribution(uint totalContributed, address indexed contributor, uint amount,
-        uint contributorsCount);
-    event onSoftCapReached(uint endTime);
-    event onHardCapReached(uint endTime);
-    event onCompensated(address indexed contributor, uint amount);
-
-    modifier onlyMultisig() {
-        require(multisigWallet == msg.sender);
-        _;
-    }
-
-    function District0xContribution(
-        address _multisigWallet,
-        address _founder1,
-        address _founder2,
-        address _earlySponsor,
-        address[] _advisers
-    ) {
-        require(_advisers.length == 5);
-        multisigWallet = _multisigWallet;
-        founder1 = _founder1;
-        founder2 = _founder2;
-        earlySponsor = _earlySponsor;
-        advisers = _advisers;
-    }
-
-    // @notice Returns true if contribution period is currently running
-    function isContribPeriodRunning() constant returns (bool) {
-        return !hardCapReached &&
-               isEnabled &&
-               startTime <= now &&
-               endTime > now;
-    }
-
-    function contribute()
-        payable
-        stopInEmergency
-    {
-        contributeWithAddress(msg.sender);
-    }
-
-    // @notice Function to participate in contribution period
-    //  Amounts from the same address should be added up
-    //  If soft or hard cap is reached, end time should be modified
-    //  Funds should be transferred into multisig wallet
-    // @param contributor Address that will receive DNT token
-    function contributeWithAddress(address contributor)
-        payable
-        stopInEmergency
-    {
-        require(tx.gasprice <= maxGasPrice);
-        require(msg.value >= minContribAmount);
-        require(isContribPeriodRunning());
-
-        uint contribValue = msg.value;
-        uint excessContribValue = 0;
-
-        uint oldTotalContributed = totalContributed;
-
-        totalContributed = oldTotalContributed.add(contribValue);
-
-        uint newTotalContributed = totalContributed;
-
-        // Soft cap was reached
-        if (newTotalContributed >= softCapAmount &&
-            oldTotalContributed < softCapAmount)
-        {
-            softCapReached = true;
-            endTime = afterSoftCapDuration.add(now);
-            onSoftCapReached(endTime);
-        }
-        // Hard cap was reached
-        if (newTotalContributed >= hardCapAmount &&
-            oldTotalContributed < hardCapAmount)
-        {
-            hardCapReached = true;
-            endTime = now;
-            onHardCapReached(endTime);
-
-            // Everything above hard cap will be sent back to contributor
-            excessContribValue = newTotalContributed.sub(hardCapAmount);
-            contribValue = contribValue.sub(excessContribValue);
-
-            totalContributed = hardCapAmount;
-        }
-
-        if (contributors[contributor].amount == 0) {
-            contributorsKeys.push(contributor);
-        }
-
-        contributors[contributor].amount = contributors[contributor].amount.add(contribValue);
-
-        multisigWallet.transfer(contribValue);
-        if (excessContribValue > 0) {
-            msg.sender.transfer(excessContribValue);
-        }
-        onContribution(newTotalContributed, contributor, contribValue, contributorsKeys.length);
-    }
-
-    // @notice This method is called by owner after contribution period ends, to distribute DNT in proportional manner
-    //  Each contributor should receive DNT just once even if this method is called multiple times
-    //  In case of many contributors must be able to compensate contributors in paginational way, otherwise might
-    //  run out of gas if wanted to compensate all on one method call. Therefore parameters offset and limit
-    // @param periodIndex Index of contribution period (0-2)
-    // @param offset Number of first contributors to skip.
-    // @param limit Max number of contributors compensated on this call
-    function compensateContributors(uint offset, uint limit)
-        onlyOwner
-    {
-        require(isEnabled);
-        require(endTime < now);
-
-        uint i = offset;
-        uint compensatedCount = 0;
-        uint contributorsCount = contributorsKeys.length;
-
-        uint ratio = CONTRIB_PERIOD1_STAKE
-            .mul(1000000000000000000)
-            .div(totalContributed);
-
-        while (i < contributorsCount && compensatedCount < limit) {
-            address contributorAddress = contributorsKeys[i];
-            if (!contributors[contributorAddress].isCompensated) {
-                uint amountContributed = contributors[contributorAddress].amount;
-                contributors[contributorAddress].isCompensated = true;
-
-                contributors[contributorAddress].amountCompensated =
-                    amountContributed.mul(ratio).div(1000000000000000000);
-
-                district0xNetworkToken.transfer(contributorAddress, contributors[contributorAddress].amountCompensated);
-                onCompensated(contributorAddress, contributors[contributorAddress].amountCompensated);
-
-                compensatedCount++;
-            }
-            i++;
-        }
-    }
-
-    // @notice Method for setting up contribution period
-    //  Only owner should be able to execute
-    //  Setting first contribution period sets up vesting for founders & advisors
-    //  Contribution period should still not be enabled after calling this method
-    // @param softCapAmount Soft Cap in wei
-    // @param afterSoftCapDuration Number of seconds till the end of sale in the moment of reaching soft cap (unless reaching hard cap)
-    // @param hardCapAmount Hard Cap in wei
-    // @param startTime Contribution start time in UNIX time
-    // @param endTime Contribution end time in UNIX time
-    function setContribPeriod(
-        uint _softCapAmount,
-        uint _afterSoftCapDuration,
-        uint _hardCapAmount,
-        uint _startTime,
-        uint _endTime
-    )
-        onlyOwner
-    {
-        require(_softCapAmount > 0);
-        require(_hardCapAmount > _softCapAmount);
-        require(_afterSoftCapDuration > 0);
-        require(_startTime > now);
-        require(_endTime > _startTime);
-        require(!isEnabled);
-
-        softCapAmount = _softCapAmount;
-        afterSoftCapDuration = _afterSoftCapDuration;
-        hardCapAmount = _hardCapAmount;
-        startTime = _startTime;
-        endTime = _endTime;
-
-        district0xNetworkToken.revokeAllTokenGrants(founder1);
-        district0xNetworkToken.revokeAllTokenGrants(founder2);
-        district0xNetworkToken.revokeAllTokenGrants(earlySponsor);
-
-        for (uint j = 0; j < advisers.length; j++) {
-            district0xNetworkToken.revokeAllTokenGrants(advisers[j]);
-        }
-
-        uint64 vestingDate = uint64(startTime.add(TEAM_VESTING_PERIOD));
-        uint64 cliffDate = uint64(startTime.add(TEAM_VESTING_CLIFF));
-        uint64 earlyContribVestingDate = uint64(startTime.add(EARLY_CONTRIBUTOR_VESTING_PERIOD));
-        uint64 earlyContribCliffDate = uint64(startTime.add(EARLY_CONTRIBUTOR_VESTING_CLIFF));
-        uint64 startDate = uint64(startTime);
-
-        district0xNetworkToken.grantVestedTokens(founder1, FOUNDER1_STAKE, startDate, cliffDate, vestingDate, true, false);
-        district0xNetworkToken.grantVestedTokens(founder2, FOUNDER2_STAKE, startDate, cliffDate, vestingDate, true, false);
-        district0xNetworkToken.grantVestedTokens(earlySponsor, EARLY_CONTRIBUTOR_STAKE, startDate, earlyContribCliffDate, earlyContribVestingDate, true, false);
-        district0xNetworkToken.grantVestedTokens(advisers[0], ADVISER_STAKE, startDate, cliffDate, vestingDate, true, false);
-        district0xNetworkToken.grantVestedTokens(advisers[1], ADVISER_STAKE, startDate, cliffDate, vestingDate, true, false);
-        district0xNetworkToken.grantVestedTokens(advisers[2], ADVISER_STAKE2, startDate, cliffDate, vestingDate, true, false);
-        district0xNetworkToken.grantVestedTokens(advisers[3], ADVISER_STAKE2, startDate, cliffDate, vestingDate, true, false);
-
-        // Community advisors stake has no vesting, but we set it up this way, so we can revoke it in case of
-        // re-setting up contribution period
-        district0xNetworkToken.grantVestedTokens(advisers[4], COMMUNITY_ADVISERS_STAKE, startDate, startDate, startDate, true, false);
-    }
-
-    // @notice Enables contribution period
-    //  Must be executed by multisignature
-    function enableContribPeriod()
-        onlyMultisig
-    {
-        require(startTime > now);
-        isEnabled = true;
-    }
-
-    // @notice Sets new min. contribution amount
-    //  Only owner can execute
-    //  Cannot be executed while contribution period is running
-    // @param _minContribAmount new min. amount
-    function setMinContribAmount(uint _minContribAmount)
-        onlyOwner
-    {
-        require(_minContribAmount > 0);
-        require(startTime > now);
-        minContribAmount = _minContribAmount;
-    }
-
-    // @notice Sets new max gas price for contribution
-    //  Only owner can execute
-    //  Cannot be executed while contribution period is running
-    // @param _minContribAmount new min. amount
-    function setMaxGasPrice(uint _maxGasPrice)
-        onlyOwner
-    {
-        require(_maxGasPrice > 0);
-        require(startTime > now);
-        maxGasPrice = _maxGasPrice;
-    }
-
-    // @notice Sets District0xNetworkToken contract
-    //  Generates all DNT tokens and assigns them to this contract
-    //  If token contract has already generated tokens, do not generate again
-    // @param _district0xNetworkToken District0xNetworkToken address
-    function setDistrict0xNetworkToken(address _district0xNetworkToken)
-        onlyOwner
-    {
-        require(_district0xNetworkToken != 0x0);
-        require(!isEnabled);
-        district0xNetworkToken = District0xNetworkToken(_district0xNetworkToken);
-        if (district0xNetworkToken.totalSupply() == 0) {
-            district0xNetworkToken.generateTokens(this, FOUNDER1_STAKE
-                .add(FOUNDER2_STAKE)
-                .add(EARLY_CONTRIBUTOR_STAKE)
-                .add(ADVISER_STAKE.mul(2))
-                .add(ADVISER_STAKE2.mul(2))
-                .add(COMMUNITY_ADVISERS_STAKE)
-                .add(CONTRIB_PERIOD1_STAKE));
-
-            district0xNetworkToken.generateTokens(multisigWallet, CONTRIB_PERIOD2_STAKE
-                .add(CONTRIB_PERIOD3_STAKE));
-        }
-    }
-
-    // @notice Enables transfers of DNT
-    //  Will be executed after first contribution period by owner
-    function enableDistrict0xNetworkTokenTransfers()
-        onlyOwner
-    {
-        require(endTime < now);
-        tokenTransfersEnabled = true;
-    }
-
-    // @notice Method to claim tokens accidentally sent to a DNT contract
-    //  Only multisig wallet can execute
-    // @param _token Address of claimed ERC20 Token
-    function claimTokensFromTokenDistrict0xNetworkToken(address _token)
-        onlyMultisig
-    {
-        district0xNetworkToken.claimTokens(_token, multisigWallet);
-    }
-
-    // @notice Kill method should not really be needed, but just in case
-    function kill(address _to) onlyMultisig external {
-        suicide(_to);
-    }
-
-    function()
-        payable
-        stopInEmergency
-    {
-        contributeWithAddress(msg.sender);
-    }
-
-    // MiniMe Controller default settings for allowing token transfers.
-    function proxyPayment(address _owner) payable public returns (bool) {
-        throw;
-    }
-
-    // Before transfers are enabled for everyone, only this contract is allowed to distribute DNT
-    function onTransfer(address _from, address _to, uint _amount) public returns (bool) {
-        return tokenTransfersEnabled || _from == address(this) || _to == address(this);
-    }
-
-    function onApprove(address _owner, address _spender, uint _amount) public returns (bool) {
-        return tokenTransfersEnabled;
-    }
-
-    function isTokenSaleToken(address tokenAddr) returns(bool) {
-        return district0xNetworkToken == tokenAddr;
-    }
-
-    /*
-     Following constant methods are used for tests and contribution web app
-     They don't impact logic of contribution contract, therefor DOES NOT NEED TO BE AUDITED
-     */
-
-    // Used by contribution front-end to obtain contribution period properties
-    function getContribPeriod()
-        constant
-        returns (bool[3] boolValues, uint[8] uintValues)
-    {
-        boolValues[0] = isEnabled;
-        boolValues[1] = softCapReached;
-        boolValues[2] = hardCapReached;
-
-        uintValues[0] = softCapAmount;
-        uintValues[1] = afterSoftCapDuration;
-        uintValues[2] = hardCapAmount;
-        uintValues[3] = startTime;
-        uintValues[4] = endTime;
-        uintValues[5] = totalContributed;
-        uintValues[6] = contributorsKeys.length;
-        uintValues[7] = CONTRIB_PERIOD1_STAKE;
-
-        return (boolValues, uintValues);
-    }
-
-    // Used by contribution front-end to obtain contribution contract properties
-    function getConfiguration()
-        constant
-        returns (bool, address, address, address, address, address[] _advisers, bool, uint)
-    {
-        _advisers = new address[](advisers.length);
-        for (uint i = 0; i < advisers.length; i++) {
-            _advisers[i] = advisers[i];
-        }
-        return (stopped, multisigWallet, founder1, founder2, earlySponsor, _advisers, tokenTransfersEnabled,
-            maxGasPrice);
-    }
-
-    // Used by contribution front-end to obtain contributor's properties
-    function getContributor(address contributorAddress)
-        constant
-        returns(uint, bool, uint)
-    {
-        Contributor contributor = contributors[contributorAddress];
-        return (contributor.amount, contributor.isCompensated, contributor.amountCompensated);
-    }
-
-    // Function to verify if all contributors were compensated
-    function getUncompensatedContributors(uint offset, uint limit)
-        constant
-        returns (uint[] contributorIndexes)
-    {
-        uint contributorsCount = contributorsKeys.length;
-
-        if (limit == 0) {
-            limit = contributorsCount;
-        }
-
-        uint i = offset;
-        uint resultsCount = 0;
-        uint[] memory _contributorIndexes = new uint[](limit);
-
-        while (i < contributorsCount && resultsCount < limit) {
-            if (!contributors[contributorsKeys[i]].isCompensated) {
-                _contributorIndexes[resultsCount] = i;
-                resultsCount++;
-            }
-            i++;
-        }
-
-        contributorIndexes = new uint[](resultsCount);
-        for (i = 0; i < resultsCount; i++) {
-            contributorIndexes[i] = _contributorIndexes[i];
-        }
-        return contributorIndexes;
-    }
-
-    function getNow()
-        constant
-        returns(uint)
-    {
-        return now;
-    }
-}
+https://etherscan.io/address/0x0ceb0d54a7e87dfa16ddf7656858cf7e29851fd7
