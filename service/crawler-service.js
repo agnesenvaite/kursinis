@@ -5,19 +5,17 @@ const FileWriterService = require ('./file-writer-service');
 
 module.exports = {
     crawEtherscan () {
-        let counter = 129;
+        let counter = 0;
         let crawler = new Crawler({
 
             maxConnections : 10000,
             // This will be called for each crawled page
             callback : function (error, result, $) {
                if (result) {
-                   // console.log(result.$);
                     let $ = result.$;
                    //deletes useless start
                    let code = ($("#dividcode").text()).substring (61);
                    if (code === "") {
-                       console.log("restart " + counter + " " + result.request.uri.href);
                        crawler.queue(result.request.uri.href);
                        return;
                    }
@@ -28,8 +26,6 @@ module.exports = {
 
                    counter ++;
 
-               }else {
-                    console.log(counter);
                }
             }
         });
