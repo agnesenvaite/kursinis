@@ -2147,12 +2147,10 @@
   </bcf:bibdata>
   <bcf:section number="0">
     <bcf:citekey order="1">Lee2015</bcf:citekey>
-    <bcf:citekey order="2">Lee2015</bcf:citekey>
-    <bcf:citekey order="3">ĮRAŠYTI</bcf:citekey>
-    <bcf:citekey order="4">ĮRAŠYTI ŠALTINĮ</bcf:citekey>
-    <bcf:citekey order="5">Kang2013</bcf:citekey>
-    <bcf:citekey order="6">ĮRAŠYTI ŠALTINius</bcf:citekey>
-    <bcf:citekey order="7">Berger2010</bcf:citekey>
+    <bcf:citekey order="2">Czarnecki2004</bcf:citekey>
+    <bcf:citekey order="3">Kang1990</bcf:citekey>
+    <bcf:citekey order="4">Kang2013</bcf:citekey>
+    <bcf:citekey order="5">Batory2005</bcf:citekey>
   </bcf:section>
   <bcf:sortlist section="0" name="anyt/global/" type="entry" sortscheme="anyt" sortnamekeyscheme="global" labelprefix="">
   <bcf:sorting>

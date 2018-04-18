@@ -19,66 +19,207 @@
 
 \refsection{0}
   \sortlist[entry]{anyt/global/}
-    \entry{Berger2010}{inproceedings}{}
-      \name{author}{5}{}{%
-        {{hash=451b3ceb6d62afdcd1df7bf792745509}{%
-           family={Berger},
+    \entry{Batory2005}{inproceedings}{}
+      \name{author}{1}{}{%
+        {{hash=ca905abe1dc0ab0f9307c7b01721b65f}{%
+           family={Batory},
            familyi={B\bibinitperiod},
-           given={Thorsten},
-           giveni={T\bibinitperiod}}}%
-        {{hash=3ea1d874ae04b3c82a2133c28de5ac9b}{%
-           family={She},
-           familyi={S\bibinitperiod},
-           given={Steven},
-           giveni={S\bibinitperiod}}}%
-        {{hash=043e98b07a4000e565f8fe311d25a405}{%
-           family={Lotufo},
-           familyi={L\bibinitperiod},
-           given={Rafael},
-           giveni={R\bibinitperiod}}}%
-        {{hash=543a2a0c075b22e8af7a40800cd7f136}{%
-           family={Wa̧sowski},
-           familyi={W\bibinitperiod},
-           given={Andrzej},
-           giveni={A\bibinitperiod}}}%
+           given={Don},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{ca905abe1dc0ab0f9307c7b01721b65f}
+      \strng{fullhash}{ca905abe1dc0ab0f9307c7b01721b65f}
+      \strng{authornamehash}{ca905abe1dc0ab0f9307c7b01721b65f}
+      \strng{authorfullhash}{ca905abe1dc0ab0f9307c7b01721b65f}
+      \field{labelalpha}{Bat05}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Feature models are used to specify members of a product-line. Despite years of progress, contemporary tools often provide limited support for feature constraints and offer little or no support for debugging feature models. We integrate prior results to connect feature models, grammars, and propositional formulas. This connection allows arbitrary propositional constraints to be defined among features and enables off-the-shelf satisfiability solvers to debug feature models. We also show how our ideas can generalize recent results on the staged configuration of feature models.}
+      \field{booktitle}{LNCS}
+      \field{title}{{Feature Models, Grammars, and Propositional Formulas}}
+      \field{volume}{3714}
+      \field{year}{2005}
+      \field{pages}{7\bibrangedash 20}
+      \range{pages}{14}
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Batory - 2005 - Feature Models, Grammars, and Propositional Formulas.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb http://www.cs.utexas.edu/ftp/predator/splc05.pdf
+      \endverb
+    \endentry
+    \entry{Czarnecki2004}{inproceedings}{}
+      \name{author}{3}{}{%
         {{hash=5de6edc81e667d8db9d387e681522a62}{%
            family={Czarnecki},
            familyi={C\bibinitperiod},
            given={Krzysztof},
            giveni={K\bibinitperiod}}}%
+        {{hash=97571a1e535ebe2317efef3b7d2102ee}{%
+           family={Helsen},
+           familyi={H\bibinitperiod},
+           given={Simon},
+           giveni={S\bibinitperiod}}}%
+        {{hash=eb79c82c9f49d70a2291cb536cdceb9c}{%
+           family={Eisenecker},
+           familyi={E\bibinitperiod},
+           given={Ulrich},
+           giveni={U\bibinitperiod}}}%
       }
-      \strng{namehash}{59aae268fafd5392830460080d262ebe}
-      \strng{fullhash}{59aae268fafd5392830460080d262ebe}
-      \strng{authornamehash}{59aae268fafd5392830460080d262ebe}
-      \strng{authorfullhash}{59aae268fafd5392830460080d262ebe}
-      \field{labelalpha}{BSL\textsuperscript {+}10}
-      \field{sortinit}{B}
-      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \strng{namehash}{af8bdb460386bded7c751a04cff86c92}
+      \strng{fullhash}{af8bdb460386bded7c751a04cff86c92}
+      \strng{authornamehash}{af8bdb460386bded7c751a04cff86c92}
+      \strng{authorfullhash}{af8bdb460386bded7c751a04cff86c92}
+      \field{labelalpha}{CHE04}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{abstract}{Variability modeling is one of the key disciplines in software product line engineering and has been addressed by academic and industrial research over the past twenty years. While the research community's focus was on creating notations and tools, most of which based on feature modeling, there are relatively few empirical studies that aim at understanding the actual use of these techniques. In this light, we present empirical work that investigates variability modeling in the context of software product lines. We study concepts and semantics of real-world variability languages and the usage of these concepts in real, large- scale variability models. We further extend our discussion to variability in software ecosystems, which target inter- organizational reuse and are often seen as natural successors of software product lines. We provide empirical evidence that the well-researched concepts of feature modeling are used in practice, but also that more advanced concepts are needed. We observe that some assumptions about realistic variability models in the literature do not hold. Further, our findings indicate that variability models are not suited for software ecosystems, and that particular kinds of dependencies are needed to enable growth of such ecosystems.}
-      \field{booktitle}{Proceedings of the IEEE/ACM international conference on Automated software engineering - ASE '10}
-      \field{isbn}{9781450301169}
-      \field{title}{{Variability modeling in the real}}
-      \field{year}{2010}
-      \field{pages}{73}
-      \range{pages}{1}
-      \verb{doi}
-      \verb 10.1145/1858996.1859010
+      \field{abstract}{Feature modeling is an important approach to capturing commonalities and variabilities in system families and product lines. In this paper, we propose a cardinality-based notation for feature modeling, which integrates a number of existing extensions of previous approaches. We then introduce and motivate the novel concept of staged configura-tion. Staged configuration can be achieved by the stepwise specialization of feature models. This is important because in a realistic development process, different groups and different people eliminate product variabil-ity in different stages. We also indicate how cardinality-based feature models and their specialization can be given a precise formal semantics.}
+      \field{title}{{Staged Configuration Using Feature Models}}
+      \field{year}{2004}
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Czarnecki, Helsen, Eisenecker - 2004 - Staged Configuration Using Feature Models.pdf:pdf
       \endverb
       \verb{url}
-      \verb http://portal.acm.org/citation.cfm?doid=1858996.1859010
+      \verb http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.95.1586%7B%5C&%7Drep=rep1%7B%5C&%7Dtype=pdf
+      \endverb
+    \endentry
+    \entry{Kang1990}{book}{}
+      \name{author}{5}{}{%
+        {{hash=32b4da38ee8a02717a1b9525501e540d}{%
+           family={Kang},
+           familyi={K\bibinitperiod},
+           given={Kyo\bibnamedelima C.},
+           giveni={K\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=6368da216c31134139024b84f3cfa11a}{%
+           family={Cohen},
+           familyi={C\bibinitperiod},
+           given={Sholom\bibnamedelima G.},
+           giveni={S\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+        {{hash=86117b4ff68f98bf67f3a4c672209775}{%
+           family={Hess},
+           familyi={H\bibinitperiod},
+           given={James\bibnamedelima A.},
+           giveni={J\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{hash=b7253365d4016a6a3a34843e66cd7a11}{%
+           family={Novak},
+           familyi={N\bibinitperiod},
+           given={William\bibnamedelima E.},
+           giveni={W\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+        {{hash=d4169bc88b75cc6b1a12061ac73486ef}{%
+           family={Peterson},
+           familyi={P\bibinitperiod},
+           given={A.\bibnamedelimi Spencer},
+           giveni={A\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \strng{namehash}{bd27521b0d8b4793766fe377b28205e8}
+      \strng{fullhash}{bd27521b0d8b4793766fe377b28205e8}
+      \strng{authornamehash}{bd27521b0d8b4793766fe377b28205e8}
+      \strng{authorfullhash}{bd27521b0d8b4793766fe377b28205e8}
+      \field{labelalpha}{KCH\textsuperscript {+}90}
+      \field{sortinit}{K}
+      \field{sortinithash}{4c244ceae61406cdc0cc2ce1cb1ff703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Chemical category is a regulatory concept facilitating filling safety data gaps. Practically, all chemical management programs like the OECD HPV Program, EU REACH, or the Canadian DSL Categorization are planning to use or are already using categorization approaches to reduce resources including animal testing. The aim of the study was to discuss the feasibility to apply computational structural similarity methods to augment formation of a category. The article discusses also how this understanding can be translated into computer readable format, an ultimate need for practical, broad scope applications. We conclude that for the skin sensitization endpoint, used as a working example, mechanistic understanding expressed as chemical reactivity can be exploited by computational structural similarity methods to augment category formation process. We propose a novel method, atom environments ranking (AER), to assess similarity to a reference training set representing a common mechanism of action, as a potential method for grouping chemicals into reactivity domains.}
+      \field{booktitle}{SAR QSAR Environ. Res.}
+      \field{isbn}{1111111111}
+      \field{issn}{1062936X}
+      \field{number}{3-4}
+      \field{title}{{Feature-Oriented Domain Analysis (FODA) Feasibility Study}}
+      \field{volume}{18}
+      \field{year}{1990}
+      \verb{doi}
+      \verb 10.1080/10629360701306050
+      \endverb
+      \verb{file}
+      \verb :home/agne/Downloads/ADA235785.pdf:pdf
+      \endverb
+      \keyw{Atom environments,Category formation,Mechanism of action,Similarity assessment,Skin sensitization}
+    \endentry
+    \entry{Kang2013}{incollection}{}
+      \name{author}{2}{}{%
+        {{hash=32b4da38ee8a02717a1b9525501e540d}{%
+           family={Kang},
+           familyi={K\bibinitperiod},
+           given={Kyo\bibnamedelima C.},
+           giveni={K\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=81414db76c1dd00846db2fa15a05eeb3}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Hyesun},
+           giveni={H\bibinitperiod}}}%
+      }
+      \strng{namehash}{294d9e20a81caf7806b432bc4084ef7d}
+      \strng{fullhash}{294d9e20a81caf7806b432bc4084ef7d}
+      \strng{authornamehash}{294d9e20a81caf7806b432bc4084ef7d}
+      \strng{authorfullhash}{294d9e20a81caf7806b432bc4084ef7d}
+      \field{labelalpha}{KL13}
+      \field{sortinit}{K}
+      \field{sortinithash}{4c244ceae61406cdc0cc2ce1cb1ff703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The aim of this chapter is to provide a comprehensive description of the notion of variability modeling in the context of software product line engineering and to give an overview of the techniques proposed for variability modeling.}
+      \field{booktitle}{Syst. Softw. Var. Manag.}
+      \field{isbn}{978-3-642-36582-9}
+      \field{title}{{Variability Modeling}}
+      \field{year}{2013}
+      \field{pages}{25\bibrangedash 42}
+      \range{pages}{18}
+      \verb{doi}
+      \verb 10.1007/978-3-642-36583-6
+      \endverb
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Kang, Lee - Unknown - Variability Modeling.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb http://link.springer.com/10.1007/978-3-642-36583-6
+      \endverb
+    \endentry
+    \entry{Lee2015}{inproceedings}{}
+      \name{author}{3}{}{%
+        {{hash=9f4d31adca922afa232108fb6992e5b0}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Kwanwoo},
+           giveni={K\bibinitperiod}}}%
+        {{hash=32b4da38ee8a02717a1b9525501e540d}{%
+           family={Kang},
+           familyi={K\bibinitperiod},
+           given={Kyo\bibnamedelima C.},
+           giveni={K\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=31e5a2336a243a77d9e6eabc425b5016}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Jaejoon},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{b5dda1b3d716699abb8336b9e03d189d}
+      \strng{fullhash}{b5dda1b3d716699abb8336b9e03d189d}
+      \strng{authornamehash}{b5dda1b3d716699abb8336b9e03d189d}
+      \strng{authorfullhash}{b5dda1b3d716699abb8336b9e03d189d}
+      \field{labelalpha}{LKL15}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Product line software engineering (PLSE) is an emerging software engineering paradigm , which guides organizations toward the development of products from core assets rather than the development of products one by one from scratch . In order to develop highly reusable core assets , PLSE must have the ability to exploit commonality and manage variability among products from a domain perspective . Feature modeling is one of the most popular domain analysis techniques , which analyzes commonality and variability in a domain to develop highly reusable core assets for a product line . Various attempts have been made to extend and apply it to the development of software product lines . However , feature modeling can be difficult and time - consuming without a pre - cise understanding of the goals of feature modeling and the aid of practical guidelines . In this paper , we clarify the concept of features and the goals of fea - ture modeling , and provide practical guidelines for successful product line soft - ware engineering . The authors have extensively used feature modeling in sev - eral industrial product line projects and the guidelines described in this paper are based on these experiences .}
+      \field{title}{{Concepts and Guidelines of Feature Modeling for Product Line Software Engineering}}
+      \field{year}{2015}
+      \verb{doi}
+      \verb 10.1007/3-540-46020-9_5
+      \endverb
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Lee, Kang, Lee - 2015 - Concepts and Guidelines of Feature Modeling for Product Line Software Engineering.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb https://www.researchgate.net/profile/Kwanwoo%7B%5C_%7DLee/publication/221553200%7B%5C_%7DConcepts%7B%5C_%7Dand%7B%5C_%7DGuidelines%7B%5C_%7Dof%7B%5C_%7DFeature%7B%5C_%7DModeling%7B%5C_%7Dfor%7B%5C_%7DProduct%7B%5C_%7DLine%7B%5C_%7DSoftware%7B%5C_%7DEngineering/links/558bdbde08ae591c19d8d3ce.pdf
       \endverb
     \endentry
   \endsortlist
-  \missing{PvzKnygEn}
-  \missing{PvzMagistrLt}
-  \missing{PvzElPubEn}
-  \missing{PvzKnygLt}
-  \missing{PvzElPubLt}
-  \missing{PvzKonfEn}
-  \missing{PvzKonfLt}
-  \missing{PvzStraipsnEn}
 \endrefsection
 \endinput
 
