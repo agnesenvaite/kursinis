@@ -38,41 +38,18 @@
 \sectionnonum{Įvadas}
 Programinės įrangos produktų linija yra nauja paradigma programų kūrime, kuri kuria programas naudodamasi jau žinomis esminėmis savybės, taip išvengdama produktų kūrimo nuo nulio. Toks kūrimas susideda iš savybių išskyrimo ir jų įgyvendinimo produkte. Gerai išskirtos produkto ypatybės padeda sukurti lengvai pernaudojamą programą. Savybės turi būti atrinktos atsižvelginat į jų paplitimą bei kintamumą srityje. Produktų linijos susiaurinimas iki srities padidina pernaudojamą bei panaudojamumą \cite{Lee2015}. \textbf{PABAIGTI}
 
-Savybių modeliavimas yra pagrindinis metodas atrinkti bei valdyti bendrąsias ir kintamas savybes produktų linijoje. Programinės įrangos šeimos gyvavimo pradžioje savybių modelis padeda išskirti pagrindines savybes, kurios gelbsti kuriant naują rinką ar  norint išlikti jau esamoje. Taip pat savybių modelis leidžia išskirti rizikingas savybes, nuspėti, kokia yra visos programos ar atskirų savybių kaina. Vėliau savybių modeliavimas padeda išskirti variacijos taškus programinės įrangos architektūroje \cite{Czarnecki2004}. Savybių modeliavimas yra populiariausias programinės įrangos produktų linijų kurime nuo pat pirmojo jo pristatymo \cite{Kang1990}. Taip yra todėl, nes savybės yra pakankamai abstraktus konseptas padedantis efektyviai bendrauti suinterasuotoms šalims. Savybių modeliavimas yra intuitivus ir efektyvus būdas žmonėms išreikšti savybių paplitimą ir kintamumą programinės įrangos šeimoje \cite{Kang2013}.   
- 
+Savybių modeliavimas yra pagrindinis metodas atrinkti bei valdyti bendrąsias ir kintamas savybes produktų linijoje. Programinės įrangos šeimos gyvavimo pradžioje savybių modelis padeda išskirti pagrindines savybes, kurios gelbsti kuriant naują rinką ar  norint išlikti jau esamoje. Taip pat savybių modelis leidžia išskirti rizikingas savybes, nuspėti, kokia yra visos programos ar atskirų savybių kaina. Vėliau savybių modeliavimas padeda išskirti variacijos taškus programinės įrangos architektūroje \cite{Czarnecki2004}. Savybių modeliavimas yra populiariausias programinės įrangos produktų linijų kurime nuo pat pirmojo jo pristatymo \cite{Kang1990}. Taip yra todėl, nes savybės yra pakankamai abstraktus konseptas padedantis efektyviai bendrauti suinterasuotoms šalims. Savybių modeliavimas yra intuitivus ir efektyvus būdas žmonėms išreikšti savybių paplitimą ir kintamumą programinės įrangos šeimoje \cite{Kang2013}. 
 
-----------------------------------------------------------------------------------
+Blockchain technologija yra jauna programinės įrangos produktų linija, kuri atsirado tik 2009, kai Satoshi Nakamoto išleidęs baltąjį popierių (angl. whitepaper) \cite{Nakamoto2008} įvykdė ICO  ir taip surinko finansavimą pirmąjam blockchain ir kriptovaliutai Bitcoin. Bitcoin - skaitmeniniai pinigai, kurių pavedimai vyksta internete naudojantis decentralizuota vieša duomenų baze - blockchain \cite{Swan2015}. Šiuo metu du populiariausi blockhain yra Ethereum ir Bitcoin \cite{Luu}. Ethreum be savo kriptovaliutos turi ir kitą svarbų funkcionalumą - išmaniuosius kontraktus - Turing complete programą, kuri leidžia rašyti decentralizuotas aplikacijas \cite{Buterin2014}. Solidity - populiariausia kalba naudojama rašyti išmaniesiems kontraktams \cite{Dannen}. Problema - išmaniųjų kontraktų technologijos yra pakankamai jaunos, dėl to pakartotonio kodo panaudojimo bazė dar tik formuojasi. ICO kontraktai yra tiražuojami kopijavimo su modifikacijos būdu.
 
-Tyrimo problema: Išmaniųjų kontraktų technologijos yra pakankamai jaunos, dėl to projektavimo šablonai bei pakartotinai panaudojamo kodo bazė dar tik formuojasi. ICO kontraktai tiražuojami kopijavimo su modifikacijomis būdu.
+Šio darbo tikslas - ištirti pirminio finansavimo kriptovaliutomis (ICO) išmaniuosius kontraktus, nustatyti, kokios savybės yra pastavios, o kokios - kintamos bei pasiūlyti būdus kodo pernaudojamumui didinti. 
 
-Tyrimo tikslas: Ištirti sutelktinio finansavimo kriptovaliutomis (ICO) išmaniuosius kontraktus, nustatyti koks funkcionalumas yra pastovus, o koks - kintantis, bei pasiūlyti būdus pakartotinio panaudojamumo laipsniui didinti.
-Įvade apibūdinamas darbo tikslas, temos aktualumas ir siekiami rezultatai.
-
-\section{Kintamumo modeliavimas (Variability modeling)}
-
-\subsection{Savybių modeliavimas (Feature modeling)}
-Citavimo pavyzdžiai: cituojamas vienas šaltinis \cite{Batory2005};
-
-\subsubsection{Savybė}
-\subsubsection{Savybių modelis}
-\subsubsection{Savybių modeliavimo sistemos}
-\subsection{Sprendimų modeliavimas (Decision modeling)}
-\section{Programinės įrangos produktų linija}
-\subsection{Produktų linijos savybių modeliavimas}
-\subsection{Savybėmis orientuotas programavimas}
-\section{Blockchain}
-\subsection{Blockchain 1.0}
-\subsubsection{Kriptovaliutos}
-\subsection{Blockchain 2.0}
-\subsubsection{Išmanusis kontraktas}
-\subsubsection{Pirminis kriptovaliutų platinimas (ICO)}
-\subsubsection{Ethereum}
-\section{Pirminio kriptovaliuto platinimo išmaniojo kontrakto savybių modeliavimas}
-\subsection{Savybės}
-\subsection{Savybių modelis}
-\subsection{Savybėmis grįstas išmanusis kontraktas pirminiui kriptovaliutų platinimui}
-
-
+Tikslui pasiekti išsikelti uždaviniai:
+\begin{enumerate}
+\item Surinkti virš 100 išmaniųjų kontraktų skirtų ICO
+\item Išskirti surinktų kontraktų savybes į pastovias ir kintančias
+\item Pasiūlyti ICO išmaniuosius kontraktus pagal išrinktas savybes
+\end{enumerate}
 
 \sectionnonum{Rezultatai}
 

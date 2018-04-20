@@ -19,35 +19,31 @@
 
 \refsection{0}
   \sortlist[entry]{anyt/global/}
-    \entry{Batory2005}{inproceedings}{}
+    \entry{Buterin2014}{unpublished}{}
       \name{author}{1}{}{%
-        {{hash=ca905abe1dc0ab0f9307c7b01721b65f}{%
-           family={Batory},
+        {{hash=850981945102d0f671b6762173c8988a}{%
+           family={Buterin},
            familyi={B\bibinitperiod},
-           given={Don},
-           giveni={D\bibinitperiod}}}%
+           given={Vitalik},
+           giveni={V\bibinitperiod}}}%
       }
-      \strng{namehash}{ca905abe1dc0ab0f9307c7b01721b65f}
-      \strng{fullhash}{ca905abe1dc0ab0f9307c7b01721b65f}
-      \strng{authornamehash}{ca905abe1dc0ab0f9307c7b01721b65f}
-      \strng{authorfullhash}{ca905abe1dc0ab0f9307c7b01721b65f}
-      \field{labelalpha}{Bat05}
+      \strng{namehash}{850981945102d0f671b6762173c8988a}
+      \strng{fullhash}{850981945102d0f671b6762173c8988a}
+      \strng{authornamehash}{850981945102d0f671b6762173c8988a}
+      \strng{authorfullhash}{850981945102d0f671b6762173c8988a}
+      \field{labelalpha}{But14}
       \field{sortinit}{B}
       \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{abstract}{Feature models are used to specify members of a product-line. Despite years of progress, contemporary tools often provide limited support for feature constraints and offer little or no support for debugging feature models. We integrate prior results to connect feature models, grammars, and propositional formulas. This connection allows arbitrary propositional constraints to be defined among features and enables off-the-shelf satisfiability solvers to debug feature models. We also show how our ideas can generalize recent results on the staged configuration of feature models.}
-      \field{booktitle}{LNCS}
-      \field{title}{{Feature Models, Grammars, and Propositional Formulas}}
-      \field{volume}{3714}
-      \field{year}{2005}
-      \field{pages}{7\bibrangedash 20}
-      \range{pages}{14}
+      \field{abstract}{When Satoshi Nakamoto first set the Bitcoin blockchain into motion in January 2009, he was simultaneously introducing two radical and untested concepts. The first is the "bitcoin", a decentralized peer-to-peer online currency that maintains a value without any backing, intrinsic value or central issuer. So far, the "bitcoin" as a currency unit has taken up the bulk of the public attention, both in terms of the political aspects of a currency without a central bank and its extreme upward and downward volatility in price. However, there is also another, equally important, part to Satoshi's grand experiment: the concept of a proof of work-based blockchain to allow for public agreement on the order of transactions. Bitcoin as an application can be described as a first-to-file system: if one entity has 50 BTC, and simultaneously sends the same 50 BTC to A and to B, only the transaction that gets confirmed first will process. There is no intrinsic way of determining from two transactions which came earlier, and for decades this stymied the development of decentralized digital currency. Satoshi's blockchain was the first credible decentralized solution. And now, attention is rapidly starting to shift toward this second part of Bitcoin's technology, and how the blockchain concept can be used for more than just money. Commonly cited applications include using on-blockchain digital assets to represent custom currencies and financial instruments ("colored coins"), the ownership of an underlying physical device ("smart property"), non-fungible assets such as domain names ("Namecoin") as well as more advanced applications such as decentralized exchange, financial derivatives, peer-to-peer gambling and on-blockchain identity and reputation systems. Another important area of inquiry is "smart contracts" -systems which automatically move digital assets according to arbitrary pre-specified rules. For example, one might have a treasury contract of the form "A can withdraw up to X currency units per day, B can withdraw up to Y per day, A and B together can withdraw anything, and A can shut off B's ability to withdraw". The logical extension of this is decentralized autonomous organizations (DAOs) -long-term smart contracts that contain the assets and encode the bylaws of an entire organization. What Ethereum intends to provide is a blockchain with a built-in fully fledged Turing-complete programming language that can be used to create "contracts" that can be used to encode arbitrary state transition functions, allowing users to create any of the systems described above, as well as many others that we have not yet imagined, simply by writing up the logic in a few lines of code.}
+      \field{title}{{A NEXT GENERATION SMART CONTRACT {\&} DECENTRALIZED APPLICATION PLATFORM}}
+      \field{year}{2014}
       \verb{file}
-      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Batory - 2005 - Feature Models, Grammars, and Propositional Formulas.pdf:pdf
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Buterin - 2014 - A NEXT GENERATION SMART CONTRACT {\&}amp DECENTRALIZED APPLICATION PLATFORM.pdf:pdf
       \endverb
       \verb{url}
-      \verb http://www.cs.utexas.edu/ftp/predator/splc05.pdf
+      \verb https://www.weusecoins.com/assets/pdf/library/Ethereum%7B%5C_%7Dwhite%7B%5C_%7Dpaper-a%7B%5C_%7Dnext%7B%5C_%7Dgeneration%7B%5C_%7Dsmart%7B%5C_%7Dcontract%7B%5C_%7Dand%7B%5C_%7Ddecentralized%7B%5C_%7Dapplication%7B%5C_%7Dplatform-vitalik-buterin.pdf
       \endverb
     \endentry
     \entry{Czarnecki2004}{inproceedings}{}
@@ -85,6 +81,38 @@
       \endverb
       \verb{url}
       \verb http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.95.1586%7B%5C&%7Drep=rep1%7B%5C&%7Dtype=pdf
+      \endverb
+    \endentry
+    \entry{Dannen}{article}{}
+      \name{author}{1}{}{%
+        {{hash=1482caac5d0fdcf3c7d4e44228bdb59e}{%
+           family={Dannen},
+           familyi={D\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{1482caac5d0fdcf3c7d4e44228bdb59e}
+      \strng{fullhash}{1482caac5d0fdcf3c7d4e44228bdb59e}
+      \strng{authornamehash}{1482caac5d0fdcf3c7d4e44228bdb59e}
+      \strng{authorfullhash}{1482caac5d0fdcf3c7d4e44228bdb59e}
+      \field{labelalpha}{Dan17}
+      \field{sortinit}{D}
+      \field{sortinithash}{d10b5413de1f3d197b20897dd0d565bb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{specifically the rights of translation, reprinting, reuse of illustrations, recitation, broadcasting, reproduction on microfilms or in any other physical way, and transmission or information storage and retrieval, electronic adaptation, computer software, or by similar or dissimilar methodology now known or hereafter developed. Trademarked names, logos, and images may appear in this book. Rather than use a trademark symbol with every occurrence of a trademarked name, logo, or image, we use the names, logos, and images only in an editorial fashion and to the benefit of the trademark owner, with no intention of infringement of the trademark. The use in this publication of trade names, trademarks, service marks, and similar terms, even if they are not identified as such, is not to be taken as an expression of opinion as to whether or not they are subject to proprietary rights.}
+      \field{isbn}{978-1-4842-2535-6}
+      \field{journaltitle}{Library of Congress Control Number}
+      \field{title}{{Introducing Ethereum and Solidity Foundations of Cryptocurrency and Blockchain Programming for Beginners Introducing Ethereum and Solidity Foundations of Cryptocurrency and Blockchain Programming for Beginners Introducing Ethereum and Solidity: Foundation}}
+      \field{year}{2017}
+      \verb{doi}
+      \verb 10.1007/978-1-4842-2535-6
+      \endverb
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Dannen - Unknown - Introducing Ethereum and Solidity Foundations of Cryptocurrency and Blockchain Programming for Beginners Introduci(2).pdf:pdf
+      \endverb
+      \verb{url}
+      \verb http://smartcontracts.engineer/wp-content/uploads/2017/09/Etherium.pdf
       \endverb
     \endentry
     \entry{Kang1990}{book}{}
@@ -125,7 +153,7 @@
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{abstract}{Chemical category is a regulatory concept facilitating filling safety data gaps. Practically, all chemical management programs like the OECD HPV Program, EU REACH, or the Canadian DSL Categorization are planning to use or are already using categorization approaches to reduce resources including animal testing. The aim of the study was to discuss the feasibility to apply computational structural similarity methods to augment formation of a category. The article discusses also how this understanding can be translated into computer readable format, an ultimate need for practical, broad scope applications. We conclude that for the skin sensitization endpoint, used as a working example, mechanistic understanding expressed as chemical reactivity can be exploited by computational structural similarity methods to augment category formation process. We propose a novel method, atom environments ranking (AER), to assess similarity to a reference training set representing a common mechanism of action, as a potential method for grouping chemicals into reactivity domains.}
-      \field{booktitle}{SAR QSAR Environ. Res.}
+      \field{booktitle}{SAR and QSAR in Environmental Research}
       \field{isbn}{1111111111}
       \field{issn}{1062936X}
       \field{number}{3-4}
@@ -163,7 +191,7 @@
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{abstract}{The aim of this chapter is to provide a comprehensive description of the notion of variability modeling in the context of software product line engineering and to give an overview of the techniques proposed for variability modeling.}
-      \field{booktitle}{Syst. Softw. Var. Manag.}
+      \field{booktitle}{Systems and Software Variability Management}
       \field{isbn}{978-3-642-36582-9}
       \field{title}{{Variability Modeling}}
       \field{year}{2013}
@@ -177,6 +205,56 @@
       \endverb
       \verb{url}
       \verb http://link.springer.com/10.1007/978-3-642-36583-6
+      \endverb
+    \endentry
+    \entry{Luu}{article}{}
+      \name{author}{5}{}{%
+        {{hash=52215df94fa3df053a9ff37eef735b8c}{%
+           family={Luu},
+           familyi={L\bibinitperiod},
+           given={Loi},
+           giveni={L\bibinitperiod}}}%
+        {{hash=7da7ade810ce8097344056432598466f}{%
+           family={Chu},
+           familyi={C\bibinitperiod},
+           given={Duc-Hiep},
+           giveni={D\bibinithyphendelim H\bibinitperiod}}}%
+        {{hash=234c9dce86ea0b40f65a0a8fc031734c}{%
+           family={Olickel},
+           familyi={O\bibinitperiod},
+           given={Hrishi},
+           giveni={H\bibinitperiod}}}%
+        {{hash=bd8f6be2fb6f2a6af3303717f7903800}{%
+           family={Saxena},
+           familyi={S\bibinitperiod},
+           given={Prateek},
+           giveni={P\bibinitperiod}}}%
+        {{hash=9e9e7df3a02984f833bbf26e3109583a}{%
+           family={Hobor},
+           familyi={H\bibinitperiod},
+           given={Aquinas},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{48f1f55f0c43ba90c343d7c8998dd6d7}
+      \strng{fullhash}{48f1f55f0c43ba90c343d7c8998dd6d7}
+      \strng{authornamehash}{48f1f55f0c43ba90c343d7c8998dd6d7}
+      \strng{authorfullhash}{48f1f55f0c43ba90c343d7c8998dd6d7}
+      \field{labelalpha}{LCO\textsuperscript {+}16}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Cryptocurrencies record transactions in a decentralized data structure called a blockchain. Two of the most popular cryptocurrencies, Bitcoin and Ethereum, support the fea-ture to encode rules or scripts for processing transactions. This feature has evolved to give practical shape to the ideas of smart contracts, or full-fledged programs that are run on blockchains. Recently, Ethereum's smart contract system has seen steady adoption, supporting tens of thousands of contracts, holding millions dollars worth of virtual coins. In this paper, we investigate the security of running smart contracts based on Ethereum in an open distributed network like those of cryptocurrencies. We introduce several new se-curity problems in which an adversary can manipulate smart contract execution to gain profit. These bugs suggest subtle gaps in the understanding of the distributed semantics of the underlying platform. As a refinement, we propose ways to enhance the operational semantics of Ethereum to make con-tracts less vulnerable. For developers writing contracts for the existing Ethereum system, we build a symbolic execution tool called Oyente to find potential security bugs. Among 19, 366 existing Ethereum contracts, Oyente flags 8, 833 of them as vulnerable, including the TheDAO bug which led to a 60 million US dollar loss in June 2016. We also discuss the severity of other attacks for several case studies which have source code available and confirm the attacks (which target only our accounts) in the main Ethereum network.}
+      \field{title}{{Making Smart Contracts Smarter}}
+      \field{year}{2016}
+      \verb{doi}
+      \verb 10.1145/2976749.2978309
+      \endverb
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Luu et al. - Unknown - Making Smart Contracts Smarter(2).pdf:pdf
+      \endverb
+      \verb{url}
+      \verb https://www.comp.nus.edu.sg/%7B~%7Dloiluu/papers/oyente.pdf
       \endverb
     \endentry
     \entry{Lee2015}{inproceedings}{}
@@ -218,6 +296,73 @@
       \verb{url}
       \verb https://www.researchgate.net/profile/Kwanwoo%7B%5C_%7DLee/publication/221553200%7B%5C_%7DConcepts%7B%5C_%7Dand%7B%5C_%7DGuidelines%7B%5C_%7Dof%7B%5C_%7DFeature%7B%5C_%7DModeling%7B%5C_%7Dfor%7B%5C_%7DProduct%7B%5C_%7DLine%7B%5C_%7DSoftware%7B%5C_%7DEngineering/links/558bdbde08ae591c19d8d3ce.pdf
       \endverb
+    \endentry
+    \entry{Nakamoto2008}{unpublished}{}
+      \name{author}{1}{}{%
+        {{hash=1977190f018b398e43ede3de043de8ea}{%
+           family={Nakamoto},
+           familyi={N\bibinitperiod},
+           given={Satoshi},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{1977190f018b398e43ede3de043de8ea}
+      \strng{fullhash}{1977190f018b398e43ede3de043de8ea}
+      \strng{authornamehash}{1977190f018b398e43ede3de043de8ea}
+      \strng{authorfullhash}{1977190f018b398e43ede3de043de8ea}
+      \field{labelalpha}{Nak08}
+      \field{sortinit}{N}
+      \field{sortinithash}{1163c28585427c673ad5a010cbf82f52}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone.}
+      \field{eprinttype}{arXiv}
+      \field{isbn}{978-972-757-716-3}
+      \field{issn}{09254560}
+      \field{title}{{Bitcoin: A Peer-to-Peer Electronic Cash System}}
+      \field{year}{2008}
+      \verb{doi}
+      \verb 10.1007/s10838-008-9062-0
+      \endverb
+      \verb{eprint}
+      \verb 43543534534v343453
+      \endverb
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Satoshi Nakamoto - 2008 - Bitcoin A Peer-to-Peer Electronic Cash System.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb https://bitcoin.org/bitcoin.pdf
+      \endverb
+    \endentry
+    \entry{Swan2015}{book}{}
+      \name{author}{1}{}{%
+        {{hash=89ec8ae9aa0976203a1a25b6f9536a64}{%
+           family={Swan},
+           familyi={S\bibinitperiod},
+           given={Melanie},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{89ec8ae9aa0976203a1a25b6f9536a64}
+      \strng{fullhash}{89ec8ae9aa0976203a1a25b6f9536a64}
+      \strng{authornamehash}{89ec8ae9aa0976203a1a25b6f9536a64}
+      \strng{authorfullhash}{89ec8ae9aa0976203a1a25b6f9536a64}
+      \field{labelalpha}{Swa15}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Bitcoin is starting to come into its own as a digital currency, but the blockchain technology behind it could prove to be much more significant. This book takes you beyond the currency (" Blockchain 1.0 ") and smart contracts (" Blockchain 2.0 ") to demonstrate how the blockchain is in position to become the fifth disruptive computing paradigm after mainframes, PCs, the Internet, and mobile/social networking. Author Melanie Swan, Founder of the Institute for Blockchain Studies, explains that the blockchain is essentially a public ledger with potential as a worldwide, decentralized record for the registration, inventory, and transfer of all assets—not just finances, but property and intangible assets such as votes, software, health data, and ideas. Topics include: ■ Concepts, features, and functionality of Bitcoin and the blockchain ■ Using the blockchain for automated tracking of all digital endeavors ■ Enabling censorship-resistant organizational models ■ Creating a decentralized digital repository to verify identity ■ Possibility of cheaper, more efficient services traditionally provided by nations ■ Blockchain for science: making better use of the data-mining network ■ Personal health record storage, including access to one's own genomic data ■ Open access academic publishing on the blockchain This book is part of an ongoing O'Reilly series. Mastering Bitcoin: Unlocking Digital Cryptocurrencies introduces Bitcoin and describes the technology behind Bitcoin and the blockchain. Blockchain: Blueprint for a New Economy considers the theoretical, philosophical, and societal impact of cryptocurrencies and blockchain technologies.}
+      \field{isbn}{978-1-491-92049-7}
+      \field{title}{{Blockchain. Blueprint for a new economy}}
+      \field{year}{2015}
+      \field{pages}{149}
+      \range{pages}{1}
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Melanie Swan - 2015 - Blockchain. Blueprint for a new economy.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb http://w2.blockchain-tec.net/blockchain/blockchain-by-melanie-swan.pdf
+      \endverb
+      \keyw{Blockchain}
     \endentry
   \endsortlist
 \endrefsection
