@@ -2,12 +2,20 @@
 \defcounter {refsection}{0}\relax 
 \select@language {lithuanian}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Įvadas}{2}
+\contentsline {section}{Įvadas}{2}{section*.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Rezultatai}{3}
+\contentsline {section}{\numberline {1.}Savybių modeliavimas programinės įrangos produktų linijos sričiai}{3}{section.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Išvados}{4}
+\contentsline {section}{\numberline {2.}Savybių modeliavimas ICO išmaniesiems kontraktams}{4}{section.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Literatūra}{5}
+\contentsline {section}{Rezultatai}{5}{section*.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Išvados}{6}{section*.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Literatūra}{7}{section*.5}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Sąvokų apibrėžimai}{9}{section*.6}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Santrumpos}{10}{section*.7}
 \defcounter {refsection}{0}\relax 
 \def \@dotsep {1000}

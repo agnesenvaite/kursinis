@@ -312,4 +312,3 @@
     \noindent \textbf{Raktiniai žodžiai:}\; \textbf{#1}
 }
 
-

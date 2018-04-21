@@ -364,6 +364,33 @@
       \endverb
       \keyw{Blockchain}
     \endentry
+    \entry{Teller1994}{article}{}
+      \name{author}{1}{}{%
+        {{hash=241b97374f20a0c1af79281d60e500a0}{%
+           family={Teller},
+           familyi={T\bibinitperiod},
+           given={Astro},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{241b97374f20a0c1af79281d60e500a0}
+      \strng{fullhash}{241b97374f20a0c1af79281d60e500a0}
+      \strng{authornamehash}{241b97374f20a0c1af79281d60e500a0}
+      \strng{authorfullhash}{241b97374f20a0c1af79281d60e500a0}
+      \field{labelalpha}{Tel94}
+      \field{sortinit}{T}
+      \field{sortinithash}{2e5c2f51f7fa2d957f3206819bf86dc3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Genetic Programming is a method for evolving functions that find approximate or exact solutions to problems. There are many problems that traditional Genetic Programming (GP) cannot solve, due to the theoretical limitations of its paradigm. A Turing machine (TM) is a theoretical abstraction that express the extent of the computational power of algorithms. Any system that is Turing complete is sufficiently powerful to recognize all possible algorithms. GP is not Turing complete. This paper will prove that when GP is combined with the technique of indexed memory, the resulting system is Turing complete. This means that, in theory, GP with indexed memory can be used to evolve any algorithm.}
+      \field{title}{{Turing Completeness in the Language of Genetic Programming with Indexed Memory}}
+      \field{year}{1994}
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Teller - Unknown - Turing Completeness in the Language of Genetic Programming with Indexed Memory.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb http://www.astroteller.net/content/3-work/2-papers/17-turing-completeness-in-the-language-of-genetic-programming-with-indexed-memory/turing.pdf
+      \endverb
+    \endentry
   \endsortlist
 \endrefsection
 \endinput

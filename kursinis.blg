@@ -1,17 +1,17 @@
 [0] Config.pm:354> INFO - This is Biber 2.7 (beta)
 [0] Config.pm:357> INFO - Logfile is 'kursinis.blg'
-[29] biber:303> INFO - === Pn Bal 20, 2018, 23:49:53
-[42] Biber.pm:360> INFO - Reading 'kursinis.bcf'
-[104] Biber.pm:836> INFO - Found 9 citekeys in bib section 0
-[117] Biber.pm:3671> INFO - Processing section 0
-[129] Biber.pm:3841> INFO - Looking for bibtex format file 'library.bib' for section 0
-[134] bibtex.pm:1424> INFO - Decoding LaTeX character macros into UTF-8
-[146] bibtex.pm:1281> INFO - Found BibTeX data source 'library.bib'
-[147] Utils.pm:164> WARN - Duplicate entry key: 'Nakamoto2008' in file 'library.bib', skipping ...
-[180] Utils.pm:164> WARN - BibTeX subsystem: /tmp/kUZ1hszBxY/library.bib_12294.utf8, line 6, warning: 170 characters of junk seen at toplevel
-[200] UCollate.pm:68> INFO - Overriding locale 'lt-LT' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[200] UCollate.pm:68> INFO - Overriding locale 'lt-LT' defaults 'variable = shifted' with 'variable = non-ignorable'
-[200] Biber.pm:3500> INFO - Sorting list 'anyt/global/' of type 'entry' with scheme 'anyt' and locale 'lt-LT'
-[211] bbl.pm:608> INFO - Writing 'kursinis.bbl' with encoding 'UTF-8'
-[214] bbl.pm:712> INFO - Output to kursinis.bbl
-[214] Biber.pm:110> INFO - WARNINGS: 2
+[54] biber:303> INFO - === Št Bal 21, 2018, 10:51:17
+[107] Biber.pm:360> INFO - Reading 'kursinis.bcf'
+[177] Biber.pm:836> INFO - Found 10 citekeys in bib section 0
+[211] Biber.pm:3671> INFO - Processing section 0
+[276] Biber.pm:3841> INFO - Looking for bibtex format file 'library.bib' for section 0
+[304] bibtex.pm:1424> INFO - Decoding LaTeX character macros into UTF-8
+[341] bibtex.pm:1281> INFO - Found BibTeX data source 'library.bib'
+[343] Utils.pm:164> WARN - Duplicate entry key: 'Nakamoto2008' in file 'library.bib', skipping ...
+[450] Utils.pm:164> WARN - BibTeX subsystem: /tmp/xc0l0cM27l/library.bib_13653.utf8, line 6, warning: 170 characters of junk seen at toplevel
+[487] UCollate.pm:68> INFO - Overriding locale 'lt-LT' defaults 'variable = shifted' with 'variable = non-ignorable'
+[487] UCollate.pm:68> INFO - Overriding locale 'lt-LT' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[488] Biber.pm:3500> INFO - Sorting list 'anyt/global/' of type 'entry' with scheme 'anyt' and locale 'lt-LT'
+[530] bbl.pm:608> INFO - Writing 'kursinis.bbl' with encoding 'UTF-8'
+[534] bbl.pm:712> INFO - Output to kursinis.bbl
+[535] Biber.pm:110> INFO - WARNINGS: 2
