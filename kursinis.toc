@@ -17,5 +17,3 @@
 \contentsline {section}{Sąvokų apibrėžimai}{9}{section*.6}
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{Santrumpos}{10}{section*.7}
-\defcounter {refsection}{0}\relax 
-\def \@dotsep {1000}
