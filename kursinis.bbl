@@ -46,6 +46,39 @@
       \verb https://www.weusecoins.com/assets/pdf/library/Ethereum%7B%5C_%7Dwhite%7B%5C_%7Dpaper-a%7B%5C_%7Dnext%7B%5C_%7Dgeneration%7B%5C_%7Dsmart%7B%5C_%7Dcontract%7B%5C_%7Dand%7B%5C_%7Ddecentralized%7B%5C_%7Dapplication%7B%5C_%7Dplatform-vitalik-buterin.pdf
       \endverb
     \endentry
+    \entry{Catalini2018}{article}{}
+      \name{author}{2}{}{%
+        {{hash=6dcb0d43571835df1232157c5c67d71e}{%
+           family={Catalini},
+           familyi={C\bibinitperiod},
+           given={Christian},
+           giveni={C\bibinitperiod}}}%
+        {{hash=dfce701a7454fb2613ca598ade436c6d}{%
+           family={Gans},
+           familyi={G\bibinitperiod},
+           given={Joshua\bibnamedelima S},
+           giveni={J\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \strng{namehash}{33da0c3b9b43fcddcaab1f327cc6eeed}
+      \strng{fullhash}{33da0c3b9b43fcddcaab1f327cc6eeed}
+      \strng{authornamehash}{33da0c3b9b43fcddcaab1f327cc6eeed}
+      \strng{authorfullhash}{33da0c3b9b43fcddcaab1f327cc6eeed}
+      \field{labelalpha}{CG18}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{This paper explores how entrepreneurs can use initial coin offerings — whereby they issue crypto tokens and commit to accept only those tokens as payment for future use of a digital platform — to fund venture start-up costs. We show that the ICO mechanism allows entrepreneurs to generate buyer competition for the token, which, in turn, reveals consumer value without the entrepreneurs having to know, ex ante, consumer willingness to pay. We find that venture returns are independent of any committed growth in the supply of tokens over time, but that initial funds raised are maximized by setting that growth to zero to encourage saving by early participants. Furthermore, by revealing key aspects of consumer demand, crypto tokens may increase entrepreneurial returns beyond what can be achieved through traditional equity financing. A lack of commitment in monetary policy can, however, undermine saving and, thus, the cost of using tokens to fund start-up costs is potential inflexibility in future capital raising. Crypto tokens can also facilitate coordination among stakeholders within digital ecosystems when network effects are present. JEL Classification Numbers: E42, L12, L26.}
+      \field{title}{{Initial Coin Offerings and the Value of Crypto Tokens}}
+      \field{year}{2018}
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Catalini, Gans - 2018 - Initial Coin Offerings and the Value of Crypto Tokens.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb http://creativecommons.org/licenses/by-nc/4.0/%20https://ssrn.com/abstract=3137213
+      \endverb
+      \keyw{blockchain,crowdfunding,crypto tokens,cryptocurrency,entrepreneurial finance,equity financing,initial coin offering,monetary policy,network effects}
+    \endentry
     \entry{Czarnecki2004}{inproceedings}{}
       \name{author}{3}{}{%
         {{hash=5de6edc81e667d8db9d387e681522a62}{%
@@ -331,6 +364,81 @@
       \endverb
       \verb{url}
       \verb https://bitcoin.org/bitcoin.pdf
+      \endverb
+    \endentry
+    \entry{Ravichandran2003}{article}{}
+      \name{author}{2}{}{%
+        {{hash=9a806ad3c40edeefa7ddc0b36884de74}{%
+           family={Ravichandran},
+           familyi={R\bibinitperiod},
+           given={T.},
+           giveni={T\bibinitperiod}}}%
+        {{hash=1130c9f1c51ad8ab1eeb2925c42dc55f}{%
+           family={Rothenberger},
+           familyi={R\bibinitperiod},
+           given={Marcus\bibnamedelima A.},
+           giveni={M\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \strng{namehash}{44be79663f717cf1ac8997010a4f68ff}
+      \strng{fullhash}{44be79663f717cf1ac8997010a4f68ff}
+      \strng{authornamehash}{44be79663f717cf1ac8997010a4f68ff}
+      \strng{authorfullhash}{44be79663f717cf1ac8997010a4f68ff}
+      \field{labelalpha}{RR03}
+      \field{sortinit}{R}
+      \field{sortinithash}{c15bc8eb6936bc6b3c8baa9e8575af53}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{See, stats, and : https : / / www . researchgate . net / publication / 220423696 Software markets Article DOI : 10 . 1145/859670.859678:DBLPCITATIONS131READS5592:T.RavichandranRensselaer74,218SEEMarcus.RothenbergerUniversity,Las31,709SEEAll.Ravichandran.The.}
+      \field{journaltitle}{Communications of the ACM}
+      \field{number}{8}
+      \field{title}{{SOFTWARE REUSE STRATEGIES AND COMPONENT MARKETS}}
+      \field{volume}{46}
+      \field{year}{2003}
+      \verb{doi}
+      \verb 10.1145/859670.859678
+      \endverb
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Ravichandran, Rothenberger - 2003 - SOFTWARE REUSE STRATEGIES AND COMPONENT MARKETS(2).pdf:pdf
+      \endverb
+      \verb{url}
+      \verb https://www.researchgate.net/profile/T%7B%5C_%7DRavichandran/publication/220423696%7B%5C_%7DSoftware%7B%5C_%7Dreuse%7B%5C_%7Dstrategies%7B%5C_%7Dand%7B%5C_%7Dcomponent%7B%5C_%7Dmarkets/links/54201aa60cf2218008d43cdb.pdf
+      \endverb
+    \endentry
+    \entry{Svahnberg}{article}{}
+      \name{author}{3}{}{%
+        {{hash=259f3f06efd03acfee4723facd6ac00d}{%
+           family={Svahnberg},
+           familyi={S\bibinitperiod},
+           given={Mikael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=72ca82ffb4fd6b0c17925aa6295c8f70}{%
+           family={{Van Gurp}},
+           familyi={V\bibinitperiod},
+           given={Jilles},
+           giveni={J\bibinitperiod}}}%
+        {{hash=3903018fc17327f32ca2eb9248c90100}{%
+           family={Bosch},
+           familyi={B\bibinitperiod},
+           given={Jan},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{f6a7c3051c0afaaf52a7a0181a085c1f}
+      \strng{fullhash}{f6a7c3051c0afaaf52a7a0181a085c1f}
+      \strng{authornamehash}{f6a7c3051c0afaaf52a7a0181a085c1f}
+      \strng{authorfullhash}{f6a7c3051c0afaaf52a7a0181a085c1f}
+      \field{labelalpha}{SVB01}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Software product lines are used in companies to provide a set of reusable assets for related groups of software products. Generally a software product line provides a common architecture and reusable code for software product developers. In this article we focus on mechanisms that help developers vary the architecture and behavior of a software product line to create individual products. We provide the reader with a framework of terminology and concepts that help understand the concept of variability better. In addition, we present a number of variability mechanisms in the context of this framework. Finally, we provide a method for incorporating variability into software product lines.}
+      \field{title}{{On the Notion of Variability in Software Product Lines}}
+      \field{year}{2001}
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Svahnberg, Van Gurp, Bosch - Unknown - On the Notion of Variability in Software Product Lines.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb www:%20http://www.ipd.hk-r.se/[msv%7B%5C%%7D7Cjvg%7B%5C%%7D7Cbosch]
       \endverb
     \endentry
     \entry{Swan2015}{book}{}

@@ -4,16 +4,24 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{Įvadas}{2}{section*.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {1.}Savybių modeliavimas programinės įrangos produktų linijos sričiai}{3}{section.1}
+\contentsline {section}{\numberline {1.}Savybių modeliavimas programinės įrangos produktų linijos sričiai}{4}{section.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.}Savybių modeliavimas ICO išmaniesiems kontraktams}{4}{section.2}
+\contentsline {subsection}{\numberline {1.1.}Savybė}{4}{subsection.1.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Rezultatai}{5}{section*.3}
+\contentsline {subsection}{\numberline {1.2.}Savybių modeliavimas}{4}{subsection.1.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Išvados}{6}{section*.4}
+\contentsline {section}{\numberline {2.}Savybių modeliavimas pirminio kriptovaliutų platinimo išmaniesiems kontraktams}{5}{section.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Literatūra}{7}{section*.5}
+\contentsline {subsection}{\numberline {2.1.}Savybė}{5}{subsection.2.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Sąvokų apibrėžimai}{9}{section*.6}
+\contentsline {subsection}{\numberline {2.2.}Savybių modeliavimas}{5}{subsection.2.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Santrumpos}{10}{section*.7}
+\contentsline {section}{Rezultatai}{6}{section*.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Išvados}{7}{section*.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Literatūra}{8}{section*.5}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Sąvokų apibrėžimai}{10}{section*.6}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Santrumpos}{11}{section*.7}

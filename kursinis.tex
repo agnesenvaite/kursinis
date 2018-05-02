@@ -30,17 +30,15 @@
 
 \tableofcontents
 
-%\sectionnonum{Sąvokų apibrėžimai}
-%Sutartinių ženklų, simbolių, vienetų ir terminų sutrumpinimų sąrašas (jeigu
-%ženklų, simbolių, vienetų ir terminų bendras skaičius didesnis nei 10 ir
-%kiekvienas iš jų tekste kartojasi daugiau nei 3 kartus).
-%
+
 \sectionnonum{Įvadas}
-Programinės įrangos produktų linija (angl. product line software engineering, toliau PLSE) yra nauja paradigma programų kūrime, kuri kuria programas naudodamasi jau žinomis esminėmis savybės, taip išvengdama produktų kūrimo nuo nulio. Toks kūrimas susideda iš savybių išskyrimo ir jų įgyvendinimo produkte. Gerai išskirtos produkto ypatybės padeda sukurti lengvai pernaudojamą programą. Savybės turi būti atrinktos atsižvelginat į jų paplitimą bei kintamumą srityje. Produktų linijos susiaurinimas iki srities padidina pernaudojamą bei panaudojamumą \cite{Lee2015}. \textbf{PABAIGTI}
+Programinės įrangos pernaudojimas leidžia naudoti programas keliuose projektuose. Tai yra svarbi strategija programinei įrangai norint padidinti sistemos efektyvumą ir kokybę. Taikant kodo pernaudojimamą programuotojai naudojasi kodu, kurį keičia taip, kad jis atitiktu dabartinio projekto reikalavimus \cite {Ravichandran2003}.
+
+Pirminio kriptovaliuto platinimo (angl. initial coin offering, toliau ICO) metu įmonė parduoda specializuotus kripto-žetonus žadėdami, kad žetonai veiks kaip mainų priemonė gaunat paslaugas įmonės platformoje. Žetonų pardavimas kuria kapitalą pradiniam įmonės platformos kūrimui nors nėra įsipareigojimo dėl būsimos paslaugos kainos (žetonais ar kitaip) \cite{Catalini2018}. Satoshi Nakamoto išleidęs baltąjį popierių (angl. whitepaper) \cite{Nakamoto2008} įvykdė ICO  ir taip surinko finansavimą pirmąjam blockchain ir kriptovaliutai Bitcoin. Bitcoin - skaitmeniniai pinigai, kurių pavedimai vyksta internete naudojantis decentralizuota vieša duomenų baze - blockchain \cite{Swan2015}. Šiuo metu du populiariausi blockchain yra Ethereum ir Bitcoin \cite{Luu}. Ethereum be savo kriptovaliutos turi ir kitą svarbų funkcionalumą - išmaniuosius kontraktus - Turing complete programą, kuri leidžia rašyti decentralizuotas aplikacijas \cite{Buterin2014}. Solidity - populiariausia kalba naudojama rašyti išmaniesiems kontraktams \cite{Dannen}. Problema - išmaniųjų kontraktų technologijos yra pakankamai jaunos, dėl to pakartotonio kodo panaudojimo bazė dar tik formuojasi. ICO kontraktai yra tiražuojami kopijavimo su modifikacijos būdu.
+
+Programinės įrangos produktų linija (angl. product line software engineering, toliau PLSE) naudojama įmonėse pakartojamumui susijusiuose programinės įrangos produktuose numatyti. PLSE suteikia bendrą architektūrą ir pernaudojamą kodą programinės įrangos kūrėjams \cite{Svahnberg}. Toks kūrimas susideda iš savybių išskyrimo ir jų įgyvendinimo produkte. Gerai išskirtos produkto ypatybės padeda sukurti lengvai pernaudojamą programą. Savybės turi būti atrinktos atsižvelginat į jų paplitimą bei kintamumą srityje \cite{Lee2015}. Naudojantis PLSE produkto kūrėjai gali fokusuotis produkto specifikacijoje, o ne bendrų savybėse \cite{Svahnberg}.
 
 Savybių modeliavimas yra pagrindinis metodas atrinkti bei valdyti bendrąsias ir kintamas savybes produktų linijoje. Programinės įrangos šeimos gyvavimo pradžioje savybių modelis padeda išskirti pagrindines savybes, kurios gelbsti kuriant naują rinką ar  norint išlikti jau esamoje. Taip pat savybių modelis leidžia išskirti rizikingas savybes, nuspėti, kokia yra visos programos ar atskirų savybių kaina. Vėliau savybių modeliavimas padeda išskirti variacijos taškus programinės įrangos architektūroje \cite{Czarnecki2004}. Savybių modeliavimas yra populiariausias PLSE kūrime nuo pat pirmojo jo pristatymo \cite{Kang1990}. Taip yra todėl, nes savybės yra pakankamai abstraktus konseptas padedantis efektyviai bendrauti suinterasuotoms šalims. Savybių modeliavimas yra intuitivus ir efektyvus būdas žmonėms išreikšti savybių paplitimą ir kintamumą programinės įrangos šeimoje \cite{Kang2013}. 
-
-Blockchain technologija yra jauna programinės įrangos produktų linija, kuri atsirado tik 2009, kai Satoshi Nakamoto išleidęs baltąjį popierių (angl. whitepaper) \cite{Nakamoto2008} įvykdė pirminį kriptovaliutų platinimą (angl. initial coin offering, toliau ICO)  ir taip surinko finansavimą pirmąjam blockchain ir kriptovaliutai Bitcoin. Bitcoin - skaitmeniniai pinigai, kurių pavedimai vyksta internete naudojantis decentralizuota vieša duomenų baze - blockchain \cite{Swan2015}. Šiuo metu du populiariausi blockchain yra Ethereum ir Bitcoin \cite{Luu}. Ethereum be savo kriptovaliutos turi ir kitą svarbų funkcionalumą - išmaniuosius kontraktus - Turing complete programą, kuri leidžia rašyti decentralizuotas aplikacijas \cite{Buterin2014}. Solidity - populiariausia kalba naudojama rašyti išmaniesiems kontraktams \cite{Dannen}. Problema - išmaniųjų kontraktų technologijos yra pakankamai jaunos, dėl to pakartotonio kodo panaudojimo bazė dar tik formuojasi. ICO kontraktai yra tiražuojami kopijavimo su modifikacijos būdu.
 
 Šio darbo tikslas - ištirti pirminio finansavimo kriptovaliutomis (ICO) išmaniuosius kontraktus, nustatyti, kokios savybės yra pastavios, o kokios - kintamos bei pasiūlyti būdus kodo pernaudojamumui didinti. 
 
@@ -53,7 +51,11 @@ Tikslui pasiekti išsikelti uždaviniai:
 \end{enumerate}
 
 \section{Savybių modeliavimas programinės įrangos produktų linijos sričiai}
-\section{Savybių modeliavimas ICO išmaniesiems kontraktams}
+\subsection{Savybė}
+\subsection{Savybių modeliavimas}
+\section{Savybių modeliavimas pirminio kriptovaliutų platinimo išmaniesiems kontraktams}
+\subsection{Savybė}
+\subsection{Savybių modeliavimas}
 
 
 \sectionnonum{Rezultatai}
