@@ -2159,7 +2159,12 @@
     <bcf:citekey order="11">Czarnecki2004</bcf:citekey>
     <bcf:citekey order="12">Kang1990</bcf:citekey>
     <bcf:citekey order="13">Kang2013</bcf:citekey>
-    <bcf:citekey order="14">Teller1994</bcf:citekey>
+    <bcf:citekey order="14">Kang1990</bcf:citekey>
+    <bcf:citekey order="15">Kang2013</bcf:citekey>
+    <bcf:citekey order="16">Kang1990</bcf:citekey>
+    <bcf:citekey order="17">Lee2015</bcf:citekey>
+    <bcf:citekey order="18">Kang2013</bcf:citekey>
+    <bcf:citekey order="19">Teller1994</bcf:citekey>
   </bcf:section>
   <bcf:sortlist section="0" name="anyt/global/" type="entry" sortscheme="anyt" sortnamekeyscheme="global" labelprefix="">
   <bcf:sorting>

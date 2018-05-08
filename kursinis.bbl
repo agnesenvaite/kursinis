@@ -404,6 +404,51 @@
       \verb https://www.researchgate.net/profile/T%7B%5C_%7DRavichandran/publication/220423696%7B%5C_%7DSoftware%7B%5C_%7Dreuse%7B%5C_%7Dstrategies%7B%5C_%7Dand%7B%5C_%7Dcomponent%7B%5C_%7Dmarkets/links/54201aa60cf2218008d43cdb.pdf
       \endverb
     \endentry
+    \entry{Sinnema2004}{inproceedings}{}
+      \name{author}{4}{}{%
+        {{hash=f04873ea948a1aafbee60fa450b4932e}{%
+           family={Sinnema},
+           familyi={S\bibinitperiod},
+           given={Marco},
+           giveni={M\bibinitperiod}}}%
+        {{hash=a6aea66ff928b81edea11c68e62c290a}{%
+           family={Deelstra},
+           familyi={D\bibinitperiod},
+           given={Sybren},
+           giveni={S\bibinitperiod}}}%
+        {{hash=7c67618f511606838fcf60a959a0b0a7}{%
+           family={Nijhuis},
+           familyi={N\bibinitperiod},
+           given={Jos},
+           giveni={J\bibinitperiod}}}%
+        {{hash=3903018fc17327f32ca2eb9248c90100}{%
+           family={Bosch},
+           familyi={B\bibinitperiod},
+           given={Jan},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{6663dd626a73978b76d5f1818e476758}
+      \strng{fullhash}{6663dd626a73978b76d5f1818e476758}
+      \strng{authornamehash}{6663dd626a73978b76d5f1818e476758}
+      \strng{authorfullhash}{6663dd626a73978b76d5f1818e476758}
+      \field{labelalpha}{SDN\textsuperscript {+}04}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{A key aspect of variability management in software product families is the explicit representation of the variability . Experiences at several industrial software development companies have shown that a software variability model (1) should uniformly represent variation points as first class entities in all abstraction layers (ranging from features to code) and (2) allow for hierarchical organization of the variability . It furthermore (3) should allow for first class representation of simple , i . e . one - to - one , and complex , i . e . n - to - m , dependencies , and (4) allow for modeling the relations between dependencies . Existing variability modeling approaches only support the first two requirements , but lack support for the latter two . The contribution of this paper is a framework for variability modeling , COVAMOF , that provides support for all four requirements .}
+      \field{title}{{COVAMOF : A Framework for Modeling Variability in Software Product Families}}
+      \field{year}{2004}
+      \verb{doi}
+      \verb 10.1007/978-3-540-28630-1_12
+      \endverb
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Sinnema et al. - 2004 - COVAMOF A Framework for Modeling Variability in Software Product Families.pdf:pdf
+      \endverb
+      \verb{url}
+      \verb https://www.researchgate.net/profile/Jan%7B%5C_%7DBosch/publication/220789726%7B%5C_%7DCOVAMOF%7B%5C_%7DA%7B%5C_%7DFramework%7B%5C_%7Dfor%7B%5C_%7DModeling%7B%5C_%7DVariability%7B%5C_%7Din%7B%5C_%7DSoftware%7B%5C_%7DProduct%7B%5C_%7DFamilies/links/09e415086dcdf501dc000000.pdf
+      \endverb
+    \endentry
     \entry{Svahnberg}{article}{}
       \name{author}{3}{}{%
         {{hash=259f3f06efd03acfee4723facd6ac00d}{%
