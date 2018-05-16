@@ -1,4 +1,6 @@
 \documentclass{VUMIFPSkursinis}
+\usepackage{graphicx}
+\graphicspath{ {img/} }
 \usepackage{algorithmicx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -60,19 +62,80 @@ Savybės yra pagrindinis produkto skiriamasis bruožas. Skirtingi srities analiz
 
 Skirtumas tarp savybės ir konceptualios abstrakcijos (pvz.: funkcijos, objekto) yra tai, kad funkcijos ir objektai yra naudojami specifikuojant vidines sistemos detales. Kitaip, funkcijos ir objektai yra konceptualios abstrakcijos, kurios yra identifikuojamos iš vidinės sistemos pusės. Savybė - aiškiai matoma  pagal charakteristiką, kuri gali išskirti produktą iš kitų. Todėl savybių modeliavimas turi išskirti iš išorės matomas charakteristikas produktuose bendrumo ir kintamumo atžvilgiu, o ne apibūdinti visas produkto modeliavimo detales (pvz.: funkcinis, objektais orientuotas modeliavimas). Suprantant produkto bendrus ir kintamus bruožus galima sukurti pernaudojamas funkcijas ir objektus \cite{Lee2015}.
 
-Savybėmis grįsti PLSE modeliai naudoja savybes kaip vienetus sudarytus iš:
-\begin{itemize}
-\item Veiksmų, kurie suteikiami vartotojams
-\item Reikalavimų
-\item Produkto konfigūracijos ir jos valdymo
-\item Kūrimo ir pristatymo klientams 
-\item Parementrizacijos pernaudojamiems vienetams
-\item Produkto valdymo skirtingiems rinkos sektoriams \cite{Kang2013}
-\end{itemize}
 \subsection{Savybių modelis}
+
+Savybėmis orientuotos srities analizės (angl. Feature-Oriented Domain analysis (FODA), toliau FODA) \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris turi pavaizduoti standartines sistemos šeimos savybes srytyje ir santykius tarp jų. Trumpiau - savybių modelis yra hierarchiškai išskirstytų savybių rinkinys \cite{Batory2005}. Struktūrizuoti santykiai tarp savybių, kurie apibūdinami kaip susideda iš (angl. consists of), kurie atvaizduoja logišką savybių suskirtymą, yra interesas. Alternatyvios ar pasirenkamos (angl. optional) savybės turi būti atvaizduotos savybių modelyje. Kiekviena savybė turi būti pavadinta išskirtinai ir jos apibūdinimas turi būti įtrauktas į srities žodyno terminologiją \cite{Kang1990}.
+
+Santykiai tarp tėvo ir vaikinės savybės yra kategorizuojami į:
+\begin{itemize}
+\item Ir - visos vaikinės savybės turi būti pasirinktos
+\item Alternatyva - tik viena vaikinė savybė gali būti pasirinkta 
+\item Ar - viena ar daugiau gali būti pasirinkta
+\item Būtina - savybė yra privaloma
+\item Pasirenkama - savybė gali būti pasirenkama
+\end{itemize}
+Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai medis, kur primityvios savybės - lapai, pagrininės - mazgai (pav. \ref{img:fm_rules}) \cite{Batory2005}. 
+
+FODA \cite{Kang1990} nusako, kad alternatyvios savybės gali būti laikomos kaip specifikavimas bendresnės kategorijos. Bendros savybės atributai yra paveldimi pagal visą jos specifikaciją. Terminas "alternatyvi savybė" (verčiau "specifikacijos savybės") yra naudojama tam, kad apibrėžtų, kad ne daugiau vienos savybės gali būti pasirinkta. 
+
+Struktūros taisyklės (pav. \ref{img:fm_rules}) apibrėžia semantika tarp savybių, kurios nėra išreikštos diagramoje. Visos pasirenkamos ar alternetyvios savybės, kurios negali būti pasirinktos, kai yra bendra savybė pasirinkta turi būti pažymėtos kaip tarpusavyje nesuderinamos (angl. mutually exclusive with). Visos pasirenkamos ir alternatyvios savybės, kurios turi būti pasirinktos, kai bendra yra pasirinkta, turi būti pažymėtos kaip reikalingos (angl. required).
+
+Pasirenkamų ir alternatyvių savybių pasirinkimas nėra savavališkas. Įprastai jos parenkamos pagal galutinio vartotojo (kliento) tikslus ar interesus. Klausimų rinkinys ir alternatyvus sprendimai renkantis iš pasirenkamų ir alternatyvių savybių yra atvaizduojami naudojantis santykių tipo yra (angl. is-a) forma.
+
+Savybių modelio dokumentacija susideda iš stuktūrinės diagramos hierarchiškai suskaidančios savybes indentifikuojančias pasirenkamas ir alternatyves savybes, savybių apibūdinimo ir taisyklių kompozicijos savybėms. 
+
+Savybių modelis tarnauja kaip komunikacija tarp naudotojų ir kūrėjų. Naudotojui savybių modelis teikia informaciją, kokios yra savybės iš kurių gali rinktis ir kada. Kūrėjams savybių modelis identifikuoja poreikius, kuriuos reikia parametrizuotikituose modeliuosi ir programinės įrangos architektūroje ir kaip parametrizacija turi būti atlikta.
+
+Kiti srities modeliai ir programinės įrangos architektūra turi būti apibrėžta aplink standartines savybes. Alternatyvios ir pasirenkams savybės turi būti įtrauktos į modelį ir archtektūrą, bet visada turi būti parametrizuotos su atitinkamomis savybės, kad įsikyšimas į modelį ir architektūra būtų padaromas lengvai. 
+
+\begin{center}
+    \includegraphics[scale=0.75]{img/feature_model_rules}
+    \captionof{figure}{Savybių modelio žymėjimai \cite{Batory2005}}
+    \label{img:fm_rules}
+\end{center}
+
+\subsection{Procesas ir gairės}
+
+Savybių analizė susideda iš reikalingų dokumentų surinkimo, savybių išskyrimo, abstrakcijos ir identifikavimo savybių kaip modelį, savybių apibrėžimo, modelio validacijos. 
+
+\subsubsection{Savybių identifikavimas}
+
+Aplikacijos savybes galima išskirti į keturias kategorijas:
+\begin{itemize}
+\item darbo aplinka
+\item galimybės
+\item srities technologija
+\item igyvendimo technika
+\end{itemize}
+
+Metodas fokusuojasi ties savybėmis susijusiomis su aplikacijos galimybėmis. 
+
+Galimybių savybės dar gali būti suskirstytos į:
+\begin{itemize}
+\item funkcines
+\item operacines
+\item pateikimo (prezentacijps)
+\end{itemize}
+
+Funkcinės savybės yra servisai, kurie yra suteikti aplikacijos. Tokios savybės gali būti rastos naudotojo vadove bei reikalavimų dokumentacijoje. Operaicnės savybes - tos kurios susiję su aplikacijos operacijomis (taip pat iš vartotojo perspektyvos); tai yra, kaip naudotojas sčveikauja su aplikacija. Naudotojo vadivas yra geras tokių savybių šaltinis. Prezentacijos - tai kaip ir kokia informacija yra pateikama naudotojui. Tokia informacija randama naudotojo vadove ir reikalavimų specifikacijoje. 
+
+Identifikuotos savybės turi būti pavadintos ir konfliktai susiję su vardais turi būti išspręsti. Savybių sinomimai taip pat turi būti įtraukti į srities terminologijos žodyną.
+
+\subsubsection{Savybių abstrakcija, klasifikacija, modeliavimas}
+
+Sekantis žingsnis identifikavus savybes turėtų būti hierarchinio modelio sukūrimas pagal savybių kklasifikavimą, strūkturizavimą naudojant susideda iš santykį. Ar savybė yra būtina, alternatyvi, pasirenkama turi būti identifikuojama modelyje. Kiekviena savybė modelyje turi būti apibrėžta. Apibūdinimas taip pat turėtų nusakyti ar tai compile-time, activation-time,  ar run-time savybė. Tai gali būti nusakyta pagal tai kaip dažnai adaptacija bus daroma.
+
+\subsubsection{Savybių modelio validacija}
+Ar savybių modelis gerai reprezentuoja srities savybes turi būti validuota prieš srities ekspertus ir esančias aplikacijas. Srities ekspertai, kurie konsultavo analizės metu, neturi būti pasirinkti.  Taip pat bent viena aplikacija, kuri nebuvo naudota analizėje, turi būti validacijo nustatyti bendrumą ir pritaikomaumą modelio. Jei galima, naujas aplikacijų rinkinys suteiktų geresnę valodaciją, bet galimybė tai padaryti priklausys nuo srities brandos ir finansinių apribojimų. 
+ 
+
+
 \section{Savybių modeliavimas pirminio kriptovaliutų platinimo išmaniesiems kontraktams}
 \subsection{Savybė}
 \subsection{Savybių modeliavimas}
+
+
+
 
 
 \sectionnonum{Rezultatai}
@@ -99,6 +162,8 @@ Turing complete - bet kuri sistema, kuri yra pakankamai galinga atpažinti visus
 PLSE - programinės įrangos produktų linija (angl. product line software engineering)
 
 ICO - pirminis kriptovaliutų platinimas (angl. initial coin offering)
+
+FODA - Feature-Oriented Domain Analysis \cite{Kang1990}
 
 %\appendix  % Priedai
 % Prieduose gali būti pateikiama pagalbinė, ypač darbo autoriaus savarankiškai

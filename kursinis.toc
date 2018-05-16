@@ -10,18 +10,26 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {1.2.}Savybių modelis}{4}{subsection.1.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.}Savybių modeliavimas pirminio kriptovaliutų platinimo išmaniesiems kontraktams}{5}{section.2}
+\contentsline {subsection}{\numberline {1.3.}Procesas ir gairės}{5}{subsection.1.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.1.}Savybė}{5}{subsection.2.1}
+\contentsline {subsubsection}{\numberline {1.3.1.}Savybių identifikavimas}{6}{subsubsection.1.3.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.2.}Savybių modeliavimas}{5}{subsection.2.2}
+\contentsline {subsubsection}{\numberline {1.3.2.}Savybių abstrakcija, klasifikacija, modeliavimas}{6}{subsubsection.1.3.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Rezultatai}{6}{section*.3}
+\contentsline {subsubsection}{\numberline {1.3.3.}Savybių modelio validacija}{6}{subsubsection.1.3.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Išvados}{7}{section*.4}
+\contentsline {section}{\numberline {2.}Savybių modeliavimas pirminio kriptovaliutų platinimo išmaniesiems kontraktams}{7}{section.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Literatūra}{8}{section*.5}
+\contentsline {subsection}{\numberline {2.1.}Savybė}{7}{subsection.2.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Sąvokų apibrėžimai}{10}{section*.6}
+\contentsline {subsection}{\numberline {2.2.}Savybių modeliavimas}{7}{subsection.2.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Santrumpos}{11}{section*.7}
+\contentsline {section}{Rezultatai}{8}{section*.3}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Išvados}{9}{section*.4}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Literatūra}{10}{section*.5}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Sąvokų apibrėžimai}{12}{section*.6}
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Santrumpos}{13}{section*.7}
