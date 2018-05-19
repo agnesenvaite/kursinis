@@ -35,7 +35,7 @@
 
 \sectionnonum{Įvadas}
 
-Programinės įrangos pernaudojimas leidžia naudoti programas keliuose projektuose. Tai yra svarbi strategija programinei įrangai norint padidinti sistemos efektyvumą ir kokybę. Taikant pernaudojamumą programuotojai naudojasi jau įgyvendintu kodu, kurį keičia taip, kad jis atitiktų dabartinio projekto reikalavimus \cite {Ravichandran2003}.
+Programinės įrangos pernaudojimas leidžia naudoti programas keliuose projektuose. Tai yra svarbi strategija programinei įrangai norint padidinti sistemos efektyvumą ir kokybę. Taikant pernaudojamumą programuotojai naudojasi jau įgyvendintu kodu, kurį keičia taip, kad jis atitiktų dabartinio projekto reikalavimus \cite {Ravichandran2003}. Viena iš būtinų sąlygų kuriant pernaudojamą programinę įranga yra supratimas skirtingų kontekstų, kuriuose pernaudojama programinė įranga galėtų būti naudojama ir kaip būtų valdomas jos pernaudojamumas. Tai padeda programinės įrangos kūrėjams nuspręsti ar programinė įranga atitinka reikalavimus ir gali būti kuriama, jei taip, tai ką reikia parametrizuoti ir kaip struktūrizuoti programinę įrangą, kad vėliau būtų galima ją pritaikyti skirtingiems kontekstams \cite{Kang1990}.
 
 Pirminio kriptovaliuto platinimo (angl. initial coin offering, toliau ICO) metu įmonė parduoda specializuotus kripto-žetonus žadėdami, kad žetonai veiks kaip mainų priemonė gaunat paslaugas įmonės platformoje. Žetonų pardavimas kuria kapitalą pradiniam įmonės platformos kūrimui nors nėra įsipareigojimo dėl būsimos paslaugos kainos (žetonais ar kitaip) \cite{Catalini2018}. Satoshi Nakamoto išleidęs baltąjį popierių (angl. whitepaper) \cite{Nakamoto2008} įvykdė ICO  ir taip surinko finansavimą pirmąjam blockchain ir kriptovaliutai Bitcoin. Bitcoin - skaitmeniniai pinigai, kurių pavedimai vyksta internete naudojantis decentralizuota vieša duomenų baze - blockchain \cite{Swan2015}. Šiuo metu du populiariausi blockchain yra Ethereum ir Bitcoin \cite{Luu}. Ethereum be savo kriptovaliutos turi ir kitą svarbų funkcionalumą - išmaniuosius kontraktus - Turing complete programą, kuri leidžia rašyti decentralizuotas aplikacijas \cite{Buterin2014}. Solidity - populiariausia kalba naudojama rašyti išmaniesiems kontraktams \cite{Dannen}. Problema - išmaniųjų kontraktų technologijos yra pakankamai jaunos, dėl to pakartotonio kodo panaudojimo bazė dar tik formuojasi. ICO kontraktai yra tiražuojami kopijavimo su modifikacijos būdu.
 
@@ -54,19 +54,17 @@ Tikslui pasiekti išsikelti uždaviniai:
 \end{enumerate}
 
 \section{Savybių modeliavimas}
-Savybių modeliavime bendri ir kintami bruožai yra modeliuojami iš produkto savybių perspektyvos PLSE, kuri yra suinterestuotų šalių interesas. Originalus savybių modeliavimas - FODA \cite{Kang1990} - paprastas modelis, kuris savybes skirsto pagal tai iš ko jos susideda bei pagal bendrumą ir specializaciją naudojant AND/OR  diagramas. Savybės yra suskirstytos į būtinas, alternatyvias ir pasirenkamas pagal bendrus ir kintamus bruožus. Savybių atributai taip pat gali būti dokumentuojami \cite{Kang2013}.
+Savybių modeliavime bendri ir kintami bruožai yra modeliuojami iš produkto savybių perspektyvos PLSE, kuri yra suinterestuotų šalių interesas. Originalus savybių modeliavimas - FODA (angl. Feature-Oriented Domain Analysis (FODA), toliau FODA) \cite{Kang1990} - paprastas modelis, kuris savybes skirsto pagal tai iš ko jos susideda bei pagal bendrumą ir specializaciją naudojant AND/OR  diagramas. Savybės yra suskirstytos į būtinas, alternatyvias ir pasirenkamas pagal bendrus ir kintamus bruožus \cite{Kang2013}.
 
-\subsection{Savybė}
+\subsection{Savybė} \label{savybe}
 
-Savybės yra pagrindinis produkto skiriamasis bruožas. Skirtingi srities analizės metodai terminą „savybė" apibūdina šiek tiek kitaip. FODA \cite{Kang1990} savybę apibūdina kaip pastebimą ir skiriamą sistemos charakteristiką, kuri yra matoma įvairioms suinteresuotoms šalims. Svarbu, kad savybių modeliavime turi būti fokusuojamasi ties bendrumo ir skirtumų srityje identifikacija, o ne ties bendrų savybių supratimo išskyrimu. Iš kitos pusės neapibrėžta savybių paskirtis daro sunkumų formuluojant jos semantiką, rezultatų valdymą bei automatinį pagalbo suteikimą.
+Kelios tos pačios srities aplikacijos turi daug bendrų galimybių, bet taip pat kiekviena aplikacija turi ir savo išskirtinumų. Tos galimybės iš naudotojo perspektyvos yra savybės \cite{Kang1990}. Savybės yra pagrindinis produkto skiriamasis bruožas. Skirtingi srities analizės metodai terminą „savybė" apibūdina šiek tiek kitaip. FODA \cite{Kang1990} savybę apibūdina kaip pastebimą ir skiriamą sistemos charakteristiką, kuri yra matoma įvairioms suinteresuotoms šalims \cite{Lee2015}.
 
-Skirtumas tarp savybės ir konceptualios abstrakcijos (pvz.: funkcijos, objekto) yra tai, kad funkcijos ir objektai yra naudojami specifikuojant vidines sistemos detales. Kitaip, funkcijos ir objektai yra konceptualios abstrakcijos, kurios yra identifikuojamos iš vidinės sistemos pusės. Savybė - aiškiai matoma  pagal charakteristiką, kuri gali išskirti produktą iš kitų. Todėl savybių modeliavimas turi išskirti iš išorės matomas charakteristikas produktuose bendrumo ir kintamumo atžvilgiu, o ne apibūdinti visas produkto modeliavimo detales (pvz.: funkcinis, objektais orientuotas modeliavimas). Suprantant produkto bendrus ir kintamus bruožus galima sukurti pernaudojamas funkcijas ir objektus \cite{Lee2015}.
+FODA fokusuojasi ties kliento perspektyva, tai yra ties paslaugomis, kurias teikia aplikacija ir aplinka, kurioje dirbama. Savybės yra sistemos atributai, kurie tiesiogiai paveikia naudotoją \cite{Kang1990}. Skirtumas tarp savybės ir konceptualios abstrakcijos (pvz.: funkcijos, objekto) yra tai, kad funkcijos ir objektai yra naudojami specifikuojant vidines sistemos detales. Kitaip, funkcijos ir objektai yra konceptualios abstrakcijos, kurios yra identifikuojamos iš vidinės sistemos pusės. Savybė - aiškiai matoma  pagal charakteristiką, kuri gali išskirti produktą iš kitų. Todėl savybių modeliavimas turi išskirti iš išorės matomas charakteristikas produktuose bendrumo ir kintamumo atžvilgiu, o ne apibūdinti visas produkto modeliavimo detales (pvz.: funkcinis, objektais orientuotas modeliavimas). Suprantant produkto bendrus ir kintamus bruožus galima sukurti pernaudojamas funkcijas ir objektus \cite{Lee2015}.
 
 \subsection{Savybių modelis}
 
-Savybėmis orientuotos srities analizės (angl. Feature-Oriented Domain analysis (FODA), toliau FODA) \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris turi pavaizduoti standartines sistemos šeimos savybes srytyje ir santykius tarp jų. Trumpiau - savybių modelis yra hierarchiškai išskirstytų savybių rinkinys \cite{Batory2005}. Struktūrizuoti santykiai tarp savybių, kurie apibūdinami kaip susideda iš (angl. consists of), kurie atvaizduoja logišką savybių suskirtymą, yra interesas. Alternatyvios ar pasirenkamos (angl. optional) savybės turi būti atvaizduotos savybių modelyje. Kiekviena savybė turi būti pavadinta išskirtinai ir jos apibūdinimas turi būti įtrauktas į srities žodyno terminologiją \cite{Kang1990}.
-
-Santykiai tarp tėvo ir vaikinės savybės yra kategorizuojami į:
+FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris turi pavaizduoti standartines sistemos šeimos savybes srityje ir santykius tarp jų. Trumpiau - savybių modelis yra hierarchiškai išskirstytų savybių rinkinys. Santykiai tarp savybių modelyje yra kategorizuojami į:
 \begin{itemize}
 \item Ir - visos vaikinės savybės turi būti pasirinktos
 \item Alternatyva - tik viena vaikinė savybė gali būti pasirinkta 
@@ -74,25 +72,19 @@ Santykiai tarp tėvo ir vaikinės savybės yra kategorizuojami į:
 \item Būtina - savybė yra privaloma
 \item Pasirenkama - savybė gali būti pasirenkama
 \end{itemize}
-Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai medis, kur primityvios savybės - lapai, pagrininės - mazgai (pav. \ref{img:fm_rules}) \cite{Batory2005}. 
 
-FODA \cite{Kang1990} nusako, kad alternatyvios savybės gali būti laikomos kaip specifikavimas bendresnės kategorijos. Bendros savybės atributai yra paveldimi pagal visą jos specifikaciją. Terminas "alternatyvi savybė" (verčiau "specifikacijos savybės") yra naudojama tam, kad apibrėžtų, kad ne daugiau vienos savybės gali būti pasirinkta. 
-
-Struktūros taisyklės (pav. \ref{img:fm_rules}) apibrėžia semantika tarp savybių, kurios nėra išreikštos diagramoje. Visos pasirenkamos ar alternetyvios savybės, kurios negali būti pasirinktos, kai yra bendra savybė pasirinkta turi būti pažymėtos kaip tarpusavyje nesuderinamos (angl. mutually exclusive with). Visos pasirenkamos ir alternatyvios savybės, kurios turi būti pasirinktos, kai bendra yra pasirinkta, turi būti pažymėtos kaip reikalingos (angl. required).
-
-Pasirenkamų ir alternatyvių savybių pasirinkimas nėra savavališkas. Įprastai jos parenkamos pagal galutinio vartotojo (kliento) tikslus ar interesus. Klausimų rinkinys ir alternatyvus sprendimai renkantis iš pasirenkamų ir alternatyvių savybių yra atvaizduojami naudojantis santykių tipo yra (angl. is-a) forma.
-
-Savybių modelio dokumentacija susideda iš stuktūrinės diagramos hierarchiškai suskaidančios savybes indentifikuojančias pasirenkamas ir alternatyves savybes, savybių apibūdinimo ir taisyklių kompozicijos savybėms. 
-
-Savybių modelis tarnauja kaip komunikacija tarp naudotojų ir kūrėjų. Naudotojui savybių modelis teikia informaciją, kokios yra savybės iš kurių gali rinktis ir kada. Kūrėjams savybių modelis identifikuoja poreikius, kuriuos reikia parametrizuotikituose modeliuosi ir programinės įrangos architektūroje ir kaip parametrizacija turi būti atlikta.
-
-Kiti srities modeliai ir programinės įrangos architektūra turi būti apibrėžta aplink standartines savybes. Alternatyvios ir pasirenkams savybės turi būti įtrauktos į modelį ir archtektūrą, bet visada turi būti parametrizuotos su atitinkamomis savybės, kad įsikyšimas į modelį ir architektūra būtų padaromas lengvai. 
+Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai medis, kur primityvios savybės - lapai, pagrininės - mazgai (pav. \ref{img:fm_rules}). Bendros savybės tarp skirtingų produktų yra modeliuojamos kaip būtinos, kai skirtingos savybės tarp jų žymimos kaip alternatyvios ar pasirenkamos (ang. optional) \cite{Batory2005}. Bendros savybės atributai yra paveldimi pagal visą jos specifikaciją. Visos pasirenkamos ar alternetyvios savybės, kurios negali būti pasirinktos, kai yra bendra savybė pasirinkta turi būti pažymėtos kaip tarpusavyje nesuderinamos (angl. mutually exclusive with). Visos pasirenkamos ir alternatyvios savybės, kurios turi būti pasirinktos, kai bendra yra pasirinkta, turi būti pažymėtos kaip privalomos. Savybių modelio dokumentacija susideda iš stuktūrinės diagramos hierarchiškai suskaidančios savybes indentifikuojančias pasirenkamas ir alternatyves savybes, savybių apibūdinimo ir taisyklių kompozicijos savybėms \cite{Kang1990}. 
 
 \begin{center}
     \includegraphics[scale=0.75]{img/feature_model_rules}
     \captionof{figure}{Savybių modelio žymėjimai \cite{Batory2005}}
     \label{img:fm_rules}
 \end{center}
+
+Pasirenkamos ir alternatyvios savybės negali būti atrinktos savavališkai. Įprastai jos parenkamos pagal galutinio naudotojo (kliento) tikslus ar interesus \cite{Kang1990}. Labai naudinga yra tai, kad savybė yra efektyvus komunikavimo būdas tarp suinteresuotų šalių. Dažnai klientai ir inžinieriai kalba apie produkto charakteristiką savybių pavidalu. Reikalavimai ir funkcijos yra apibūdinami kaip savybės kadangi jos yra aiškiai atpažįstamos abstrakcijos (plačiau \ref{savybe} Savybė) \cite{Lee2015}. Savybių modelis taip pat tarnauja kaip komunikacija tarp naudotojų ir kūrėjų. Naudotojui savybių modelis teikia informaciją, kokios yra savybės iš kurių gali rinktis ir kada. Kūrėjams savybių modelis identifikuoja, ką reiktų parametrizuoti kituose modeliuose bei programinės įrangos architektūroje ir kaip parametrizacija turi būti atlikta \cite{Kang1990}. Kitaip, savybių modelis gelbsti ne tik pernaudojamų komponentų kūrime, bet ir valdant produktų konfigūraciją srityje \cite{Lee2015}.
+
+%Srities savybių modelis ir programinės įrangos architektūra turi būti apibrėžta aplink standartines savybes. Alternatyvios ir pasirenkamos savybės turi būti įtrauktos į modelį ir arcihtektūrą, bet visada turi būti parametrizuotos su atitinkamomis savybės, kad įsikyšimas į modelį ir architektūra būtų nesudėtingas \cite{Kang1990}. 
+
 
 \subsection{Procesas ir gairės}
 
