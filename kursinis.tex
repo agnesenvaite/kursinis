@@ -86,45 +86,59 @@ Pasirenkamos ir alternatyvios savybės negali būti atrinktos savavališkai. Įp
 %Srities savybių modelis ir programinės įrangos architektūra turi būti apibrėžta aplink standartines savybes. Alternatyvios ir pasirenkamos savybės turi būti įtrauktos į modelį ir arcihtektūrą, bet visada turi būti parametrizuotos su atitinkamomis savybės, kad įsikyšimas į modelį ir architektūra būtų nesudėtingas \cite{Kang1990}. 
 
 
-\subsection{Procesas ir gairės}
+\subsection{Procesas ir gairės} \label{procesas}
 
-Savybių analizė susideda iš reikalingų dokumentų surinkimo, savybių išskyrimo, abstrakcijos ir identifikavimo savybių kaip modelį, savybių apibrėžimo, modelio validacijos. 
+Savybių analizė susideda iš reikalingų dokumentų surinkimo, savybių išskyrimo, savybių abstrakcijos ir identifikavimo modelyje, savybių apibrėžimo, modelio validacijos \cite{Kang1990}. Tačiau, prieš atliekant savybių modelį pirma turėtų būti išskirta sritis, kurios savybių alalizė bus atliekama \cite{Lee2015}. 
+
+\subsubsection{Srities identifikavimas}
+
+Srities identifikavimas prasideda nustantant sritį su kuria bus dirbama. Pasirinkus sritį turi būti nubrėžtos ribos ir santykiai tarp srities elementų ir kitų esybių esančių už srities ribų bei informacijos dalinimasis vieni tarp kitų. Srities modeliavimo tikslas yra nustatyti bendrus ir skirtingus konseptus ar charakteristikas sistemos kūrime \cite{Lee2015}.  
 
 \subsubsection{Savybių identifikavimas}
 
-Aplikacijos savybes galima išskirti į keturias kategorijas:
+Savybių identifikavimas susideda iš išskyrimo srities žinių gautų iš srities ekspertų ir kitų dokumentų tokių kaip knygos, nadotojo vadovo, projektavimo dokumentų ir jau parašytų programų \cite{Lee2015}. Aplikacijos savybes galima išskirti į keturias kategorijas:
 \begin{itemize}
-\item darbo aplinka
-\item galimybės
-\item srities technologija
-\item igyvendimo technika
+\item darbo aplinka, kurioje aplikacijos yra naudojamos
+\item galimybės iš naudotojo perspektyvos 
+\item srities technologija - kokiais reikalavimais remiantis sprendimas yra padaromas 
+\item įgyvendinimo technika
 \end{itemize}
 
-Metodas fokusuojasi ties savybėmis susijusiomis su aplikacijos galimybėmis. 
+%Metodas fokusuojasi ties savybėmis susijusiomis su aplikacijos galimybėmis. 
 
-Galimybių savybės dar gali būti suskirstytos į:
-\begin{itemize}
-\item funkcines
-\item operacines
-\item pateikimo (prezentacijps)
-\end{itemize}
+%Galimybių savybės dar gali būti suskirstytos į:
+%\begin{itemize}
+%\item funkcines
+%\item operacines
+%\item pateikimo (prezentacijps)
+%\end{itemize}
 
-Funkcinės savybės yra servisai, kurie yra suteikti aplikacijos. Tokios savybės gali būti rastos naudotojo vadove bei reikalavimų dokumentacijoje. Operaicnės savybes - tos kurios susiję su aplikacijos operacijomis (taip pat iš vartotojo perspektyvos); tai yra, kaip naudotojas sčveikauja su aplikacija. Naudotojo vadivas yra geras tokių savybių šaltinis. Prezentacijos - tai kaip ir kokia informacija yra pateikama naudotojui. Tokia informacija randama naudotojo vadove ir reikalavimų specifikacijoje. 
+%Funkcinės savybės yra servisai, kurie yra suteikti aplikacijos. Tokios savybės gali būti rastos naudotojo vadove bei reikalavimų dokumentacijoje. Operaicnės savybes - tos kurios susiję su aplikacijos operacijomis (taip pat iš vartotojo perspektyvos); tai yra, kaip naudotojas sčveikauja su aplikacija. Naudotojo vadivas yra geras tokių savybių šaltinis. Prezentacijos - tai kaip ir kokia informacija yra pateikama naudotojui. Tokia informacija randama naudotojo vadove ir reikalavimų specifikacijoje. 
 
-Identifikuotos savybės turi būti pavadintos ir konfliktai susiję su vardais turi būti išspręsti. Savybių sinomimai taip pat turi būti įtraukti į srities terminologijos žodyną.
+Visos identifikuotos savybės turi būti pavadintos ir konfliktai susiję su vardais turi būti išspręsti. Savybių sinomimai taip pat turi būti įtraukti į srities terminologijos žodyną \cite{Kang1990}.
 
 \subsubsection{Savybių abstrakcija, klasifikacija, modeliavimas}
 
-Sekantis žingsnis identifikavus savybes turėtų būti hierarchinio modelio sukūrimas pagal savybių kklasifikavimą, strūkturizavimą naudojant susideda iš santykį. Ar savybė yra būtina, alternatyvi, pasirenkama turi būti identifikuojama modelyje. Kiekviena savybė modelyje turi būti apibrėžta. Apibūdinimas taip pat turėtų nusakyti ar tai compile-time, activation-time,  ar run-time savybė. Tai gali būti nusakyta pagal tai kaip dažnai adaptacija bus daroma.
+Sekantis žingsnis identifikavus savybes turėtų būti hierarchinio modelio sukūrimas pagal savybių klasifikavimą, strūkturizavimą naudojant susideda iš santykį. Ar savybė yra būtina, alternatyvi, pasirenkama turi būti identifikuojama modelyje. Kiekviena savybė modelyje turi būti apibrėžta \cite{Kang1990}.
 
 \subsubsection{Savybių modelio validacija}
-Ar savybių modelis gerai reprezentuoja srities savybes turi būti validuota prieš srities ekspertus ir esančias aplikacijas. Srities ekspertai, kurie konsultavo analizės metu, neturi būti pasirinkti.  Taip pat bent viena aplikacija, kuri nebuvo naudota analizėje, turi būti validacijo nustatyti bendrumą ir pritaikomaumą modelio. Jei galima, naujas aplikacijų rinkinys suteiktų geresnę valodaciją, bet galimybė tai padaryti priklausys nuo srities brandos ir finansinių apribojimų. 
+
+Ar savybių modelis gerai reprezentuoja srities savybes turi būti validuota prieš srities ekspertus ir  jau egzituojančias aplikacijas. Srities ekspertai, kurie konsultavo analizės metu, neturi dalyvauti validacijoje. Taip pat bent viena aplikacija, kuri nebuvo naudota analizėje, turi būti panaudota, kad  būtų nustatytas modelio bendrumas ir pritaikomumas. Jei įmanoma validuojant turi būti panaudotas naujas aplikacijų rinkinys \cite{Kang1990}.
  
 
 
 \section{Savybių modeliavimas pirminio kriptovaliutų platinimo išmaniesiems kontraktams}
-\subsection{Savybė}
-\subsection{Savybių modeliavimas}
+
+Buvo pasirinkta atlikti savybių modeliavimą remiantis procesu aprašytu \ref{procesas} skyriuje. Savybių modeliavimas buvo pradėtas nuo srities nusistatymo (plačiau \ref{sritis} Sritis), tada buvo surinkta informacija reikalinga srities modelio sudarymui ir savybių išskyrimui (plačiau \ref{informacija} ...), turint visą reikiamą informaciją buvo galima išskirti savybes (palčiau \ref{isskyrimas} Savybių išskyrimas), sekantis žingsnis buvo modelio sudarymas (plačiau \ref{modelis} Savybių modelis) ir jo validacija (plačiau \ref{validacija} Savybių modelio validacija).
+
+\subsection{Sritis} \label{sritis}
+
+%Pirmiausia buvo išskirta išmaniųjų kontraktų sritis, tada susiaurinta iki pirminio kriptovaliutų platinimo išmaniųjų kontraktai. {Citata, kad išmanieji kontraktai neveikia išorinio pasaulio}. Todėl nereikia analizuoti poveikio išorinėms esybėms ir sąryšio su jomis. 
+
+\subsection{Reikalingų dokumentų surinkimas} \label{informacija}
+\subsection{Savybių išskyrimas} \label{isskyrimas}
+\subsection{Savybių modelis} \label{modelis}
+\subsection{Savybių modelio validacija} \label{validacija}
 
 
 
