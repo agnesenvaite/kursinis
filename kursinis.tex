@@ -8,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage{bm}
 \usepackage{color}
+\usepackage{longtable}
 \usepackage{hyperref}  % Nuorodų aktyvavimas
 \usepackage{url}
 
@@ -33,7 +34,7 @@
 \tableofcontents
 
 
-\sectionnonum{Įvadas}
+\sectionnonum{Įvadas} \label{ivadas}
 
 Programinės įrangos pernaudojimas leidžia naudoti programas keliuose projektuose. Tai yra svarbi strategija programinei įrangai norint padidinti sistemos efektyvumą ir kokybę. Taikant pernaudojamumą programuotojai naudojasi jau įgyvendintu kodu, kurį keičia taip, kad jis atitiktų dabartinio projekto reikalavimus \cite {Ravichandran2003}. Viena iš būtinų sąlygų kuriant pernaudojamą programinę įranga yra supratimas skirtingų kontekstų, kuriuose pernaudojama programinė įranga galėtų būti naudojama ir kaip būtų valdomas jos pernaudojamumas. Tai padeda programinės įrangos kūrėjams nuspręsti ar programinė įranga atitinka reikalavimus ir gali būti kuriama, jei taip, tai ką reikia parametrizuoti ir kaip struktūrizuoti programinę įrangą, kad vėliau būtų galima ją pritaikyti skirtingiems kontekstams \cite{Kang1990}.
 
@@ -94,7 +95,7 @@ Savybių analizė susideda iš reikalingų dokumentų surinkimo, savybių išsky
 
 Srities identifikavimas prasideda nustantant sritį su kuria bus dirbama. Pasirinkus sritį turi būti nubrėžtos ribos ir santykiai tarp srities elementų ir kitų esybių esančių už srities ribų bei informacijos dalinimasis vieni tarp kitų. Srities modeliavimo tikslas yra nustatyti bendrus ir skirtingus konseptus ar charakteristikas sistemos kūrime \cite{Lee2015}.  
 
-\subsubsection{Savybių identifikavimas}
+\subsubsection{Savybių identifikavimas} \label{identifikavimas}
 
 Savybių identifikavimas susideda iš išskyrimo srities žinių gautų iš srities ekspertų ir kitų dokumentų tokių kaip knygos, nadotojo vadovo, projektavimo dokumentų ir jau parašytų programų \cite{Lee2015}. Aplikacijos savybes galima išskirti į keturias kategorijas:
 \begin{itemize}
@@ -127,16 +128,98 @@ Ar savybių modelis gerai reprezentuoja srities savybes turi būti validuota pri
  
 
 
-\section{Savybių modeliavimas pirminio kriptovaliutų platinimo išmaniesiems kontraktams}
+\section{Savybių modeliavimas ICO išmaniesiems kontraktams}
 
-Buvo pasirinkta atlikti savybių modeliavimą remiantis procesu aprašytu \ref{procesas} skyriuje. Savybių modeliavimas buvo pradėtas nuo srities nusistatymo (plačiau \ref{sritis} Sritis), tada buvo surinkta informacija reikalinga srities modelio sudarymui ir savybių išskyrimui (plačiau \ref{informacija} ...), turint visą reikiamą informaciją buvo galima išskirti savybes (palčiau \ref{isskyrimas} Savybių išskyrimas), sekantis žingsnis buvo modelio sudarymas (plačiau \ref{modelis} Savybių modelis) ir jo validacija (plačiau \ref{validacija} Savybių modelio validacija).
+Buvo pasirinkta atlikti savybių modeliavimą remiantis procesu aprašytu \ref{procesas} skyriuje. Savybių modeliavimas buvo pradėtas nuo srities nusistatymo (plačiau \ref{sritis} Srities identifikavimas), tada buvo surinkta informacija reikalinga srities modelio sudarymui ir savybių išskyrimui bei atrinktos savybės (plačiau \ref{isskyrimas} Savybių identifikavimas), sekantis žingsnis buvo modelio sudarymas (plačiau \ref{modelis} Savybių modelis) ir jo validacija (plačiau \ref{validacija} Savybių modelio validacija).
 
-\subsection{Sritis} \label{sritis}
+\subsection{Srities identifikavimas} \label{sritis}
 
-%Pirmiausia buvo išskirta išmaniųjų kontraktų sritis, tada susiaurinta iki pirminio kriptovaliutų platinimo išmaniųjų kontraktai. {Citata, kad išmanieji kontraktai neveikia išorinio pasaulio}. Todėl nereikia analizuoti poveikio išorinėms esybėms ir sąryšio su jomis. 
+Šio savybių modeliavimo sritis - išmanieji kontraktai pirminiam kriptovaliutų platinimui. Kaip jau buvo minėta \ref{ivadas} įvade: „Išmaniųjų kontraktų technologijos yra pakankamai jaunos, dėl to pakartotinio kodo panaudojimo bazė dar tik formuojasi. ICO kontraktai yra tiražuojami kopijavimo su modifikacijos būdu." Todėl šiame savybių modeliavime bus apsirobojama tik ICO naudojamais kontraktais ir nebus analizuojami santykiai su kitais išmaniaisiais kontraktais ar sistemomis.
 
-\subsection{Reikalingų dokumentų surinkimas} \label{informacija}
-\subsection{Savybių išskyrimas} \label{isskyrimas}
+
+\subsection{Savybių identifikavimas} \label{isskyrimas}
+
+Savybių modelio sukūrimui yra būtinas savybių identifikavimas. Remiantis \ref{identifikavimas} skyriuje aprašytu savybių identifikavimo būdais buvo pasirinktas jau parašytų programų (šiuo atveju išmaniųjų kontraktų) surinkimas, analizavimas ir savybių juose identifikavimas. Išmaniųjų kontraktų surinkimo procesas:
+\begin{enumerate}
+\item Iš Ethereum blockchain blokų naršyklės - etherscan.io, buvo atrinkti išmaniųjų kontraktų adresai ir nuorodos į juos platformoje
+\item Parašytas interneto skaitytuvas (angl. web crawler) naudojantis Node.js karkasu
+\item Visi surinktų išmaniųjų kontraktų kodai buvo surašyti į failus. Failo pavadinino struktūra: contract + identifikacijos numeris + .sol plėtinys
+\end{enumerate}
+
+Tokiu būdu buvo surinkta 128 pirminio kriptovaliutų platinimo išmanieji kontraktai. Savybės iš išmaniųjų kontraktų buvo išskirtos analizavimo būdu - pirmiausia atrinkta 21 išmanusis kontraktas, kuris neturi savybės - žetono sukūrimas ir disponavimas (priežastys šiam pasirinkimui yra pateiktos \ref{sritis} skyriuje). Išanalizavus atrinktus kontraktus buvo išskirtos savybės ir apibūdintos dalinai naudojantis forma pateikta FODA \cite{Kang1990}:
+
+\begin{center}
+    \begin{longtable}[H]{| p {4cm} | p{4cm} | p{4cm} | p{4cm} |}
+    \hline
+    Savybės pavadinimas  & Apibūdinimas & Susideda iš & Šaltiniai \endhead \hline
+	
+	Žetono kainos nustatymas skirtingomos pakopomis  & ICO metu žetonas gali turėti kelias kainas, skirtinga pakopa žetonų platinime - skirtinga kaina & lalal & contract2, contract23, contract43, contract46, contract55, contract62, contract85, contract120
+ \\ 
+	\hline
+	
+	ICO būsenos nustatymas & ICO gali turėti kelias būsenas, tokias kaip: neprasidėjo, prasidėjo, surinkta maksimali suma ir t.t. &  lalal & contract2, contract23, contract46, contract62, contract94, contract114, contract120, contract126 \\ 
+	\hline
+	
+	
+	Minimalaus investavimo kriterijus & Naudotojas turi būtinai ivestuoti sumą nemažensę nei minimalus investavimo kriterijus &  lalal & contract2, contract16, contract46, contract106  \\ 
+	\hline
+	
+	ETH susigrąžinimo galimybė nepasiekus tikslo & Jei ICO nepasiekia nusistatyto minimalaus suinvestuotų pinigų ribos, tai visi investuoti pinigai yra grąžinami naudotojams &  lalal & contract2, contract23, contract46, contract62, contract85, contract94, contract96, contract120  \\ 
+	\hline
+	
+	Žetonų atsiėmimas tik įvykus ICO & Įvykus ICO naudotojai gauna nusipirktus žetonus &  lalal & contract2, contract126 \\ 
+	\hline
+	
+	Žetono ir fondo adresų nustatymas & Žetono ir fondo piniginių adresai gali būti nustatyti pakartotinai &  lalal & contract2, contract12, contract31, contract40,contract62, contract94, contract96, contract114, contract120  \\ 
+	\hline
+	
+	Kainos už žetoną pakeitimas & Žetono kaina gali kisti neatsižvelgiant į pasikeičiančias pakopas &  lalal & contract2, contract40  \\ 
+	\hline
+	
+	Kontrakto savininko nustatymas bei kai kurio funkcionalumo priskyrimas tik jam & Išmanusis kontraktas turi priviligijuotą adresą - kontrakto savininką, kuris turi daugiau funkcionalumo nei įprastas naudotojas &  lalal & contract2, contract12, contract13, contract16, contract23, contract31, contract43, contract46, contract62, contract72, contract85, contract86, contract94, contract106, contract114, contract116, contract120, contract126 \\ 
+	\hline
+	
+	Galimybė sustabdyti ICO ir vėl paleisti iš naujo & ICO sustabdymo metu nebūtų galima nusipirkti žetonų &  lalal &  contract12, contract31\\ 
+	\hline
+	
+	Galimybė pirkimo metu nustatyti kitą adresą kaip pirkėją & Naudotojas pirkdamas žetonus nustato adresą (pirkėją), kurį atstovauja &  lalal & contract12, contract31, contract62  \\ 
+	\hline
+	
+	Pirkimas tik indentifikuotiems naudotojams & Pirkti žetonus gali tik anksčiau į kontraktą pridėti naudotojai &  lalal & contract12, contract16, contract31 \\ 
+	\hline
+	
+	ICO sustabdymas ar galimybė keisti datą & ICO galima sustabdyti ar keisti jo pabaigos datą &  lalal & contract16, contract43, contract46, contract86, contract106  \\ 
+	\hline
+	
+	Pelno pasiskirstymas tarp komandos ir kompanijos & Surinkta pinigų suma yra paskirtita ne tik kompanijai, bet ir komandai &  lalal &  contract23\\ 
+	\hline
+	
+	ICO pradžios nustatymas  & ICO pradžios data gali būti keičiama &  lalal &  contract40, contract86, contract106, contract126 \\ 
+	\hline
+	
+	Fondas atskirtas nuo kontrakto šeimininko & Išmaniojo kontrakto fondas ir savininkas yra dvi skirtingos piniginės &  lalal &  contract2, contract12, contract16, contract23, contract31, contract43, contract46, contract62, contract85, contract106, contract114, contract120, contract126\\ 
+	\hline
+	
+	Maksimalaus galimo surinkti ETH keitimas & Galimybė papidinti ar sumažinti investicijų sumos skaičių &  lalal & contract43, contract86 \\ 
+	\hline
+	
+	Nustatytas maksimalus galimas žetonų kiekis nupirktas per kartą & Naudotojas gali nusipirkti ne daugiau žetonų nei yra nustatyta &  lalal & contract43 \\ 
+	\hline
+	
+	Nereikalingų žetonų išsitraukimas iš kontrakto  & Likusių žetonų nuo ICO susigrąžinimas &  lalal & contract13, contract62, contract94, contract114, contract120, contract126 \\ 
+	\hline
+	
+	Žetonų išskyrimas komandai & Žetonų paskirstymas komandos nariams &  lalal &  contract62, contract72, contract94, contract114, contract120, contract126\\ 
+	\hline
+
+
+    \end{longtable}
+    \captionof{table}{ICO išmaniųjų kontraktų savybės}
+
+\end{center}
+
+
+
 \subsection{Savybių modelis} \label{modelis}
 \subsection{Savybių modelio validacija} \label{validacija}
 
@@ -163,6 +246,11 @@ suformuluojamos svarbiausios darbo išvados, rekomendacijos bei pasiūlymai.
 
 \sectionnonum{Sąvokų apibrėžimai}
 Turing complete - bet kuri sistema, kuri yra pakankamai galinga atpažinti visus galimus algoritmus \cite{Teller1994}. 
+
+Interneto skaitytuvas (anlg. web crawler) - programa, kuri nuskaito puslapį ar kelis, nuskaito informacija juose ir grąžina rezultatą \cite{Thelwall2001}.
+
+Node.js - vienos gijos Javascript serverio pusės karkasas \cite{Mccune}.
+
 
 \sectionnonum{Santrumpos}
 PLSE - programinės įrangos produktų linija (angl. product line software engineering)

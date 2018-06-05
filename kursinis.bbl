@@ -403,6 +403,38 @@
       \verb https://www.researchgate.net/profile/Kwanwoo%7B%5C_%7DLee/publication/221553200%7B%5C_%7DConcepts%7B%5C_%7Dand%7B%5C_%7DGuidelines%7B%5C_%7Dof%7B%5C_%7DFeature%7B%5C_%7DModeling%7B%5C_%7Dfor%7B%5C_%7DProduct%7B%5C_%7DLine%7B%5C_%7DSoftware%7B%5C_%7DEngineering/links/558bdbde08ae591c19d8d3ce.pdf
       \endverb
     \endentry
+    \entry{Mccune}{article}{}
+      \name{author}{1}{}{%
+        {{hash=e6cef40aeb30e0aa6373360a208f590f}{%
+           family={Mccune},
+           familyi={M\bibinitperiod},
+           given={Robert\bibnamedelima Ryan},
+           giveni={R\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+      }
+      \strng{namehash}{e6cef40aeb30e0aa6373360a208f590f}
+      \strng{fullhash}{e6cef40aeb30e0aa6373360a208f590f}
+      \strng{bibnamehash}{e6cef40aeb30e0aa6373360a208f590f}
+      \strng{authorbibnamehash}{e6cef40aeb30e0aa6373360a208f590f}
+      \strng{authornamehash}{e6cef40aeb30e0aa6373360a208f590f}
+      \strng{authorfullhash}{e6cef40aeb30e0aa6373360a208f590f}
+      \field{labelalpha}{Mcc11}
+      \field{sortinit}{M}
+      \field{sortinithash}{cfd219b90152c06204fab207bc6c7cab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{—The current environment of web applications demands performance and scalability. Several previous approaches have implemented threading, events, or both, but increasing traffic requires new solutions for improved concurrent service. Node.js is a new web framework that achieves both through server-side JavaScript and event-driven I/O. Tests will be performed against two comparable frameworks that compare service request times over a number of cores. The results will demonstrate the per-formance of JavaScript as a server-side language and the efficiency of the non-blocking asynchronous model.}
+      \field{title}{{Node.js Paradigms and Benchmarks}}
+      \field{year}{2011}
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Mccune - Unknown - Node.js Paradigms and Benchmarks(2).pdf:pdf
+      \endverb
+      \verb{urlraw}
+      \verb http://jis.sagepub.com http://jis.sagepub.com/cgi/content/abstract/27/5/319 http://www.sagepublications.com http://jis.sagepub.com/cgi/alerts http://jis.sagepub.com/subscriptions http://www.sagepub.com/journalsReprints.nav http://www.sagepub.com/journalsP
+      \endverb
+      \verb{url}
+      \verb http://jis.sagepub.com%20http://jis.sagepub.com/cgi/content/abstract/27/5/319%20http://www.sagepublications.com%20http://jis.sagepub.com/cgi/alerts%20http://jis.sagepub.com/subscriptions%20http://www.sagepub.com/journalsReprints.nav%20http://www.sagepub.com/journalsP
+      \endverb
+    \endentry
     \entry{Nakamoto2008}{article}{}
       \name{author}{34}{}{%
         {{hash=8f46c676824e97f9856c702dab462241}{%
@@ -766,6 +798,44 @@
       \endverb
       \verb{url}
       \verb http://www.astroteller.net/content/3-work/2-papers/17-turing-completeness-in-the-language-of-genetic-programming-with-indexed-memory/turing.pdf
+      \endverb
+    \endentry
+    \entry{Thelwall2001}{article}{}
+      \name{author}{1}{}{%
+        {{hash=a3c232f8ebd0760b0f13b9b52ca76307}{%
+           family={Thelwall},
+           familyi={T\bibinitperiod},
+           given={Mike},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{a3c232f8ebd0760b0f13b9b52ca76307}
+      \strng{fullhash}{a3c232f8ebd0760b0f13b9b52ca76307}
+      \strng{bibnamehash}{a3c232f8ebd0760b0f13b9b52ca76307}
+      \strng{authorbibnamehash}{a3c232f8ebd0760b0f13b9b52ca76307}
+      \strng{authornamehash}{a3c232f8ebd0760b0f13b9b52ca76307}
+      \strng{authorfullhash}{a3c232f8ebd0760b0f13b9b52ca76307}
+      \field{labelalpha}{The01}
+      \field{sortinit}{T}
+      \field{sortinithash}{6f7aff9db9dcfeb7f95fd5bbd2f78df9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The content of the web has increasingly become a focus for academic research. Computer programs are needed in order to conduct any large-scale processing of web pages, requiring the use of a web crawler at some stage in order to fetch the pages to be analysed. The processing of the text of web pages in order to extract information can be expensive in terms of processor time. Consequently a distributed design is pro-posed in order to effectively use idle computing resources and to help information scientists avoid the need to employ dedicated equipment. A system developed using the model is examined and the advantages and limitations of the approach are discussed.}
+      \field{journaltitle}{Journal of Information Science}
+      \field{number}{319}
+      \field{title}{{A web crawler design for data mining}}
+      \field{volume}{27}
+      \field{year}{2001}
+      \verb{doi}
+      \verb 10.1177/016555150102700503
+      \endverb
+      \verb{file}
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Thelwall - 2001 - A web crawler design for data mining.pdf:pdf
+      \endverb
+      \verb{urlraw}
+      \verb http://jis.sagepub.com http://jis.sagepub.com/cgi/content/abstract/27/5/319 http://www.sagepublications.com http://jis.sagepub.com/cgi/alerts http://jis.sagepub.com/subscriptions http://www.sagepub.com/journalsReprints.nav http://www.sagepub.com/journalsP
+      \endverb
+      \verb{url}
+      \verb http://jis.sagepub.com%20http://jis.sagepub.com/cgi/content/abstract/27/5/319%20http://www.sagepublications.com%20http://jis.sagepub.com/cgi/alerts%20http://jis.sagepub.com/subscriptions%20http://www.sagepub.com/journalsReprints.nav%20http://www.sagepub.com/journalsP
       \endverb
     \endentry
   \enddatalist

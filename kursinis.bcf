@@ -1960,8 +1960,11 @@
     <bcf:citekey order="35">Kang1990</bcf:citekey>
     <bcf:citekey order="36">Kang1990</bcf:citekey>
     <bcf:citekey order="37">Kang1990</bcf:citekey>
-    <bcf:citekey order="38">Teller1994</bcf:citekey>
-    <bcf:citekey order="39">Kang1990</bcf:citekey>
+    <bcf:citekey order="38">Kang1990</bcf:citekey>
+    <bcf:citekey order="39">Teller1994</bcf:citekey>
+    <bcf:citekey order="40">Thelwall2001</bcf:citekey>
+    <bcf:citekey order="41">Mccune</bcf:citekey>
+    <bcf:citekey order="42">Kang1990</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="anyt">
