@@ -1,16 +1,31 @@
 \documentclass{VUMIFPSkursinis}
-\usepackage{graphicx}
-\graphicspath{ {img/} }
-\usepackage{algorithmicx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{bm}
+\usepackage{caption}
 \usepackage{color}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{listings}
 \usepackage{longtable}
 \usepackage{hyperref}  % Nuorodų aktyvavimas
 \usepackage{url}
+\usepackage{subfig}
+\usepackage{wrapfig}
+\usepackage{algorithmicx}
+\graphicspath{ {img/} }
+\usepackage[toc,page]{appendix}
+
+\addto\captionsspanish{%
+  \renewcommand\appendixname{Anexo}
+  \renewcommand\appendixpagename{Anexos}
+}
+
+
+
+
 
 
 % Titulinio aprašas
@@ -65,7 +80,7 @@ FODA fokusuojasi ties kliento perspektyva, tai yra ties paslaugomis, kurias teik
 
 \subsection{Savybių modelis}
 
-FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris turi pavaizduoti standartines sistemos šeimos savybes srityje ir santykius tarp jų. Trumpiau - savybių modelis yra hierarchiškai išskirstytų savybių rinkinys. Santykiai tarp savybių modelyje yra kategorizuojami į:
+FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris turi pavaizduoti standartines sistemos šeimos savybes srityje ir santykius tarp jų. Trumpiau - savybių modelis yra hierarchiškai išskirstytų savybių rinkinys. Santykiai tarp savybių (pav. \ref{img:fm_rules}) modelyje yra kategorizuojami į:
 \begin{itemize}
 \item Ir - visos vaikinės savybės turi būti pasirinktos
 \item Alternatyva - tik viena vaikinė savybė gali būti pasirinkta 
@@ -74,12 +89,19 @@ FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris 
 \item Pasirenkama - savybė gali būti pasirenkama
 \end{itemize}
 
-Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai medis, kur primityvios savybės - lapai, pagrininės - mazgai (pav. \ref{img:fm_rules}). Bendros savybės tarp skirtingų produktų yra modeliuojamos kaip būtinos, kai skirtingos savybės tarp jų žymimos kaip alternatyvios ar pasirenkamos (ang. optional) \cite{Batory2005}. Bendros savybės atributai yra paveldimi pagal visą jos specifikaciją. Visos pasirenkamos ar alternetyvios savybės, kurios negali būti pasirinktos, kai yra bendra savybė pasirinkta turi būti pažymėtos kaip tarpusavyje nesuderinamos (angl. mutually exclusive with). Visos pasirenkamos ir alternatyvios savybės, kurios turi būti pasirinktos, kai bendra yra pasirinkta, turi būti pažymėtos kaip privalomos. Savybių modelio dokumentacija susideda iš stuktūrinės diagramos hierarchiškai suskaidančios savybes indentifikuojančias pasirenkamas ir alternatyves savybes, savybių apibūdinimo ir taisyklių kompozicijos savybėms \cite{Kang1990}. 
+\begin{center}
+    \captionof{figure}{Santykių kategorijos tarp savybių \cite{Batory2005}}
+    \includegraphics[scale=0.75]{img/feature_model_rules}
+    \label{img:fm_rules}
+
+\end{center}
+
+Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai modelis-medis, kur primityvios savybės - lapai, pagrindinės - mazgai (modelio pavyzdys pav. \ref{img:fm_example}). Bendros savybės tarp skirtingų produktų yra modeliuojamos kaip būtinos, kai skirtingos savybės tarp jų žymimos kaip alternatyvios ar pasirenkamos (angl. optional) \cite{Batory2005}. Bendros savybės atributai yra paveldimi pagal visą jos specifikaciją. Visos pasirenkamos ar alternetyvios savybės, kurios negali būti pasirinktos, kai yra bendra savybė pasirinkta turi būti pažymėtos kaip tarpusavyje nesuderinamos (angl. mutually exclusive with). Visos pasirenkamos ir alternatyvios savybės, kurios turi būti pasirinktos, kai bendra yra pasirinkta, turi būti pažymėtos kaip privalomos. Savybių modelio dokumentacija susideda iš stuktūrinės diagramos hierarchiškai suskaidančios savybes indentifikuojančias pasirenkamas ir alternatyves savybes, savybių apibūdinimo ir taisyklių kompozicijos savybėms \cite{Kang1990}. 
 
 \begin{center}
-    \includegraphics[scale=0.75]{img/feature_model_rules}
-    \captionof{figure}{Savybių modelio žymėjimai \cite{Batory2005}}
-    \label{img:fm_rules}
+    \captionof{figure}{Savybių modelis mobiliajam telefonui \cite{Kang2013}}
+    \includegraphics[scale=0.6]{img/mobile}
+    \label{img:fm_example}
 \end{center}
 
 Pasirenkamos ir alternatyvios savybės negali būti atrinktos savavališkai. Įprastai jos parenkamos pagal galutinio naudotojo (kliento) tikslus ar interesus \cite{Kang1990}. Labai naudinga yra tai, kad savybė yra efektyvus komunikavimo būdas tarp suinteresuotų šalių. Dažnai klientai ir inžinieriai kalba apie produkto charakteristiką savybių pavidalu. Reikalavimai ir funkcijos yra apibūdinami kaip savybės kadangi jos yra aiškiai atpažįstamos abstrakcijos (plačiau \ref{savybe} Savybė) \cite{Lee2015}. Savybių modelis taip pat tarnauja kaip komunikacija tarp naudotojų ir kūrėjų. Naudotojui savybių modelis teikia informaciją, kokios yra savybės iš kurių gali rinktis ir kada. Kūrėjams savybių modelis identifikuoja, ką reiktų parametrizuoti kituose modeliuose bei programinės įrangos architektūroje ir kaip parametrizacija turi būti atlikta \cite{Kang1990}. Kitaip, savybių modelis gelbsti ne tik pernaudojamų komponentų kūrime, bet ir valdant produktų konfigūraciją srityje \cite{Lee2015}.
@@ -141,86 +163,97 @@ Buvo pasirinkta atlikti savybių modeliavimą remiantis procesu aprašytu \ref{p
 
 Savybių modelio sukūrimui yra būtinas savybių identifikavimas. Remiantis \ref{identifikavimas} skyriuje aprašytu savybių identifikavimo būdais buvo pasirinktas jau parašytų programų (šiuo atveju išmaniųjų kontraktų) surinkimas, analizavimas ir savybių juose identifikavimas. Išmaniųjų kontraktų surinkimo procesas:
 \begin{enumerate}
-\item Iš Ethereum blockchain blokų naršyklės - etherscan.io, buvo atrinkti išmaniųjų kontraktų adresai ir nuorodos į juos platformoje
+\item Iš Ethereum blockchain blokų naršyklės - etherscan.io\footnote{\url{https://etherscan.io/}}, buvo atrinkti išmaniųjų kontraktų adresai ir nuorodos į juos platformoje
 \item Parašytas interneto skaitytuvas (angl. web crawler) naudojantis Node.js karkasu
 \item Visi surinktų išmaniųjų kontraktų kodai buvo surašyti į failus. Failo pavadinino struktūra: contract + identifikacijos numeris + .sol plėtinys
 \end{enumerate}
 
 Tokiu būdu buvo surinkta 128 pirminio kriptovaliutų platinimo išmanieji kontraktai. Savybės iš išmaniųjų kontraktų buvo išskirtos analizavimo būdu - pirmiausia atrinkta 21 išmanusis kontraktas, kuris neturi savybės - žetono sukūrimas ir disponavimas (priežastys šiam pasirinkimui yra pateiktos \ref{sritis} skyriuje). Išanalizavus atrinktus kontraktus buvo išskirtos savybės ir apibūdintos dalinai naudojantis forma pateikta FODA \cite{Kang1990}:
-
+\pagebreak
 \begin{center}
-    \begin{longtable}[H]{| p {4cm} | p{4cm} | p{4cm} | p{4cm} |}
+    \captionof{table}{ICO išmaniųjų kontraktų savybės}
+    \begin{longtable}[H]{| p {5cm} | p{5cm} | p{6cm} |}
     \hline
-    Savybės pavadinimas  & Apibūdinimas & Susideda iš & Šaltiniai \endhead \hline
+    Savybės pavadinimas  & Apibūdinimas & Šaltiniai \endhead \hline
 	
-	Žetono kainos nustatymas skirtingomos pakopomis  & ICO metu žetonas gali turėti kelias kainas, skirtinga pakopa žetonų platinime - skirtinga kaina & lalal & contract2, contract23, contract43, contract46, contract55, contract62, contract85, contract120
+	Žetono kainos nustatymas skirtingomos pakopomis  & ICO metu žetonas gali turėti kelias kainas, skirtinga pakopa žetonų platinime - skirtinga kaina  & contract2, contract23, contract43, contract46, contract55, contract62, contract85, contract120
  \\ 
 	\hline
 	
-	ICO būsenos nustatymas & ICO gali turėti kelias būsenas, tokias kaip: neprasidėjo, prasidėjo, surinkta maksimali suma ir t.t. &  lalal & contract2, contract23, contract46, contract62, contract94, contract114, contract120, contract126 \\ 
+	ICO būsenos nustatymas & ICO gali turėti kelias būsenas, tokias kaip: neprasidėjo, prasidėjo, surinkta maksimali suma ir t.t.  & contract2, contract23, contract46, contract62, contract94, contract114, contract120, contract126 \\ 
 	\hline
 	
 	
-	Minimalaus investavimo kriterijus & Naudotojas turi būtinai ivestuoti sumą nemažensę nei minimalus investavimo kriterijus &  lalal & contract2, contract16, contract46, contract106  \\ 
+	Minimalaus investavimo kriterijus & Naudotojas turi būtinai ivestuoti sumą nemažensę nei minimalus investavimo kriterijus  & contract2, contract16, contract46, contract106  \\ 
 	\hline
 	
-	ETH susigrąžinimo galimybė nepasiekus tikslo & Jei ICO nepasiekia nusistatyto minimalaus suinvestuotų pinigų ribos, tai visi investuoti pinigai yra grąžinami naudotojams &  lalal & contract2, contract23, contract46, contract62, contract85, contract94, contract96, contract120  \\ 
+	ETH susigrąžinimo galimybė nepasiekus tikslo & Jei ICO nepasiekia nusistatyto minimalaus suinvestuotų pinigų ribos, tai visi investuoti pinigai yra grąžinami naudotojams  & contract2, contract23, contract46, contract62, contract85, contract94, contract96, contract120  \\ 
 	\hline
 	
-	Žetonų atsiėmimas tik įvykus ICO & Įvykus ICO naudotojai gauna nusipirktus žetonus &  lalal & contract2, contract126 \\ 
+	Žetonų atsiėmimas tik įvykus ICO & Įvykus ICO naudotojai gauna nusipirktus žetonus  & contract2, contract126 \\ 
 	\hline
 	
-	Žetono ir fondo adresų nustatymas & Žetono ir fondo piniginių adresai gali būti nustatyti pakartotinai &  lalal & contract2, contract12, contract31, contract40,contract62, contract94, contract96, contract114, contract120  \\ 
+	Žetono ir fondo adresų nustatymas & Žetono ir fondo piniginių adresai gali būti nustatyti pakartotinai  & contract2, contract12, contract31, contract40,contract62, contract94, contract96, contract114, contract120  \\ 
 	\hline
 	
-	Kainos už žetoną pakeitimas & Žetono kaina gali kisti neatsižvelgiant į pasikeičiančias pakopas &  lalal & contract2, contract40  \\ 
+	Kainos už žetoną pakeitimas & Žetono kaina gali kisti neatsižvelgiant į pasikeičiančias pakopas  & contract2, contract40  \\ 
 	\hline
 	
-	Kontrakto savininko nustatymas bei kai kurio funkcionalumo priskyrimas tik jam & Išmanusis kontraktas turi priviligijuotą adresą - kontrakto savininką, kuris turi daugiau funkcionalumo nei įprastas naudotojas &  lalal & contract2, contract12, contract13, contract16, contract23, contract31, contract43, contract46, contract62, contract72, contract85, contract86, contract94, contract106, contract114, contract116, contract120, contract126 \\ 
+	Kontrakto savininko nustatymas bei kai kurio funkcionalumo priskyrimas tik jam & Išmanusis kontraktas turi priviligijuotą adresą - kontrakto savininką, kuris turi daugiau funkcionalumo nei įprastas naudotojas  & contract2, contract12, contract13, contract16, contract23, contract31, contract43, contract46, contract62, contract72, contract85, contract86, contract94, contract106, contract114, contract116, contract120, contract126 \\ 
 	\hline
 	
-	Galimybė sustabdyti ICO ir vėl paleisti iš naujo & ICO sustabdymo metu nebūtų galima nusipirkti žetonų &  lalal &  contract12, contract31\\ 
+	Galimybė sustabdyti ICO ir vėl paleisti iš naujo & ICO sustabdymo metu nebūtų galima nusipirkti žetonų  &  contract12, contract31\\ 
 	\hline
 	
-	Galimybė pirkimo metu nustatyti kitą adresą kaip pirkėją & Naudotojas pirkdamas žetonus nustato adresą (pirkėją), kurį atstovauja &  lalal & contract12, contract31, contract62  \\ 
+	Galimybė pirkimo metu nustatyti kitą adresą kaip pirkėją & Naudotojas pirkdamas žetonus nustato adresą (pirkėją), kurį atstovauja  & contract12, contract31, contract62  \\ 
 	\hline
 	
-	Pirkimas tik indentifikuotiems naudotojams & Pirkti žetonus gali tik anksčiau į kontraktą pridėti naudotojai &  lalal & contract12, contract16, contract31 \\ 
+	Pirkimas tik indentifikuotiems naudotojams & Pirkti žetonus gali tik anksčiau į kontraktą pridėti naudotojai  & contract12, contract16, contract31 \\ 
 	\hline
 	
-	ICO sustabdymas ar galimybė keisti datą & ICO galima sustabdyti ar keisti jo pabaigos datą &  lalal & contract16, contract43, contract46, contract86, contract106  \\ 
+	ICO sustabdymas ar galimybė keisti datą & ICO galima sustabdyti ar keisti jo pabaigos datą  & contract16, contract43, contract46, contract86, contract106  \\ 
 	\hline
 	
-	Pelno pasiskirstymas tarp komandos ir kompanijos & Surinkta pinigų suma yra paskirtita ne tik kompanijai, bet ir komandai &  lalal &  contract23\\ 
+	Pelno pasiskirstymas tarp komandos ir kompanijos & Surinkta pinigų suma yra paskirtita ne tik kompanijai, bet ir komandai  &  contract23\\ 
 	\hline
 	
-	ICO pradžios nustatymas  & ICO pradžios data gali būti keičiama &  lalal &  contract40, contract86, contract106, contract126 \\ 
+	ICO pradžios nustatymas  & ICO pradžios data gali būti keičiama  &  contract40, contract86, contract106, contract126 \\ 
 	\hline
 	
-	Fondas atskirtas nuo kontrakto šeimininko & Išmaniojo kontrakto fondas ir savininkas yra dvi skirtingos piniginės &  lalal &  contract2, contract12, contract16, contract23, contract31, contract43, contract46, contract62, contract85, contract106, contract114, contract120, contract126\\ 
+	Fondas atskirtas nuo kontrakto šeimininko & Išmaniojo kontrakto fondas ir savininkas yra dvi skirtingos piniginės  &  contract2, contract12, contract16, contract23, contract31, contract43, contract46, contract62, contract85, contract106, contract114, contract120, contract126\\ 
 	\hline
 	
-	Maksimalaus galimo surinkti ETH keitimas & Galimybė papidinti ar sumažinti investicijų sumos skaičių &  lalal & contract43, contract86 \\ 
+	Maksimalaus galimo surinkti ETH keitimas & Galimybė papidinti ar sumažinti investicijų sumos skaičių  & contract43, contract86 \\ 
 	\hline
 	
-	Nustatytas maksimalus galimas žetonų kiekis nupirktas per kartą & Naudotojas gali nusipirkti ne daugiau žetonų nei yra nustatyta &  lalal & contract43 \\ 
+	Nustatytas maksimalus galimas žetonų kiekis nupirktas per kartą & Naudotojas gali nusipirkti ne daugiau žetonų nei yra nustatyta  & contract43 \\ 
 	\hline
 	
-	Nereikalingų žetonų išsitraukimas iš kontrakto  & Likusių žetonų nuo ICO susigrąžinimas &  lalal & contract13, contract62, contract94, contract114, contract120, contract126 \\ 
+	Nereikalingų žetonų išsitraukimas iš kontrakto  & Likusių žetonų nuo ICO susigrąžinimas  & contract13, contract62, contract94, contract114, contract120, contract126 \\ 
 	\hline
 	
-	Žetonų išskyrimas komandai & Žetonų paskirstymas komandos nariams &  lalal &  contract62, contract72, contract94, contract114, contract120, contract126\\ 
+	Žetonų išskyrimas komandai & Žetonų paskirstymas komandos nariams  &  contract62, contract72, contract94, contract114, contract120, contract126\\ 
 	\hline
-
 
     \end{longtable}
-    \captionof{table}{ICO išmaniųjų kontraktų savybės}
+
+    \label{table:features}
 
 \end{center}
 
 
 
-\subsection{Savybių modelis} \label{modelis}
+\subsection{Savybių abstrakcija, klasifikacija, modeliavimas} \label{modelis}
+
+Savybių modelis ICO išmaniesiems kontraktams (pav. \ref{img:fm_ico}) buvo sudarytas naudojantis savybėmis, kurios yra išvardintos \ref{isskyrimas} skyriuje, \ref{table:features} lentelėje. Jei savybė lentelėje neturėjo sau priešingos, tai modelyje priešinga savybė jau yra įvardinama ir tai priimtina kaip savaime suprantamas reiškinys. Visos savybės buvo klasifikuotos ir struktūrizuotos naudojant susideda iš santykį, taip pat savybės modelyje identifikuotos naudojantis santykių kategorijomis tarp savybių (pav. \ref{img:fm_rules}).
+
+
+\begin{center}
+    \captionof{figure}{Savybių modelis ICO išmaniesiems kontraktams}
+    \includegraphics[scale=0.65]{img/ico_model}
+    \label{img:fm_ico}
+\end{center}
+
 \subsection{Savybių modelio validacija} \label{validacija}
 
 
@@ -265,5 +298,12 @@ FODA - Feature-Oriented Domain Analysis \cite{Kang1990}
 % diskelyje ar kompaktiniame diske. Priedai taip pat vadinami ir numeruojami.
 % Tekstas su priedais siejamas nuorodomis (pvz.: \ref{img:mlp}).
 %
+\pagebreak
+
+\sectionnonum{Priedai}
+\subsection*{ ICO dokumentų surinkimas}
+
+Interneto skaitytuvas, naudotas surinkti kontraktus, yra patalpintas git, vesijavimo sistemos, internetinėje prieigos svetainėje github.com \footnote{\url {https://github.com/}}. Interneto skaitytuvo \href{https://github.com/maciukaite/kursinis/tree/crawler-etherscan}{saugykla}\footnote{\url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan}} yra vieša ir prieinama peržiūrai. Skaitytuvo rezultatai, išmanieji kontraktai, patalpinti toje pačioje vietoje, res \href{https://github.com/maciukaite/kursinis/tree/crawler-etherscan/res}{aplankale}\footnote{\url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan/res}}.
+
 
 \end{document}

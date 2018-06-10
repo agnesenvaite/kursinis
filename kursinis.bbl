@@ -435,217 +435,46 @@
       \verb http://jis.sagepub.com%20http://jis.sagepub.com/cgi/content/abstract/27/5/319%20http://www.sagepublications.com%20http://jis.sagepub.com/cgi/alerts%20http://jis.sagepub.com/subscriptions%20http://www.sagepub.com/journalsReprints.nav%20http://www.sagepub.com/journalsP
       \endverb
     \endentry
-    \entry{Nakamoto2008}{article}{}
-      \name{author}{34}{}{%
-        {{hash=8f46c676824e97f9856c702dab462241}{%
-           family={Prehofer},
-           familyi={P\bibinitperiod},
-           given={Christian},
-           giveni={C\bibinitperiod}}}%
-        {{hash=f7ad85aae1881b93396a2b8c65130577}{%
-           family={Pohl},
-           familyi={P\bibinitperiod},
-           given={Klaus},
-           giveni={K\bibinitperiod}}}%
-        {{hash=758358bf5a2b9975ed3b3d6c6d5ece42}{%
-           family={Metzger},
-           familyi={M\bibinitperiod},
-           given={Andreas},
-           giveni={A\bibinitperiod}}}%
-        {{hash=5de6edc81e667d8db9d387e681522a62}{%
-           family={Czarnecki},
-           familyi={C\bibinitperiod},
-           given={Krzysztof},
-           giveni={K\bibinitperiod}}}%
-        {{hash=97571a1e535ebe2317efef3b7d2102ee}{%
-           family={Helsen},
-           familyi={H\bibinitperiod},
-           given={Simon},
-           giveni={S\bibinitperiod}}}%
-        {{hash=eb79c82c9f49d70a2291cb536cdceb9c}{%
-           family={Eisenecker},
-           familyi={E\bibinitperiod},
-           given={Ulrich},
-           giveni={U\bibinitperiod}}}%
-        {{hash=32b4da38ee8a02717a1b9525501e540d}{%
-           family={Kang},
-           familyi={K\bibinitperiod},
-           given={Kyo\bibnamedelima C.},
-           giveni={K\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
-        {{hash=6368da216c31134139024b84f3cfa11a}{%
-           family={Cohen},
-           familyi={C\bibinitperiod},
-           given={Sholom\bibnamedelima G.},
-           giveni={S\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
-        {{hash=86117b4ff68f98bf67f3a4c672209775}{%
-           family={Hess},
-           familyi={H\bibinitperiod},
-           given={James\bibnamedelima A.},
-           giveni={J\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
-        {{hash=b7253365d4016a6a3a34843e66cd7a11}{%
-           family={Novak},
-           familyi={N\bibinitperiod},
-           given={William\bibnamedelima E.},
-           giveni={W\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
-        {{hash=d4169bc88b75cc6b1a12061ac73486ef}{%
-           family={Peterson},
-           familyi={P\bibinitperiod},
-           given={A.\bibnamedelimi Spencer},
-           giveni={A\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
-        {{hash=febf98f5a0e228e43636a28afe8e1a3f}{%
-           family={Harber},
-           familyi={H\bibinitperiod},
-           given={Stuart},
-           giveni={S\bibinitperiod}}}%
-        {{hash=a39904e1ef18232791bc21474bb01220}{%
-           family={Stornetta},
-           familyi={S\bibinitperiod},
-           given={W.Scott},
-           giveni={W\bibinitperiod}}}%
-        {{hash=850981945102d0f671b6762173c8988a}{%
-           family={Buterin},
-           familyi={B\bibinitperiod},
-           given={Vitalik},
-           giveni={V\bibinitperiod}}}%
-        {{hash=5de6edc81e667d8db9d387e681522a62}{%
-           family={Czarnecki},
-           familyi={C\bibinitperiod},
-           given={Krzysztof},
-           giveni={K\bibinitperiod}}}%
-        {{hash=c8b0e91faa44753ff8f4ef19bd147cdf}{%
-           family={Gr{ü}nbacher},
-           familyi={G\bibinitperiod},
-           given={Paul},
-           giveni={P\bibinitperiod}}}%
-        {{hash=b64e29e3c533727e9024bf50f4ef2b1d}{%
-           family={Rabiser},
-           familyi={R\bibinitperiod},
-           given={Rick},
-           giveni={R\bibinitperiod}}}%
-        {{hash=5eeaf58996ff840c4b1ab592b0c928da}{%
-           family={Schmid},
-           familyi={S\bibinitperiod},
-           given={Klaus},
-           giveni={K\bibinitperiod}}}%
-        {{hash=798b60e6d436fb00a37e1373005cd26d}{%
-           family={Wasowski},
-           familyi={W\bibinitperiod},
-           given={Andrzej},
-           giveni={A\bibinitperiod}}}%
-        {{hash=9f4d31adca922afa232108fb6992e5b0}{%
-           family={Lee},
-           familyi={L\bibinitperiod},
-           given={Kwanwoo},
-           giveni={K\bibinitperiod}}}%
-        {{hash=32b4da38ee8a02717a1b9525501e540d}{%
-           family={Kang},
-           familyi={K\bibinitperiod},
-           given={Kyo\bibnamedelima C.},
-           giveni={K\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
-        {{hash=31e5a2336a243a77d9e6eabc425b5016}{%
-           family={Lee},
-           familyi={L\bibinitperiod},
-           given={Jaejoon},
-           giveni={J\bibinitperiod}}}%
-        {{hash=ca905abe1dc0ab0f9307c7b01721b65f}{%
-           family={Batory},
-           familyi={B\bibinitperiod},
-           given={Don},
-           giveni={D\bibinitperiod}}}%
-        {{hash=32b4da38ee8a02717a1b9525501e540d}{%
-           family={Kang},
-           familyi={K\bibinitperiod},
-           given={Kyo\bibnamedelima C.},
-           giveni={K\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
-        {{hash=81414db76c1dd00846db2fa15a05eeb3}{%
-           family={Lee},
-           familyi={L\bibinitperiod},
-           given={Hyesun},
-           giveni={H\bibinitperiod}}}%
-        {{hash=f04873ea948a1aafbee60fa450b4932e}{%
-           family={Sinnema},
-           familyi={S\bibinitperiod},
-           given={Marco},
-           giveni={M\bibinitperiod}}}%
-        {{hash=a6aea66ff928b81edea11c68e62c290a}{%
-           family={Deelstra},
-           familyi={D\bibinitperiod},
-           given={Sybren},
-           giveni={S\bibinitperiod}}}%
-        {{hash=7c67618f511606838fcf60a959a0b0a7}{%
-           family={Nijhuis},
-           familyi={N\bibinitperiod},
-           given={Jos},
-           giveni={J\bibinitperiod}}}%
-        {{hash=3903018fc17327f32ca2eb9248c90100}{%
-           family={Bosch},
-           familyi={B\bibinitperiod},
-           given={Jan},
-           giveni={J\bibinitperiod}}}%
-        {{hash=5de6edc81e667d8db9d387e681522a62}{%
-           family={Czarnecki},
-           familyi={C\bibinitperiod},
-           given={Krzysztof},
-           giveni={K\bibinitperiod}}}%
-        {{hash=155e208cfe2a93a12575ed485d9115a9}{%
-           family={Hwan},
-           familyi={H\bibinitperiod},
-           given={Chang},
-           giveni={C\bibinitperiod}}}%
-        {{hash=1a1b7684291844e9b66720eca81d534e}{%
-           family={Kim},
-           familyi={K\bibinitperiod},
-           given={Peter},
-           giveni={P\bibinitperiod}}}%
+    \entry{Nakamoto2008}{unpublished}{}
+      \name{author}{1}{}{%
         {{hash=1977190f018b398e43ede3de043de8ea}{%
            family={Nakamoto},
            familyi={N\bibinitperiod},
            given={Satoshi},
            giveni={S\bibinitperiod}}}%
-        {{hash=89ec8ae9aa0976203a1a25b6f9536a64}{%
-           family={Swan},
-           familyi={S\bibinitperiod},
-           given={Melanie},
-           giveni={M\bibinitperiod}}}%
       }
-      \strng{namehash}{c71ab9bdee8742d56a4e82862221226e}
-      \strng{fullhash}{bf33d665558b9b5425103a2cc388ea25}
-      \strng{bibnamehash}{c71ab9bdee8742d56a4e82862221226e}
-      \strng{authorbibnamehash}{c71ab9bdee8742d56a4e82862221226e}
-      \strng{authornamehash}{c71ab9bdee8742d56a4e82862221226e}
-      \strng{authorfullhash}{bf33d665558b9b5425103a2cc388ea25}
-      \field{labelalpha}{PPM\textsuperscript {+}15}
-      \field{sortinit}{P}
-      \field{sortinithash}{8d51b3d5b78d75b54308d706b9bbe285}
+      \strng{namehash}{1977190f018b398e43ede3de043de8ea}
+      \strng{fullhash}{1977190f018b398e43ede3de043de8ea}
+      \strng{bibnamehash}{1977190f018b398e43ede3de043de8ea}
+      \strng{authorbibnamehash}{1977190f018b398e43ede3de043de8ea}
+      \strng{authornamehash}{1977190f018b398e43ede3de043de8ea}
+      \strng{authorfullhash}{1977190f018b398e43ede3de043de8ea}
+      \field{labelalpha}{Nak08}
+      \field{sortinit}{N}
+      \field{sortinithash}{f7242c3ed3dc50029fca1be76c497c7c}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{abstract}{Feature models are used to specify members of a product-line. Despite years of progress, contemporary tools often provide limited support for feature constraints and offer little or no support for debugging feature models. We integrate prior results to connect feature models, grammars, and propositional formulas. This connection allows arbitrary propositional constraints to be defined among features and enables off-the-shelf satisfiability solvers to debug feature models. We also show how our ideas can generalize recent results on the staged configuration of feature models.}
+      \field{abstract}{A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending. We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone.}
       \field{eprinttype}{arXiv}
-      \field{isbn}{978-1-491-92049-7}
+      \field{isbn}{978-972-757-716-3}
       \field{issn}{09254560}
-      \field{journaltitle}{Systems and Software Variability Management}
-      \field{number}{3-4}
-      \field{title}{{Blockchain. Blueprint for a new economy}}
-      \field{volume}{3714}
-      \field{year}{2015}
-      \field{pages}{99\bibrangedash 111}
-      \range{pages}{13}
+      \field{title}{{Bitcoin: A Peer-to-Peer Electronic Cash System}}
+      \field{year}{2008}
       \verb{doi}
-      \verb 10.1007/978-3-540-28630-1_12
+      \verb 10.1007/s10838-008-9062-0
       \endverb
       \verb{eprint}
       \verb 43543534534v343453
       \endverb
       \verb{file}
-      \verb :home/agne/Downloads/Haber{\_}Stornetta.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Batory - 2005 - Feature Models, Grammars, and Propositional Formulas.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Prehofer - Unknown - Feature-Oriented Programming A Fresh Look at Objects.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Czarnecki, Hwan, Kim - 2005 - Cardinality-Based Feature Modeling and Constraints A Progress Report.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Czarnecki, Helsen, Eisenecker - 2004 - Staged Configuration Using Feature Models.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Satoshi Nakamoto - 2008 - Bitcoin A Peer-to-Peer Electronic Cash System.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Czarnecki et al. - 2012 - Cool Features and Tough Decisions A Comparison of Variability Modeling Approaches.pdf:pdf;:home/agne/Downloads/ADA235785.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Buterin - 2014 - A NEXT GENERATION SMART CONTRACT {\&}amp DECENTRALIZED APPLICATION PLATFORM.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Melanie Swan - 2015 - Blockchain. Blueprint for a new economy.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Kang, Lee - Unknown - Variability Modeling.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Sinnema et al. - 2004 - COVAMOF A Framework for Modeling Variability in Software Product Families.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Lee, Kang, Lee - 2015 - Concepts and Guidelines of Feature Modeling for Product Line Software Engineering.pdf:pdf;:home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Pohl, Metzger - Unknown - Variability Management in Software Product Line Engineering.pdf:pdf
+      \verb :home/agne/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Satoshi Nakamoto - 2008 - Bitcoin A Peer-to-Peer Electronic Cash System.pdf:pdf
       \endverb
       \verb{urlraw}
-      \verb http://w2.blockchain-tec.net/blockchain/blockchain-by-melanie-swan.pdf https://bitcoin.org/bitcoin.pdf http://softwarefactories.com/workshops/OOPSLA-2005/Papers/Czarnecki.pdf https://www.researchgate.net/profile/Jan{\_}Bosch/publication/220789726{\_}COVAMOF{\_}A{\_}F
+      \verb https://bitcoin.org/bitcoin.pdf
       \endverb
       \verb{url}
-      \verb http://w2.blockchain-tec.net/blockchain/blockchain-by-melanie-swan.pdf%20https://bitcoin.org/bitcoin.pdf%20http://softwarefactories.com/workshops/OOPSLA-2005/Papers/Czarnecki.pdf%20https://www.researchgate.net/profile/Jan%7B%5C_%7DBosch/publication/220789726%7B%5C_%7DCOVAMOF%7B%5C_%7DA%7B%5C_%7DF
+      \verb https://bitcoin.org/bitcoin.pdf
       \endverb
-      \keyw{Atom environments,Blockchain,Categories and,Category formation,Descriptors,Mechanism of action,Similarity assessment,Skin sensitization,Subject}
     \endentry
     \entry{Ravichandran2003}{article}{}
       \name{author}{2}{}{%
