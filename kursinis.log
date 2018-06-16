@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2018.5.16)  16 JUN 2018 14:01
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2018.5.16)  16 JUN 2018 14:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1384,12 +1384,7 @@ Underfull \vbox (badness 10000) detected at line 226
 [8] [9]
 File: img/ico_model.png Graphic file (type bmp)
 <img/ico_model.png>
-
-Overfull \hbox (20.50426pt too wide) in paragraph at lines 242--244
- [] 
- []
-
-[10] [11
+ [10] [11
 
 ] [12
 
@@ -1472,10 +1467,10 @@ Package logreq Info: Writing requests to 'kursinis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 23934 strings out of 493007
- 471591 string characters out of 6136719
+ 23936 strings out of 493007
+ 471665 string characters out of 6136719
  968745 words of memory out of 5000000
- 27602 multiletter control sequences out of 15000+600000
+ 27604 multiletter control sequences out of 15000+600000
  544799 words of font info for 99 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  67i,12n,96p,10537b,5927s stack positions out of 5000i,500n,10000p,200000b,80000s
