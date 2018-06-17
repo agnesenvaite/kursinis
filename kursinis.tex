@@ -15,6 +15,7 @@
 \usepackage{wrapfig}
 \usepackage{algorithmicx}
 \graphicspath{ {img/} }
+\usepackage{rotating}
 
 
 
@@ -27,8 +28,8 @@
 \faculty{Matematikos ir informatikos fakultetas}
 \department{Programų sistemų katedra}
 \papertype{Kursinis darbas}
-\title{Pakartotinis kodo panaudojimas pirminio kriptovaliutų platinimo (ICO) išmaniuosiuose kontraktuose}
-\titleineng{Code review in initial coin offering (ICO) smart contracts}
+\title{Pakartotinis kodo panaudojimas pirminio kriptovaliutų platinimo išmaniuosiuose kontraktuose}
+\titleineng{Code Reuse in Initial Coin Offering Smart Contracts}
 \status{3 kurso 1 grupės studentė}
 \author{Agnė Mačiukaitė}
 \supervisor{lekt. Gediminas Rimša}
@@ -46,43 +47,43 @@
 
 \sectionnonum{Įvadas} \label{ivadas}
 
-Kodo pernaudojimas leidžia naudoti programas keliuose projektuose. Tai yra svarbi strategija kodui, norint padidinti sistemos efektyvumą ir kokybę. Taikant pernaudojamumą programuotojai naudojasi jau įgyvendintu kodu, kurį keičia taip, kad jis atitiktų dabartinio projekto reikalavimus \cite {Ravichandran2003}. Viena iš būtinų sąlygų, kuriant pernaudojamą kodą yra supratimas skirtingų kontekstų, kuriuose pernaudojamas kodas galėtų būti naudojama ir kaip būtų valdomas jos pernaudojamumas. Tai padeda programuotojams nuspręsti ar kodas atitinka reikalavimus ir gali būti kuriamas, jei taip, tai ką reikia parametrizuoti ir kaip struktūrizuoti kodą, kad vėliau būtų galima ją pritaikyti skirtingiems kontekstams \cite{Kang1990}.
+Kodo pernaudojimas leidžia naudoti programas keliuose projektuose. Tai yra svarbi strategija kodui, norint padidinti sistemos efektyvumą ir kokybę. Taikant pernaudojamumą programuotojai naudojasi jau įgyvendintu kodu, kurį keičia taip, kad jis atitiktų naujo projekto reikalavimus \cite {Ravichandran2003}. Viena iš būtinų sąlygų, kuriant pernaudojamą kodą yra supratimas skirtingų kontekstų, kuriuose pernaudojamas kodas galėtų būti naudojama ir kaip būtų valdomas jo pernaudojamumas. Tai padeda programuotojams nuspręsti ar kodas atitinka reikalavimus ir gali būti kuriamas, jei taip, tai ką reikia parametrizuoti ir kaip struktūrizuoti kodą, kad vėliau būtų galima ją pritaikyti skirtingiems kontekstams \cite{Kang1990}.
 
-Pirminio kriptovaliuto platinimo (angl. initial coin offering, toliau ICO) metu įmonė parduoda specializuotus kripto-žetonus žadėdami, kad žetonai veiks kaip mainų priemonė gaunat paslaugas įmonės platformoje. Žetonų pardavimas kuria kapitalą pradiniam įmonės platformos kūrimui, nors nėra įsipareigojimo dėl būsimos paslaugos kainos (žetonais ar kitaip). Neseniai iškylęs ICO populiarumas yra paveiktas Satoshi Nakamoto sukurto Bitcoin ir Ethereum sukurtos kriptovaliutos su papildoma programavimo galimybe \cite{Catalini2018}. Ethereum ir Bitcoin šiuo metu du populiariausi blockchain \cite{Luu}. Bitcoin - skaitmeniniai pinigai, kurių pavedimai vyksta internete naudojantis decentralizuota vieša duomenų baze - blockchain \cite{Swan2015}. Ethereum be savo kriptovaliutos turi ir kitą svarbų funkcionalumą - išmaniuosius kontraktus - Turing complete programą, kuri leidžia rašyti decentralizuotas aplikacijas \cite{Buterin2014}. Solidity - populiariausia kalba, naudojama rašyti išmaniesiems kontraktams \cite{Dannen}. Problema - išmaniųjų kontraktų technologijos yra pakankamai jaunos, dėl to pakartotinio kodo panaudojimo bazė dar tik formuojasi. ICO kontraktai yra tiražuojami kopijavimo su modifikacijos būdu.
+Pirminio kriptovaliuto platinimo (angl. initial coin offering, toliau ICO) metu įmonė parduoda specializuotus kripto-žetonus žadėdami, kad žetonai veiks kaip mainų priemonė gaunat paslaugas įmonės platformoje. Žetonų pardavimas kuria kapitalą pradiniam įmonės platformos kūrimui, nors nėra įsipareigojimo dėl būsimos paslaugos kainos (žetonais ar kitaip). Neseniai iškylęs ICO populiarumas yra paveiktas Bitcoin ir Ethereum sukurtos kriptovaliutos su papildoma programavimo galimybe \cite{Catalini2018}. Ethereum ir Bitcoin šiuo metu dvi populiariausios blokų grandinės (angl. blockchain, toliau blockchain) \cite{Luu}. Bitcoin - skaitmeniniai pinigai, kurių pavedimai vyksta internete naudojantis decentralizuota vieša duomenų baze - blockchain \cite{Swan2015}. Ethereum be savo kriptovaliutos turi ir kitą svarbų funkcionalumą - išmaniuosius kontraktus - Turing complete programą, kuri leidžia rašyti decentralizuotas aplikacijas \cite{Buterin2014}. Solidity - populiariausia kalba, naudojama rašyti išmaniesiems kontraktams \cite{Dannen}. Problema - išmaniųjų kontraktų technologijos yra pakankamai jaunos, dėl to pakartotinio kodo panaudojimo bazė dar tik formuojasi. Šiuo metu ICO išmanieji kontraktai yra tiražuojami kopijavimo su modifikacijos būdu.
 
 Produktų linijos programinė įranga (angl. product line software engineering, toliau PLSE) naudojama įmonėse pakartojamumui susijusiuose programinės įrangos produktuose numatyti. PLSE suteikia bendrą architektūrą ir pernaudojamą kodą programinės įrangos kūrėjams \cite{Svahnberg}. Toks kūrimas susideda iš savybių išskyrimo ir jų įgyvendinimo produkte. Gerai išskirtos produkto ypatybės padeda sukurti lengvai pernaudojamą programą. Savybės turi būti atrinktos atsižvelginat į jų paplitimą bei kintamumą srityje \cite{Lee2015}. Naudojantis PLSE produkto kūrėjai gali fokusuotis produkto specifikacijoje, o ne bendrose savybėse \cite{Svahnberg}.
 
-Savybių modeliavimas yra pagrindinis metodas atrinkti bei valdyti bendrąsias ir kintamas savybes produktų linijoje. Programinės įrangos šeimos gyvavimo pradžioje savybių modelis padeda išskirti pagrindines savybes, kurios gelbsti kuriant naują rinką ar  norint išlikti jau esamoje. Taip pat savybių modelis leidžia išskirti rizikingas savybes, nuspėti, kokia yra visos programos ar atskirų savybių kaina. Vėliau savybių modeliavimas padeda išskirti variacijos taškus programinės įrangos architektūroje \cite{Czarnecki2004}. Savybių modeliavimas yra populiariausias PLSE kūrime nuo pat pirmojo jo pristatymo \cite{Kang1990}. Kadangi savybės yra pakankamai abstraktus konseptas, padedantis efektyviai bendrauti suinterasuotoms šalims. Savybių modeliavimas yra intuityvus ir efektyvus būdas, žmonėms išreikšti savybių paplitimą ir kintamumą programinės įrangos šeimoje \cite{Kang2013}. 
+Savybių modeliavimas yra pagrindinis metodas atrinkti bei valdyti bendrąsias ir kintamas savybes produktų linijoje. Programinės įrangos šeimos gyvavimo pradžioje savybių modelis padeda išskirti pagrindines savybes, kurios gelbsti kuriant naują rinką ar  norint išlikti jau esamoje. Taip pat savybių modelis leidžia išskirti rizikingas savybes, nuspėti, kokia yra visos programos ar atskirų savybių kaina. Vėliau savybių modeliavimas padeda išskirti variacijos taškus programinės įrangos architektūroje \cite{Czarnecki2004}. Savybių modeliavimas yra populiariausias PLSE kūrime nuo pat pirmojo jo pristatymo \cite{Kang1990}. Kadangi savybės yra pakankamai abstraktus konceptas, padedantis efektyviai bendrauti suinterasuotoms šalims. Savybių modeliavimas yra intuityvus ir efektyvus būdas, žmonėms išreikšti savybių paplitimą ir kintamumą programinės įrangos šeimoje \cite{Kang2013}. 
 
-Šio darbo tikslas - ištirti pirminio finansavimo kriptovaliutomis (ICO) išmaniuosius kontraktus, nustatyti, kokios savybės yra pastavios, o kokios - kintamos bei pasiūlyti būdus kodo pernaudojamumui didinti. 
+Šio darbo tikslas - ištirti pirminio finansavimo kriptovaliutomis išmaniuosius kontraktus, nustatyti, kokios savybės yra pastavios, o kokios - kintamos bei pasiūlyti būdus kodo pernaudojamumui didinti. 
 
 Tikslui pasiekti išsikelti uždaviniai:
 \begin{enumerate}
-\item Apžvelgti savybių modeliavimą programinės įrangos produktų linijos sričiai 
-\item Surinkti virš 100 išmaniųjų kontraktų skirtų ICO
-\item Išskirti surinktų kontraktų savybes
-\item Sukurti ICO savybių modelį ir jį validuoti
+\item Apžvelgti savybių modeliavimą programinės įrangos produktų linijos sričiai;
+\item Surinkti virš 100 išmaniųjų kontraktų skirtų ICO;
+\item Išskirti surinktų išmaniųjų kontraktų savybes;
+\item Sukurti ICO savybių modelį ir jį validuoti;
 \end{enumerate}
 
 \section{Savybių modeliavimas}
 
-Savybių modeliavime bendri ir kintami bruožai yra modeliuojami iš produkto savybių perspektyvos PLSE. Originalus savybių modeliavimas - FODA (angl. Feature-Oriented Domain Analysis (FODA), toliau FODA) \cite{Kang1990} - paprastas modelis, kuris savybes skirsto pagal tai „susideda is" santykį bei pagal bendrumą ir specializaciją naudojant IR/AR (angl. AND/OR)  diagramas. Savybės yra suskirstytos į būtinas, alternatyvias ir pasirenkamas pagal bendrus ir kintamus bruožus \cite{Kang2013}.
+Savybių modeliavime bendri ir kintami bruožai yra modeliuojami iš produkto savybių perspektyvos PLSE. Originalus savybių modeliavimas - FODA (angl. Feature-Oriented Domain Analysis (FODA), toliau FODA) \cite{Kang1990} - paprastas modelis, kuris savybes skirsto pagal „susideda iš" santykį bei pagal bendrumą ir specializaciją naudojant IR/AR (angl. AND/OR)  diagramas. Savybės yra suskirstytos į būtinas, alternatyvias ir pasirenkamas pagal bendrus ir kintamus bruožus \cite{Kang2013}.
 
 \subsection{Savybė} \label{savybe}
 
-Keli tos pačios srities programinės įrangos produktai turi daug bendrų galimybių, bet taip pat kiekviena programinė įranga turi ir savo išskirtinumų. Tos galimybės iš naudotojo perspektyvos yra savybės \cite{Kang1990}. Savybės yra pagrindinis produkto skiriamasis bruožas. Skirtingi srities analizės metodai terminą „savybė" apibūdina šiek tiek kitaip \cite{Lee2015}. FODA \cite{Kang1990} savybę apibūdina kaip pastebimą ir skiriamą sistemos charakteristiką, kuri yra matoma įvairioms suinteresuotoms šalims.
+Keli tos pačios srities programinės įrangos produktai turi daug bendrų galimybių, bet taip pat kiekviena programinė įranga turi ir savo išskirtinumų. Tos galimybės iš naudotojo perspektyvos yra savybės \cite{Kang1990}. Savybės yra pagrindinis produkto skiriamasis bruožas. Skirtingi srities analizės metodai terminą savybė apibūdina šiek tiek kitaip \cite{Lee2015}. FODA \cite{Kang1990} savybę apibūdina kaip pastebimą ir skiriamą sistemos charakteristiką, kuri yra matoma įvairioms suinteresuotoms šalims.
 
 FODA fokusuojasi ties kliento perspektyva, tai yra ties paslaugomis, kurias teikia aplikacija ir aplinka, kurioje dirbama. Savybės yra programinės įrangos atributai, kurie tiesiogiai paveikia naudotoją \cite{Kang1990}. Skirtumas tarp savybės ir konceptualios abstrakcijos (pvz.: funkcijos, objekto) yra tai, kad funkcijos ir objektai yra naudojami specifikuojant vidines programinės įrangos detales. Kitaip, funkcijos ir objektai yra konceptualios abstrakcijos, kurios yra identifikuojamos iš vidinės programinės įrangos pusės. Savybė - aiškiai matoma  pagal charakteristiką, kuri gali išskirti produktą iš kitų. Todėl savybių modeliavimas turi išskirti iš išorės matomas charakteristikas produktuose bendrumo ir kintamumo atžvilgiu, o ne apibūdinti visas produkto modeliavimo detales (pvz.: funkcinis, objektais orientuotas modeliavimas). Suprantant produkto bendrus ir kintamus bruožus galima sukurti pernaudojamas funkcijas ir objektus \cite{Lee2015}.
 
 \subsection{Savybių modelis}
 
-FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris turi pavaizduoti standartines sistemos šeimos savybes srityje ir santykius tarp jų. Trumpiau - savybių modelis yra hierarchiškai išskirstytų savybių rinkinys - „susideda iš" santykių rinkinys \cite{Kang1990, Batory2005}. Santykiai tarp savybių  modelyje yra kategorizuojami į (pav. \ref{img:fm_rules}):
+FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris turi pavaizduoti standartines sistemos šeimos savybes srityje ir santykius tarp jų. Trumpiau - savybių modelis yra hierarchiškai išskirstytų savybių rinkinys - „susideda iš" santykių rinkinys \cite{Kang1990, Batory2005}. Santykiai tarp savybių  modelyje yra kategorizuojami į ( \ref{img:fm_rules} pav.):
 \begin{itemize}
-\item Ir - visos vaikinės savybės turi būti pasirinktos
-\item Alternatyva - tik viena vaikinė savybė gali būti pasirinkta 
-\item Ar - viena ar daugiau gali būti pasirinkta
-\item Būtina - savybė yra privaloma
-\item Pasirenkama - savybė gali būti pasirenkama
+\item Ir - visos vaikinės savybės turi būti pasirinktos;
+\item Alternatyva - tik viena vaikinė savybė gali būti pasirinkta ;
+\item Ar - viena ar daugiau gali būti pasirinkta;
+\item Privaloma - savybė yra privaloma;
+\item Pasirenkama - savybė gali būti pasirenkama;
 \end{itemize}
 
 \begin{center}
@@ -92,7 +93,7 @@ FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris 
 
 \end{center}
 
-Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai modelis - medis, kur primityvios savybės - lapai, pagrindinės - mazgai (modelio pavyzdys - pav. \ref{img:fm_example}). Bendros savybės tarp skirtingų produktų yra modeliuojamos kaip būtinos, kai skirtingos savybės tarp jų žymimos kaip alternatyvios ar pasirenkamos (angl. optional) \cite{Batory2005}. Bendros savybės atributai yra paveldimi pagal visą jos specifikaciją. Visos pasirenkamos ar alternetyvios savybės, kurios negali būti pasirinktos, kai yra bendra savybė pasirinkta turi būti pažymėtos kaip tarpusavyje nesuderinamos (angl. mutually exclusive with). Visos pasirenkamos ir alternatyvios savybės, kurios turi būti pasirinktos, kai bendra yra pasirinkta, turi būti pažymėtos kaip privalomos. Savybių modelio dokumentacija susideda iš stuktūrinės diagramos hierarchiškai suskaidančios savybes indentifikuojančias pasirenkamas ir alternatyves savybes, savybių apibūdinimo ir taisyklių kompozicijos savybėms \cite{Kang1990}. 
+Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai modelis - medis, kur primityvios savybės - lapai, pagrindinės - mazgai (modelio pavyzdys - \ref{img:fm_example} pav.). Būtinos savybės tarp skirtingų produktų yra modeliuojamos kaip privalomos, kai skirtingos savybės tarp jų žymimos kaip alternatyvios ar pasirenkamos (angl. optional) \cite{Batory2005}. Bendros savybės atributai yra paveldimi pagal visą jos specifikaciją. Visos pasirenkamos ar alternetyvios savybės, kurios negali būti pasirinktos, kai yra bendra savybė pasirinkta turi būti pažymėtos kaip tarpusavyje nesuderinamos (angl. mutually exclusive with). Visos pasirenkamos ir alternatyvios savybės, kurios turi būti pasirinktos, kai bendra yra pasirinkta, turi būti pažymėtos kaip privalomos. Savybių modelio dokumentacija susideda iš stuktūrinės diagramos hierarchiškai suskaidančios savybes indentifikuojančias pasirenkamas ir alternatyves savybes, savybių apibūdinimo ir taisyklių kompozicijos savybėms \cite{Kang1990}. 
 
 \begin{center}
     \captionof{figure}{Savybių modelis mobiliajam telefonui \cite{Kang2013}}
@@ -100,7 +101,7 @@ Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai modelis - me
     \label{img:fm_example}
 \end{center}
 
-Pasirenkamos ir alternatyvios savybės negali būti atrinktos savavališkai. Įprastai jos parenkamos pagal galutinio naudotojo (kliento) tikslus ar interesus \cite{Kang1990}. Labai naudinga yra tai, kad savybė yra efektyvus komunikavimo būdas tarp suinteresuotų šalių. Dažnai klientai ir inžinieriai kalba apie produkto charakteristiką savybių pavidalu. Reikalavimai ir funkcijos yra apibūdinami kaip savybės, kadangi jos yra aiškiai atpažįstamos abstrakcijos (plačiau \ref{savybe} Savybė) \cite{Lee2015}. Savybių modelis taip pat tarnauja kaip komunikacija tarp naudotojų ir kūrėjų. Naudotojui savybių modelis teikia informaciją, kokios yra savybės, iš kurių gali rinktis ir kada. Kūrėjams savybių modelis identifikuoja, ką reikėtų parametrizuoti kituose modeliuose bei programinės įrangos architektūroje ir kaip parametrizacija turi būti atlikta \cite{Kang1990}. Kitaip, savybių modelis gelbsti ne tik pernaudojamų komponentų kūrime, bet ir valdant produktų konfigūraciją srityje \cite{Lee2015}.
+Pasirenkamos ir alternatyvios savybės negali būti atrinktos savavališkai. Įprastai jos parenkamos pagal galutinio naudotojo (kliento) tikslus ar interesus \cite{Kang1990}. Labai naudinga yra tai, kad savybė yra efektyvus komunikavimo būdas tarp suinteresuotų šalių. Dažnai klientai ir inžinieriai kalba apie produkto charakteristiką savybių pavidalu. Reikalavimai ir funkcijos yra apibūdinami kaip savybės, kadangi jos yra aiškiai atpažįstamos abstrakcijos (plačiau \ref{savybe}. Savybė) \cite{Lee2015}. Savybių modelis taip pat tarnauja kaip komunikacija tarp naudotojų ir kūrėjų. Naudotojui savybių modelis teikia informaciją, kokios yra savybės, iš kurių gali rinktis ir kada. Kūrėjams savybių modelis identifikuoja, ką reikėtų parametrizuoti kituose modeliuose bei programinės įrangos architektūroje ir kaip parametrizacija turi būti atlikta \cite{Kang1990}. Kitaip, savybių modelis gelbsti ne tik pernaudojamų komponentų kūrime, bet ir valdant produktų konfigūraciją srityje \cite{Lee2015}.
 
 %Srities savybių modelis ir programinės įrangos architektūra turi būti apibrėžta aplink standartines savybes. Alternatyvios ir pasirenkamos savybės turi būti įtrauktos į modelį ir arcihtektūrą, bet visada turi būti parametrizuotos su atitinkamomis savybės, kad įsikyšimas į modelį ir architektūra būtų nesudėtingas \cite{Kang1990}. 
 
@@ -111,16 +112,16 @@ Savybių analizė susideda iš reikalingų dokumentų surinkimo, savybių išsky
 
 \subsubsection{Srities identifikavimas}
 
-Srities identifikavimas prasideda nustantant sritį su kuria bus dirbama. Pasirinkus sritį turi būti nubrėžtos ribos ir santykiai tarp srities elementų ir kitų esybių, esančių už srities ribų bei informacijos dalinimasis vieni tarp kitų. Srities modeliavimo tikslas yra nustatyti bendrus ir skirtingus konseptus ar charakteristikas sistemos kūrime \cite{Lee2015}.  
+Srities identifikavimas prasideda nustantant sritį su kuria bus dirbama. Pasirinkus sritį turi būti nubrėžtos ribos ir santykiai tarp srities elementų ir kitų esybių, esančių už srities ribų bei informacijos dalinimasis vieni tarp kitų. Srities modeliavimo tikslas yra nustatyti bendrus ir skirtingus konceptus ar charakteristikas sistemos kūrime \cite{Lee2015}.  
 
 \subsubsection{Savybių identifikavimas} \label{identifikavimas}
 
 Savybių identifikavimas susideda iš išskyrimo srities žinių gautų iš srities ekspertų ir kitų dokumentų tokių kaip knygos, nadotojo vadovo, projektavimo dokumentų ir jau parašytų programų \cite{Lee2015}. Aplikacijos savybes galima išskirti į keturias kategorijas:
 \begin{itemize}
-\item darbo aplinka, kurioje aplikacijos yra naudojamos
-\item galimybės iš naudotojo perspektyvos 
-\item srities technologija - kokiais reikalavimais remiantis sprendimas yra padaromas 
-\item įgyvendinimo technika
+\item darbo aplinka, kurioje aplikacijos yra naudojamos;
+\item galimybės iš naudotojo perspektyvos;
+\item srities technologija - kokiais reikalavimais remiantis sprendimas yra padaromas;
+\item įgyvendinimo technika;
 \end{itemize}
 
 %Metodas fokusuojasi ties savybėmis susijusiomis su aplikacijos galimybėmis. 
@@ -140,7 +141,7 @@ Visos identifikuotos savybės turi būti pavadintos ir konfliktai susiję su var
 
 Sekantis žingsnis identifikavus savybes turėtų būti hierarchinio modelio sukūrimas pagal savybių klasifikavimą, strūkturizavimą naudojant „susideda iš" santykį. Ar savybė yra būtina, alternatyvi, pasirenkama turi būti identifikuojama modelyje. Kiekviena savybė modelyje turi būti apibrėžta \cite{Kang1990}.
 
-\subsubsection{Savybių modelio validacija}
+\subsubsection{Savybių modelio validacija} \label{validacija_teor}
 
 Ar savybių modelis gerai reprezentuoja srities savybes turi būti validuota prieš srities ekspertus ir  jau egzituojančias aplikacijas. Srities ekspertai, kurie konsultavo analizės metu, neturi dalyvauti validacijoje. Taip pat bent viena aplikacija, kuri nebuvo naudota analizėje, turi būti panaudota, kad  būtų nustatytas modelio bendrumas ir pritaikomumas. Jei įmanoma validuojant turi būti panaudotas naujas aplikacijų rinkinys \cite{Kang1990}.
  
@@ -148,7 +149,7 @@ Ar savybių modelis gerai reprezentuoja srities savybes turi būti validuota pri
 
 \section{Savybių modeliavimas ICO išmaniesiems kontraktams}
 
-Buvo pasirinkta atlikti savybių modeliavimą remiantis procesu aprašytu \ref{procesas} skyriuje. Savybių modeliavimas buvo pradėtas nuo srities nusistatymo (plačiau \ref{sritis} Srities identifikavimas), tada buvo surinkta informacija reikalinga srities modelio sudarymui ir savybių išskyrimui bei atrinktos savybės (plačiau \ref{isskyrimas} Savybių identifikavimas), sekantis žingsnis buvo modelio sudarymas (plačiau \ref{modelis} Savybių modelis) ir jo validacija (plačiau \ref{validacija} Savybių modelio validacija).
+Buvo pasirinkta atlikti savybių modeliavimą remiantis procesu aprašytu \ref{procesas}. skyriuje. Savybių modeliavimas buvo pradėtas nuo srities nusistatymo (plačiau \ref{sritis}. Srities identifikavimas), tada buvo surinkta informacija reikalinga srities modelio sudarymui ir savybių išskyrimui bei atrinktos savybės (plačiau \ref{isskyrimas}. Savybių identifikavimas), sekantis žingsnis buvo modelio sudarymas (plačiau \ref{modelis}. Savybių modelis) ir jo validacija (plačiau \ref{validacija}. Savybių modelio validacija).
 
 \subsection{Srities identifikavimas} \label{sritis}
 
@@ -157,20 +158,20 @@ Buvo pasirinkta atlikti savybių modeliavimą remiantis procesu aprašytu \ref{p
 
 \subsection{Savybių identifikavimas} \label{isskyrimas}
 
-Savybių modelio sukūrimui yra būtinas savybių identifikavimas. Remiantis \ref{identifikavimas} skyriuje aprašytu savybių identifikavimo būdais buvo pasirinktas jau parašytų programų (šiuo atveju išmaniųjų kontraktų) surinkimas, analizavimas ir savybių juose identifikavimas. Išmaniųjų kontraktų surinkimo procesas:
+Savybių modelio sukūrimui yra būtinas savybių identifikavimas. Remiantis \ref{identifikavimas}. skyriuje aprašytu savybių identifikavimo būdais buvo pasirinktas jau parašytų programų (šiuo atveju išmaniųjų kontraktų) surinkimas, analizavimas ir savybių juose identifikavimas. Išmaniųjų kontraktų surinkimo procesas:
 \begin{enumerate}
-\item Iš Ethereum blockchain blokų naršyklės - etherscan.io\footnote{\url{https://etherscan.io/}}, buvo atrinkti išmaniųjų kontraktų adresai ir nuorodos į juos platformoje
-\item Parašytas interneto skaitytuvas (angl. web crawler) naudojantis Node.js karkasu
-\item Visi surinktų išmaniųjų kontraktų kodai buvo surašyti į failus. Failo pavadinino struktūra: contract + identifikacijos numeris + .sol plėtinys
+\item Iš Ethereum blockchain blokų naršyklės - etherscan.io\footnote{\url{https://etherscan.io/}}, buvo atrinkti išmaniųjų kontraktų adresai ir nuorodos į juos platformoje;
+\item Parašytas interneto skaitytuvas (angl. web crawler) naudojantis Node.js karkasu;
+\item Visi surinktų išmaniųjų kontraktų kodai buvo surašyti į failus. Failo pavadinino struktūra: contract + identifikacijos numeris + .sol plėtinys;
 \end{enumerate}
 
 Tokiu būdu buvo surinkta 128 pirminio kriptovaliutų platinimo išmanieji kontraktai. Savybės iš išmaniųjų kontraktų buvo išskirtos analizavimo būdu - pirmiausia atrinkta 21 išmanusis kontraktas, kuris neturi savybės - žetono sukūrimas ir disponavimas (priežastys šiam pasirinkimui yra pateiktos \ref{sritis} skyriuje). Išanalizavus atrinktus kontraktus buvo išskirtos savybės ir apibūdintos dalinai naudojantis forma pateikta FODA \cite{Kang1990}:
 \pagebreak
 \begin{center}
-    \captionof{table}{ICO išmaniųjų kontraktų savybės}
-    \begin{longtable}[H]{| p {5cm} | p{5cm} | p{6cm} |}
+    \captionof{table}{Atrinktos aibės ICO išmaniųjų kontraktų savybės}
+    \begin{longtable}[H]{| p {5cm} | p{5cm} | p{5.4cm} |}
     \hline
-    Savybės pavadinimas  & Apibūdinimas & Šaltiniai \endhead \hline
+    \textbf{Savybės pavadinimas } &\textbf{Apibūdinimas} & \textbf{Šaltiniai} \endhead \hline
 	
 	Žetono kainos nustatymas skirtingomos pakopomis  & ICO metu žetonas gali turėti kelias kainas, skirtinga pakopa žetonų platinime - skirtinga kaina  & contract2, contract23, contract43, contract46, contract55, contract62, contract85, contract120
  \\ 
@@ -222,8 +223,8 @@ Tokiu būdu buvo surinkta 128 pirminio kriptovaliutų platinimo išmanieji kontr
 	
 	Žetonų išskyrimas komandai & Žetonų paskirstymas komandos nariams  &  contract62, contract72, contract94, contract114, contract120, contract126\\ 
 	\hline
-
     \end{longtable}
+	\addtocounter{table}{-1}
 
     \label{table:features}
 
@@ -233,38 +234,99 @@ Tokiu būdu buvo surinkta 128 pirminio kriptovaliutų platinimo išmanieji kontr
 
 \subsection{Savybių abstrakcija, klasifikacija, modeliavimas} \label{modelis}
 
-Savybių modelis ICO išmaniesiems kontraktams (pav. \ref{img:fm_ico}) buvo sudarytas naudojantis savybėmis, kurios yra išvardintos \ref{isskyrimas} skyriuje, \ref{table:features} lentelėje. Savybių pavadinimai esantys lentelėje ir modelyje ggali nesutpti, kadangi savybės modelyje yra abstraktesnės ir kai kurios savybės ar jos dalys yra sujuntos. Jei savybė lentelėje neturėjo sau priešingos, tai modelyje priešinga savybė jau yra įvardinama ir tai priimtina kaip savaime suprantamas reiškinys. Visos savybės buvo klasifikuotos ir struktūrizuotos naudojant „susideda iš" santykį, taip pat savybės modelyje identifikuotos naudojantis santykių kategorijomis tarp savybių (pav. \ref{img:fm_rules}). Žemiau savybių modelio yra nurodytos kompozicijos taisyklės.
+Savybių modelis ICO išmaniesiems kontraktams (\ref{img:fm_ico} pav.) buvo sudarytas naudojantis savybėmis, kurios yra išvardintos \ref{isskyrimas}. skyriuje, \ref{table:features} lentelėje. Savybių pavadinimai esantys lentelėje ir modelyje gali nesutapti, kadangi savybės modelyje yra padaryta savybių abstrakcija ir kai kurios savybės ar jos dalys yra sujuntos. Jei savybė lentelėje neturėjo sau priešingos, tai modelyje priešinga savybė jau yra įvardinama ir tai priimtina kaip savaime suprantamas reiškinys. Visos savybės buvo klasifikuotos ir struktūrizuotos naudojant „susideda iš" santykį, taip pat savybės modelyje identifikuotos naudojantis santykių kategorijomis tarp savybių (\ref{img:fm_rules} pav.). Modelio kompozicijos taisyklės:
+\begin{enumerate}
+\item Nereikalingų žetonų susigrąžinimui reikalingas savininkas;
+\item Platinimo periodo keitimui reikalingas savininkas;
+\item Kainos pakeitimui rankiniu būdu reikalingas savininkas;
+\item Žetonus atsiimti po ICO gali tik pirkėjas;
+\item ETH susigrąžinti nepasiekus tikslo gali tik pirkėjas;
+\end{enumerate}
 
-\pagebreak
+
+\begin{sidewaysfigure}
 
 \begin{center}
     \captionof{figure}{Savybių modelis ICO išmaniesiems kontraktams}
-    \includegraphics[scale=0.65]{img/ico_model}
+    \includegraphics[scale=0.5]{img/ico_model}
     \label{img:fm_ico}
 \end{center}
 
-Kompozicijos taisyklės:
-\begin{enumerate}
-\item Nereikalingų žetonų susigrąžinimui reikalingas savininkas
-\item Platinimo periodo keitimui reikalingas savininkas
-\item Kainos pakeitimui rankiniu būdu reikalingas savininkas
-\item Žetonus atsiimti po ICO gali tik pirkėjas
-\item ETH susigrąžinti nepasiekus tikslo gali tik pirkėjas
-\end{enumerate}
+\end{sidewaysfigure}
+\pagebreak
 
 \subsection{Savybių modelio validacija} \label{validacija}
 
+Remiantis \ref{validacija_teor}. skyriuje aprašytu procesu validuoti modelį turėtų srities ekspertai ar naujas dokumentų rinkinys. Kadangi šiame darbe negalima pasinaudoti srities ekspertais, tai validacijai naudojami dokumentai - išmanieji kontraktai, kurie buvo surinkti anksčiau (plačiau \ref{isskyrimas}. skyriuje). Iš dar nenaudotų dokumentų buvo atsitiktinai atrinkta 10 išmaniųjų kontraktų ir patikrinta ar savybių modelis (\ref{img:fm_ico} pav.) yra validus. Validacijos rezultatas pateiktas lentelėje:
+\begin{center}
+    \captionof{table}{ICO savybių modelio validacija}
+    \begin{longtable}[H]{| p {2.1cm} | p{11cm} | p{1.8cm} |}
+    \hline
+    \textbf{Dokumentas}  & \textbf{Savybės} & \textbf{Validumas} \endhead \hline
+	
+	contract0 & Savininkas, nereikalingų žetonų susigrąžinimas, nekeičiamas platinimo periodas, nekintama kaina, maksimalus ir minimalus investavimo kriterijai, galimybė pirkti visiems, pirkėjas - tas pats adresas
+& validus
+ \\ 
+	\hline
+	contract6 & Savininkas, nekeičiamas platinimo periodas, minimalus investavimo kriterijus, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus
+	\\
+		\hline
+	contract22 & Savininkas, nereikalingų žetonų susigražinimas, galimybė keisti platinimo periodą, minimalus investavimo kriterijus, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus
+	\\
+		\hline
+	contract33 & Savininkas, pirkimas tik identifikuotiems pirkėjams, kaina keičiama rankiniu būdu, galimybė sustabdyti ir keiti periodą, pirkėjas tas pats adresas & validus
+	\\
+		\hline
+	contract39 & Savininkas, keičiamas ir stabdomas platinimo periodas, minimalus investavimo kriterijus, ETH susigrąžinimas nepasiekus tikslo, nekintama kaina, galimybė pirkti visiems, pirkėjas tas pats adresas & validus
+	\\
+		\hline
+	contract51 & Savininkas, nereikalingų žetonų susigrąžinimas, žetonų išskyrimas komandai, nekeičiamas platinimo periodas, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus
+	\\
+		\hline
+	contract71 & Nekeičiamas platinimo periodas, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus 
+	\\
+		\hline
+	contract91 & Nekeičiamas platinimo periodas, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus
+	\\
+		\hline
+	contract103 & Savininkas, maksimalus ir minimalus investavimo kriterijai, pirkimas tik identifikuotiems, galimybė keisti ir sustabdyti periodą, nekintama kaina, pirkėjas - tas pats adresas & validus
+	\\
+		\hline
+	contract122 & Savininkas, minimalus ir maksimalus investavimo kriterijai, nekeičiamas platinimo periodas, nekintama kaina, galimybė pirkti visiems, prikėjas - tas pats adresas & validus
+	\\
+		\hline
+		
+		
+\end{longtable}
+    \label{table:validacija}
 
-
+\end{center}
 
 
 \sectionnonum{Rezultatai}
 
+Šiame darbe pasiekti rezultatai:
+\begin{enumerate}
 
+\item Apžvelgtos kodo pernaudojimo galimybės naudojantis savybių modeliavimu;
+\item Surinkti ICO išmanieji kontraktai bei ištirtos jų savybės;
+\item Nustatyta, kurios savybės yra pastovios ir kintamos;
+\item Kodo pernaudojamumui didinti sudarytas savybių modelis;
+
+\end{enumerate}
+
+Pavyko pasiekti darbo tikslą - ištirti pirminio finansavimo kriptovaliutomis išmaniuosius kontraktus, nustatyti, kokios savybės yra pastavios, o kokios - kintamos bei pasiūlyti būdus kodo pernaudojamumui didinti.
 
 \sectionnonum{Išvados}
-Išvadose ir pasiūlymuose, nekartojant atskirų dalių apibendrinimų,
-suformuluojamos svarbiausios darbo išvados, rekomendacijos bei pasiūlymai.
+
+Pasiekti rezultatai rodo, kad:
+\begin{enumerate}
+\item Savybių modeliavimas yra puikus būdas didinti kodo pernaudojamumą;
+\item ICO išmanieji kontraktai turi pagrindą kodo pernaudojamumui plėstis;
+\item ICO išmanieji kontraktų pernaudojamumą galima didinti naudojantis savybių modeliavimu;
+\end{enumerate}
+
+Toliau galima nagrinėti savybių modeliavimą ir kodo pernaudojamumą srityje. ICO išmanieji kontraktai yra gera sritis savybių modeliavimo pritaikymui, kadangi sritis yra jauna, tai jos savybių modeliavimas padeda toliau jai augti ir plėstis kodo pernaudojamumo atžvilgiu.
 
 
 
@@ -299,7 +361,7 @@ FODA - Feature-Oriented Domain Analysis \cite{Kang1990}
 %\sectionnonum{Priedai}
 \section {ICO dokumentų surinkimas}
 
-Interneto skaitytuvas, naudotas surinkti kontraktus, yra patalpintas git, vesijavimo sistemos, internetinėje prieigos svetainėje github.com \footnote{\url {https://github.com/}}. Interneto skaitytuvo saugykla\footnote{\url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan}} yra vieša ir prieinama peržiūrai. Skaitytuvo rezultatai, išmanieji kontraktai, patalpinti toje pačioje vietoje, res aplankale\footnote{\url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan/res}}.
+Interneto skaitytuvas, naudotas surinkti kontraktus, yra patalpintas git vesijavimo sistemos, internetinėje prieigos svetainėje github.com \footnote{\url {https://github.com/}}. Interneto skaitytuvo saugykla\footnote{\url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan}} yra vieša ir prieinama peržiūrai. Skaitytuvo rezultatai, išmanieji kontraktai, patalpinti toje pačioje vietoje, res aplanke\footnote{\url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan/res}}.
 
 
 \end{document}
