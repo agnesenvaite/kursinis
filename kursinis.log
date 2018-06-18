@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2018.5.16)  18 JUN 2018 19:05
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2018.5.16)  18 JUN 2018 19:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1350,7 +1350,7 @@ Underfull \vbox (badness 10000) detected at line 226
 File: img/ico_model_num.png Graphic file (type bmp)
 <img/ico_model_num.png>
 
-Overfull \hbox (29.10295pt too wide) in paragraph at lines 251--252
+Overfull \hbox (24.0809pt too wide) in paragraph at lines 251--252
  [] 
  []
 
