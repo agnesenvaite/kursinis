@@ -1,3 +1,4 @@
+
 \documentclass{VUMIFPSkursinis}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -16,12 +17,7 @@
 \usepackage{algorithmicx}
 \graphicspath{ {img/} }
 \usepackage{rotating}
-
-
-
-
-
-
+\usepackage{enumitem}
 
 % Titulinio aprašas
 \university{Vilniaus universitetas}
@@ -58,11 +54,11 @@ Savybių modeliavimas yra pagrindinis metodas atrinkti bei valdyti bendrąsias i
 Šio darbo tikslas - ištirti pirminio finansavimo kriptovaliutomis išmaniuosius kontraktus, nustatyti, kokios savybės yra pastavios, o kokios - kintamos bei pasiūlyti būdus kodo pernaudojamumui didinti. 
 
 Tikslui pasiekti išsikelti uždaviniai:
-\begin{enumerate}
+\begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
 \item Apžvelgti savybių modeliavimą programinės įrangos produktų linijos sričiai;
 \item Surinkti virš 100 išmaniųjų kontraktų skirtų ICO;
 \item Išskirti surinktų išmaniųjų kontraktų savybes;
-\item Sukurti ICO savybių modelį ir jį validuoti;
+\item Sukurti ICO savybių modelį ir jį validuoti.
 \end{enumerate}
 
 \section{Savybių modeliavimas}
@@ -78,17 +74,19 @@ FODA fokusuojasi ties kliento perspektyva, tai yra ties paslaugomis, kurias teik
 \subsection{Savybių modelis}
 
 FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris turi pavaizduoti standartines sistemos šeimos savybes srityje ir santykius tarp jų. Trumpiau - savybių modelis yra hierarchiškai išskirstytų savybių rinkinys - „susideda iš" santykių rinkinys \cite{Kang1990, Batory2005}. Santykiai tarp savybių  modelyje yra kategorizuojami į ( \ref{img:fm_rules} pav.):
-\begin{itemize}
+\begin{itemize}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
 \item Ir - visos vaikinės savybės turi būti pasirinktos;
 \item Alternatyva - tik viena vaikinė savybė gali būti pasirinkta ;
 \item Ar - viena ar daugiau gali būti pasirinkta;
 \item Privaloma - savybė yra privaloma;
-\item Pasirenkama - savybė gali būti pasirenkama;
+\item Pasirenkama - savybė gali būti pasirenkama.
 \end{itemize}
 
+\pagebreak
+
 \begin{center}
-    \captionof{figure}{Santykių kategorijos tarp savybių \cite{Batory2005}}
     \includegraphics[scale=0.75]{img/feature_model_rules}
+    \captionof{figure}{Santykių kategorijos tarp savybių \cite{Batory2005}}
     \label{img:fm_rules}
 
 \end{center}
@@ -96,8 +94,8 @@ FODA \cite{Kang1990} autoriai apibrėžia savybių modelį, kaip modelį, kuris 
 Savybių diagrama yra grafinė savybių modelio reprezentacija. Tai modelis - medis, kur primityvios savybės - lapai, pagrindinės - mazgai (modelio pavyzdys - \ref{img:fm_example} pav.). Būtinos savybės tarp skirtingų produktų yra modeliuojamos kaip privalomos, kai skirtingos savybės tarp jų žymimos kaip alternatyvios ar pasirenkamos (angl. optional) \cite{Batory2005}. Bendros savybės atributai yra paveldimi pagal visą jos specifikaciją. Visos pasirenkamos ar alternetyvios savybės, kurios negali būti pasirinktos, kai yra bendra savybė pasirinkta turi būti pažymėtos kaip tarpusavyje nesuderinamos (angl. mutually exclusive with). Visos pasirenkamos ir alternatyvios savybės, kurios turi būti pasirinktos, kai bendra yra pasirinkta, turi būti pažymėtos kaip privalomos. Savybių modelio dokumentacija susideda iš stuktūrinės diagramos hierarchiškai suskaidančios savybes indentifikuojančias pasirenkamas ir alternatyves savybes, savybių apibūdinimo ir taisyklių kompozicijos savybėms \cite{Kang1990}. 
 
 \begin{center}
-    \captionof{figure}{Savybių modelis mobiliajam telefonui \cite{Kang2013}}
     \includegraphics[scale=0.6]{img/mobile}
+    \captionof{figure}{Savybių modelis mobiliajam telefonui \cite{Kang2013}}
     \label{img:fm_example}
 \end{center}
 
@@ -117,11 +115,11 @@ Srities identifikavimas prasideda nustantant sritį su kuria bus dirbama. Pasiri
 \subsubsection{Savybių identifikavimas} \label{identifikavimas}
 
 Savybių identifikavimas susideda iš išskyrimo srities žinių gautų iš srities ekspertų ir kitų dokumentų tokių kaip knygos, nadotojo vadovo, projektavimo dokumentų ir jau parašytų programų \cite{Lee2015}. Aplikacijos savybes galima išskirti į keturias kategorijas:
-\begin{itemize}
+\begin{itemize}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
 \item darbo aplinka, kurioje aplikacijos yra naudojamos;
 \item galimybės iš naudotojo perspektyvos;
 \item srities technologija - kokiais reikalavimais remiantis sprendimas yra padaromas;
-\item įgyvendinimo technika;
+\item įgyvendinimo technika.
 \end{itemize}
 
 %Metodas fokusuojasi ties savybėmis susijusiomis su aplikacijos galimybėmis. 
@@ -159,69 +157,71 @@ Buvo pasirinkta atlikti savybių modeliavimą remiantis procesu aprašytu \ref{p
 \subsection{Savybių identifikavimas} \label{isskyrimas}
 
 Savybių modelio sukūrimui yra būtinas savybių identifikavimas. Remiantis \ref{identifikavimas}. skyriuje aprašytu savybių identifikavimo būdais buvo pasirinktas jau parašytų programų (šiuo atveju išmaniųjų kontraktų) surinkimas, analizavimas ir savybių juose identifikavimas. Išmaniųjų kontraktų surinkimo procesas:
-\begin{enumerate}
+\begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
 \item Iš Ethereum blockchain blokų naršyklės - etherscan.io\footnote{\url{https://etherscan.io/}}, buvo atrinkti išmaniųjų kontraktų adresai ir nuorodos į juos platformoje;
-\item Parašytas interneto skaitytuvas (angl. web crawler) naudojantis Node.js karkasu;
-\item Visi surinktų išmaniųjų kontraktų kodai buvo surašyti į failus. Failo pavadinino struktūra: contract + identifikacijos numeris + .sol plėtinys;
+\item Parašytas interneto skaitytuvas\footnote{Interneto skaitytuvas patalpintas: \url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan}} (angl. web crawler) naudojantis Node.js karkasu;
+\item Visi surinktų išmaniųjų kontraktų kodai buvo surašyti į failus\footnote{Visi failai patalpinti: \url{ https://github.com/maciukaite/kursinis/tree/crawler-etherscan/res}}. Failo pavadinino struktūra: contract + identifikacijos numeris + .sol plėtinys;
 \end{enumerate}
 
 Tokiu būdu buvo surinkta 128 pirminio kriptovaliutų platinimo išmanieji kontraktai. Savybės iš išmaniųjų kontraktų buvo išskirtos analizavimo būdu - pirmiausia atrinkta 21 išmanusis kontraktas, kuris neturi savybės - žetono sukūrimas ir disponavimas (priežastys šiam pasirinkimui yra pateiktos \ref{sritis} skyriuje). Išanalizavus atrinktus kontraktus buvo išskirtos savybės ir apibūdintos dalinai naudojantis forma pateikta FODA \cite{Kang1990}:
+
 \pagebreak
+
 \begin{center}
     \captionof{table}{Atrinktos aibės ICO išmaniųjų kontraktų savybės}
-    \begin{longtable}[H]{| p {5cm} | p{5cm} | p{5.4cm} |}
+    \begin{longtable}[H]{| p {5cm} | p{5cm} | p{5cm} |}
     \hline
-    \textbf{Savybės pavadinimas } &\textbf{Apibūdinimas} & \textbf{Šaltiniai} \endhead \hline
+    \textbf{Savybės pavadinimas } &\textbf{Apibūdinimas} & \textbf{ICO išmaniųjų kontraktų numeriai} \endhead \hline
 	
-	Žetono kainos nustatymas skirtingomos pakopomis  & ICO metu žetonas gali turėti kelias kainas, skirtinga pakopa žetonų platinime - skirtinga kaina  & contract2, contract23, contract43, contract46, contract55, contract62, contract85, contract120
+	Žetono kainos nustatymas skirtingomos pakopomis  & ICO metu žetonas gali turėti kelias kainas, skirtinga pakopa žetonų platinime - skirtinga kaina  & 2, 23, 43, 46, 55, 62, 85, 120
  \\ 
 	\hline
 	
 	
-	Minimalaus investavimo kriterijus & Naudotojas turi būtinai ivestuoti sumą nemažensę nei minimalus investavimo kriterijus  & contract2, contract16, contract46, contract106  \\ 
+	Minimalaus investavimo kriterijus & Naudotojas turi būtinai ivestuoti sumą nemažensę nei 15  & 2, 16, 46, 106  \\ 
 	\hline
 	
-	ETH susigrąžinimo galimybė nepasiekus tikslo & Jei ICO nepasiekia nusistatyto minimalaus suinvestuotų pinigų ribos, tai visi investuoti pinigai yra grąžinami naudotojams  & contract2, contract23, contract46, contract62, contract85, contract94, contract96, contract120  \\ 
+	ETH susigrąžinimo galimybė nepasiekus tikslo & Jei ICO nepasiekia nusistatyto minimalaus suinvestuotų pinigų ribos, tai visi investuoti pinigai yra grąžinami naudotojams  & 2, 23, 46, 62, 85, 94, 96, 120  \\ 
 	\hline
 	
-	Žetonų atsiėmimas tik įvykus ICO & Įvykus ICO naudotojai gauna nusipirktus žetonus  & contract2, contract126 \\ 
+	Žetonų atsiėmimas tik įvykus ICO & Įvykus ICO naudotojai gauna nusipirktus žetonus  & 2, 126 \\ 
 	\hline
 	
-	Kainos už žetoną pakeitimas & Žetono kaina gali kisti neatsižvelgiant į pasikeičiančias pakopas  & contract2, contract40  \\ 
+	Kainos už žetoną pakeitimas & Žetono kaina gali kisti neatsižvelgiant į pasikeičiančias pakopas  & 2, 40  \\ 
 	\hline
 	
-	Kontrakto savininko nustatymas bei kai kurio funkcionalumo priskyrimas tik jam & Išmanusis kontraktas turi priviligijuotą adresą - kontrakto savininką, kuris turi daugiau funkcionalumo nei įprastas naudotojas  & contract2, contract12, contract13, contract16, contract23, contract31, contract43, contract46, contract62, contract72, contract85, contract86, contract94, contract106, contract114, contract116, contract120, contract126 \\ 
+	Kontrakto savininko nustatymas bei kai kurio funkcionalumo priskyrimas tik jam & Išmanusis kontraktas turi priviligijuotą adresą - kontrakto savininką, kuris turi daugiau funkcionalumo nei įprastas naudotojas  & 2, 12, 13, 16, 23, 31, 43, 46, 62, 72, 85, 86, 94, 106, 114, 116, 120, 126 \\ 
 	\hline
 	
-	Galimybė sustabdyti ICO ir vėl paleisti iš naujo & ICO sustabdymo metu nebūtų galima nusipirkti žetonų  &  contract12, contract31\\ 
+	Galimybė sustabdyti ICO ir vėl paleisti iš naujo & ICO sustabdymo metu nebūtų galima nusipirkti žetonų  &  12, 31\\ 
 	\hline
 	
-	Galimybė pirkimo metu nustatyti kitą adresą kaip pirkėją & Naudotojas pirkdamas žetonus nustato adresą (pirkėją), kurį atstovauja  & contract12, contract31, contract62  \\ 
+	Galimybė pirkimo metu nustatyti kitą adresą kaip pirkėją & Naudotojas pirkdamas žetonus nustato adresą (pirkėją), kurį atstovauja  & 12, 31, 62  \\ 
 	\hline
 	
-	Pirkimas tik indentifikuotiems naudotojams & Pirkti žetonus gali tik anksčiau į išmaniajame kontrakte pažymėti naudotojai  & contract12, contract16, contract31 \\ 
+	Pirkimas tik indentifikuotiems naudotojams & Pirkti žetonus gali tik anksčiau į išmaniajame kontrakte pažymėti naudotojai  & 12, 16, 31 \\ 
 	\hline
 	
-	ICO sustabdymas ar galimybė keisti datą & ICO galima sustabdyti ar keisti jo pabaigos datą  & contract16, contract43, contract46, contract86, contract106  \\ 
+	ICO sustabdymas ar galimybė keisti datą & ICO galima sustabdyti ar keisti jo pabaigos datą  & 16, 43, 46, 86, 106  \\ 
 	\hline
 	
-	Pelno pasiskirstymas tarp komandos ir įmonės & Surinkta pinigų suma yra paskirstyta ne tik įmonei, bet ir komandai  &  contract23\\ 
+	Pelno pasiskirstymas tarp komandos ir įmonės & Surinkta pinigų suma yra paskirstyta ne tik įmonei, bet ir komandai  &  23\\ 
 	\hline
 	
-	ICO pradžios nustatymas  & ICO pradžios data gali būti keičiama  &  contract40, contract86, contract106, contract126 \\ 
+	ICO pradžios nustatymas  & ICO pradžios data gali būti keičiama  &  40, 86, 106, 126 \\ 
 	\hline
 	
 	
-	Maksimalaus galimo surinkti ETH keitimas & Galimybė papidinti ar sumažinti investicijų sumos skaičių  & contract43, contract86 \\ 
+	Maksimalaus galimo surinkti ETH keitimas & Galimybė papidinti ar sumažinti investicijų sumos skaičių  & 43, 86 \\ 
 	\hline
 	
-	Nustatytas maksimalus galimas žetonų kiekis nupirktas per kartą & Naudotojas gali nusipirkti ne daugiau žetonų nei yra nustatyta  & contract43 \\ 
+	Nustatytas maksimalus galimas žetonų kiekis nupirktas per kartą & Naudotojas gali nusipirkti ne daugiau žetonų nei yra nustatyta  & 43 \\ 
 	\hline
 	
-	Nereikalingų žetonų išsitraukimas iš kontrakto  & Likusių žetonų nuo ICO susigrąžinimas  & contract13, contract62, contract94, contract114, contract120, contract126 \\ 
+	Nereikalingų žetonų išsitraukimas iš kontrakto  & Likusių žetonų nuo ICO susigrąžinimas  & 13, 62, 94, 114, 120, 126 \\ 
 	\hline
 	
-	Žetonų išskyrimas komandai & Žetonų paskirstymas komandos nariams  &  contract62, contract72, contract94, contract114, contract120, contract126\\ 
+	Žetonų išskyrimas komandai & Žetonų paskirstymas komandos nariams  &  62, 72, 94, 114, 120, 126\\ 
 	\hline
     \end{longtable}
 	\addtocounter{table}{-1}
@@ -234,21 +234,22 @@ Tokiu būdu buvo surinkta 128 pirminio kriptovaliutų platinimo išmanieji kontr
 
 \subsection{Savybių abstrakcija, klasifikacija, modeliavimas} \label{modelis}
 
-Savybių modelis ICO išmaniesiems kontraktams (\ref{img:fm_ico} pav.) buvo sudarytas naudojantis savybėmis, kurios yra išvardintos \ref{isskyrimas}. skyriuje, \ref{table:features} lentelėje. Savybių pavadinimai esantys lentelėje ir modelyje gali nesutapti, kadangi savybės modelyje yra padaryta savybių abstrakcija ir kai kurios savybės ar jos dalys yra sujuntos. Jei savybė lentelėje neturėjo sau priešingos, tai modelyje priešinga savybė jau yra įvardinama ir tai priimtina kaip savaime suprantamas reiškinys. Visos savybės buvo klasifikuotos ir struktūrizuotos naudojant „susideda iš" santykį, taip pat savybės modelyje identifikuotos naudojantis santykių kategorijomis tarp savybių (\ref{img:fm_rules} pav.). Modelio kompozicijos taisyklės:
-\begin{enumerate}
+Savybių modelis ICO išmaniesiems kontraktams (\ref{img:fm_ico} pav.) buvo sudarytas naudojantis savybėmis, kurios yra išvardintos \ref{isskyrimas}. skyriuje, \ref{table:features} lentelėje. Savybių pavadinimai esantys lentelėje ir modelyje gali nesutapti, kadangi savybės modelyje yra padaryta savybių abstrakcija ir kai kurios savybės ar jos dalys yra sujungtos. Jei savybė lentelėje neturėjo sau priešingos, tai modelyje priešinga savybė jau yra įvardinama ir tai priimtina kaip savaime suprantamas reiškinys. Visos savybės buvo klasifikuotos ir struktūrizuotos naudojant „susideda iš" santykį, taip pat savybės modelyje identifikuotos naudojantis santykių kategorijomis tarp savybių (\ref{img:fm_rules} pav.). Modelio kompozicijos taisyklės:
+\begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
 \item Nereikalingų žetonų susigrąžinimui reikalingas savininkas;
 \item Platinimo periodo keitimui reikalingas savininkas;
 \item Kainos pakeitimui rankiniu būdu reikalingas savininkas;
 \item Žetonus atsiimti po ICO gali tik pirkėjas;
-\item ETH susigrąžinti nepasiekus tikslo gali tik pirkėjas;
+\item ETH susigrąžinti nepasiekus tikslo gali tik pirkėjas.
 \end{enumerate}
 
+Savybės, kurios neturi vaikinių savybių, turi identifikacijos numerį, tam, kad validuojant modelį būtų galima lengviau identifikuoti bendras savybes.
 
 \begin{sidewaysfigure}
 
 \begin{center}
+    \includegraphics[scale=0.5]{img/ico_model_num}
     \captionof{figure}{Savybių modelis ICO išmaniesiems kontraktams}
-    \includegraphics[scale=0.5]{img/ico_model}
     \label{img:fm_ico}
 \end{center}
 
@@ -260,39 +261,39 @@ Savybių modelis ICO išmaniesiems kontraktams (\ref{img:fm_ico} pav.) buvo suda
 Remiantis \ref{validacija_teor}. skyriuje aprašytu procesu validuoti modelį turėtų srities ekspertai ar naujas dokumentų rinkinys. Kadangi šiame darbe negalima pasinaudoti srities ekspertais, tai validacijai naudojami dokumentai - išmanieji kontraktai, kurie buvo surinkti anksčiau (plačiau \ref{isskyrimas}. skyriuje). Iš dar nenaudotų dokumentų buvo atsitiktinai atrinkta 10 išmaniųjų kontraktų ir patikrinta ar savybių modelis (\ref{img:fm_ico} pav.) yra validus. Validacijos rezultatas pateiktas lentelėje:
 \begin{center}
     \captionof{table}{ICO savybių modelio validacija}
-    \begin{longtable}[H]{| p {2.1cm} | p{11cm} | p{1.8cm} |}
+    \begin{longtable}[H]{| p {2.5cm} | p{8cm} | p{2.5cm} |}
     \hline
-    \textbf{Dokumentas}  & \textbf{Savybės} & \textbf{Validumas} \endhead \hline
+    \textbf{Dokumentas}  & \textbf{Savybės numeris} & \textbf{Validumas} \endhead \hline
 	
-	contract0 & Savininkas, nereikalingų žetonų susigrąžinimas, nekeičiamas platinimo periodas, nekintama kaina, maksimalus ir minimalus investavimo kriterijai, galimybė pirkti visiems, pirkėjas - tas pats adresas
+	contract0 & 1, 5, 7, 10, 13, 15, 16, 18
 & validus
  \\ 
 	\hline
-	contract6 & Savininkas, nekeičiamas platinimo periodas, minimalus investavimo kriterijus, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus
+	contract6 & 1, 7, 10, 13, 15, 18 & validus
 	\\
 		\hline
-	contract22 & Savininkas, nereikalingų žetonų susigražinimas, galimybė keisti platinimo periodą, minimalus investavimo kriterijus, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus
+	contract22 & 1, 5, 9, 10, 13, 15, 18 & validus
 	\\
 		\hline
-	contract33 & Savininkas, pirkimas tik identifikuotiems pirkėjams, kaina keičiama rankiniu būdu, galimybė sustabdyti ir keiti periodą, pirkėjas tas pats adresas & validus
+	contract33 & 1, 8, 9, 11, 14, 18 & validus
 	\\
 		\hline
-	contract39 & Savininkas, keičiamas ir stabdomas platinimo periodas, minimalus investavimo kriterijus, ETH susigrąžinimas nepasiekus tikslo, nekintama kaina, galimybė pirkti visiems, pirkėjas tas pats adresas & validus
+	contract39 & 1, 4, 8, 9, 10, 13, 15, 18 & validus
 	\\
 		\hline
-	contract51 & Savininkas, nereikalingų žetonų susigrąžinimas, žetonų išskyrimas komandai, nekeičiamas platinimo periodas, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus
+	contract51 & 1, 3, 5, 7, 10, 13, 18 & validus
 	\\
 		\hline
-	contract71 & Nekeičiamas platinimo periodas, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus 
+	contract71 & 7, 10, 13, 18 & validus 
 	\\
 		\hline
-	contract91 & Nekeičiamas platinimo periodas, nekintama kaina, galimybė pirkti visiems, pirkėjas - tas pats adresas & validus
+	contract91 & 7, 10, 13, 18 & validus
 	\\
 		\hline
-	contract103 & Savininkas, maksimalus ir minimalus investavimo kriterijai, pirkimas tik identifikuotiems, galimybė keisti ir sustabdyti periodą, nekintama kaina, pirkėjas - tas pats adresas & validus
+	contract103 & 1, 8, 9, 10, 14, 15, 16, 18 & validus
 	\\
 		\hline
-	contract122 & Savininkas, minimalus ir maksimalus investavimo kriterijai, nekeičiamas platinimo periodas, nekintama kaina, galimybė pirkti visiems, prikėjas - tas pats adresas & validus
+	contract122 & 1, 7, 10, 13, 15, 16, 18 & validus
 	\\
 		\hline
 		
@@ -303,31 +304,37 @@ Remiantis \ref{validacija_teor}. skyriuje aprašytu procesu validuoti modelį tu
 \end{center}
 
 
-\sectionnonum{Rezultatai}
+\sectionnonum{Rezultatai ir išvados}
 
 Šiame darbe pasiekti rezultatai:
-\begin{enumerate}
+\begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
 
 \item Apžvelgtos kodo pernaudojimo galimybės naudojantis savybių modeliavimu;
 \item Surinkti ICO išmanieji kontraktai bei ištirtos jų savybės;
 \item Nustatyta, kurios savybės yra pastovios ir kintamos;
-\item Kodo pernaudojamumui didinti sudarytas savybių modelis;
+\item Kodo pernaudojamumui didinti sudarytas savybių modelis.
 
 \end{enumerate}
 
-Pavyko pasiekti darbo tikslą - ištirti pirminio finansavimo kriptovaliutomis išmaniuosius kontraktus, nustatyti, kokios savybės yra pastavios, o kokios - kintamos bei pasiūlyti būdus kodo pernaudojamumui didinti.
+Darbo tikslas - ištirti pirminio finansavimo kriptovaliutomis išmaniuosius kontraktus, nustatyti, kokios savybės yra pastavios, o kokios - kintamos bei pasiūlyti būdus kodo pernaudojamumui didinti - pasiektas.
 
-\sectionnonum{Išvados}
+\bigbreak
 
-Pasiekti rezultatai rodo, kad:
-\begin{enumerate}
-\item Savybių modeliavimas yra puikus būdas didinti kodo pernaudojamumą;
-\item ICO išmanieji kontraktai turi pagrindą kodo pernaudojamumui plėstis;
-\item ICO išmanieji kontraktų pernaudojamumą galima didinti naudojantis savybių modeliavimu;
+Pasiekti rezultatai leidžia daryti išvadas:
+\begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
+\item Savybių modeliavimas yra geras būdas ICO išmaniųjų kontraktų kodo pernaudojamumui didinti;
+\item Yra sukurta pakankamai daug ICO išmaniųjų kontraktų turinčių įvairių savybių, todėl žinant, koks savybių rinkinys yra reikalingas, būtų galima pernaudoti esamą kontraktą ar jo dalį.
 \end{enumerate}
 
-Toliau galima nagrinėti savybių modeliavimą ir kodo pernaudojamumą srityje. ICO išmanieji kontraktai yra gera sritis savybių modeliavimo pritaikymui, kadangi sritis yra jauna, tai jos savybių modeliavimas padeda toliau jai augti ir plėstis kodo pernaudojamumo atžvilgiu.
+\bigbreak
 
+Darbą galima toliau tęsti šiomis kryptimis:
+\begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
+\item Būtų galima tobulinti savybių modelį paimant didesnę aibę ICO išmaniųjų kontraktų;
+\item Būtų galima ICO savybių modelį panaudoti kuriant ICO išmaniųjų kontraktų produktų liniją;
+\item Būtų galima panaudoti savybių modelį jau sukurtoms išmaniųjų kontraktų bibliotekoms tobulinti;
+\item Būtų galima sukurti ICO išmanųjį kontraktą, kuris remtusi savybėmis iš modelio bei jau sukurtu kodu ir leistų jais lengvai varijuoti.
+\end{enumerate}
 
 
 \printbibliography[heading=bibintoc] % Literatūros šaltiniai aprašomi
@@ -349,19 +356,6 @@ ICO - pirminis kriptovaliutų platinimas (angl. initial coin offering)
 
 FODA - Feature-Oriented Domain Analysis \cite{Kang1990}
 
-\pagebreak
-
- \appendix   
-% Prieduose gali būti pateikiama pagalbinė, ypač darbo autoriaus savarankiškai
-% parengta, medžiaga. Savarankiški priedai gali būti pateikiami kompiuterio
-% diskelyje ar kompaktiniame diske. Priedai taip pat vadinami ir numeruojami.
-% Tekstas su priedais siejamas nuorodomis (pvz.: \ref{img:mlp}).
-%
-
-%\sectionnonum{Priedai}
-\section {ICO dokumentų surinkimas}
-
-Interneto skaitytuvas, naudotas surinkti kontraktus, yra patalpintas git vesijavimo sistemos, internetinėje prieigos svetainėje github.com \footnote{\url {https://github.com/}}. Interneto skaitytuvo saugykla\footnote{\url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan}} yra vieša ir prieinama peržiūrai. Skaitytuvo rezultatai, išmanieji kontraktai, patalpinti toje pačioje vietoje, res aplanke\footnote{\url{https://github.com/maciukaite/kursinis/tree/crawler-etherscan/res}}.
 
 
 \end{document}
