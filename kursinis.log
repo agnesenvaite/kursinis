@@ -1,11 +1,11 @@
-This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2018.5.16)  18 JUN 2018 19:18
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017/Debian) (preloaded format=xelatex 2018.6.19)  19 JUN 2018 10:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **kursinis.tex
 (./kursinis.tex
 LaTeX2e <2017-04-15>
-Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
+Babel <3.18> and hyphenation patterns for 7 language(s) loaded.
 (./VUMIFPSkursinis.cls
 Document Class: VUMIFPSkursinis 2015/02/03 1.0 VU MIF SE course work class
 (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
@@ -432,10 +432,21 @@ Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
 (/usr/share/texlive/texmf-dist/tex/latex/polyglossia/gloss-lithuanian.ldf
 File: gloss-lithuanian.ldf polyglossia: module for lithuanian
+
+
+Package polyglossia Warning: No hyphenation patterns were loaded for `Lithuania
+n'
+(polyglossia)                I will use \language=\l@nohyphenation instead on i
+nput line 9.
+
+\l@lithuanian = a dialect from \language\l@nohyphenation 
+
+Package polyglossia Warning: \setlocalhyphenmin useless for unhyphenated langua
+ge lithuanian on input line 9.
+
 )
 Package polyglossia Info: Default language is lithuanian.
-
-(/usr/share/texlive/texmf-dist/tex/latex/polyglossia/gloss-english.ldf
+ (/usr/share/texlive/texmf-dist/tex/latex/polyglossia/gloss-english.ldf
 File: gloss-english.ldf polyglossia: module for english
 )
 (/usr/share/texlive/texmf-dist/tex/latex/tools/indentfirst.sty
@@ -1284,7 +1295,13 @@ Package biblatex Info: Reference segment=0 on input line 37.
 
  [1
 
-] [2
+]
+Underfull \hbox (badness 3954) in paragraph at lines 54--55
+\TU/texgyretermes(0)/m/n/12 nustatyti, kokios savybės yra pastavios, o kokios -
+ kintamos bei pasiūlyti būdus kodo
+ []
+
+[2
 
 ] [3] [4
 
@@ -1293,11 +1310,35 @@ File: img/feature_model_rules.png Graphic file (type bmp)
 <img/feature_model_rules.png>
 File: img/mobile.png Graphic file (type bmp)
 <img/mobile.png>
- [5] [6]
+
+Underfull \hbox (badness 1342) in paragraph at lines 102--103
+[]\TU/texgyretermes(0)/m/n/12 Pasirenkamos ir alternatyvios savybės negali būti
+ atrinktos savavališkai. Įprastai jos
+ []
+
+[5] [6]
+Underfull \hbox (badness 1817) in paragraph at lines 150--151
+\TU/texgyretermes(0)/m/n/12 atrinktos savybės (plačiau 2.2[]. Savybių identifik
+avimas), sekantis žingsnis buvo modelio
+ []
+
+
+Underfull \hbox (badness 1178) in paragraph at lines 159--160
+\TU/texgyretermes(0)/m/n/12 išmaniųjų kontraktų) surinkimas, analizavimas ir sa
+vybių juose identifikavimas. Išmaniųjų
+ []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 162--162
 [][]\TU/texgyretermes(0)/m/n/10 Interneto skaitytuvas patalpintas: $[][][][][] 
 [] [] [] [][][][][][] [] [][][] [] [][][][][][][][][][] [] [][][][][][][][] [] 
 [][][][] []
+ []
+
+
+Underfull \hbox (badness 1231) in paragraph at lines 166--167
+\TU/texgyretermes(0)/m/n/12 iš išmaniųjų kontraktų buvo išskirtos analizavimo b
+ūdu - pirmiausia atrinkta 21 išmanusis
  []
 
 [7
@@ -1313,13 +1354,83 @@ Underfull \hbox (badness 10000) in paragraph at lines 176--176
  []
 
 
-Underfull \hbox (badness 1701) in paragraph at lines 184--184
-[]|\TU/texgyretermes(0)/m/n/12 Jei ICO nepasiekia nusista-
+Underfull \hbox (badness 10000) in paragraph at lines 176--176
+\TU/texgyretermes(0)/m/n/12 kelias kainas, skirtinga
  []
 
 
-Underfull \hbox (badness 1152) in paragraph at lines 193--193
-\TU/texgyretermes(0)/m/n/12 viligijuotą adresą - kontrak-
+Underfull \hbox (badness 6016) in paragraph at lines 176--176
+\TU/texgyretermes(0)/m/n/12 pakopa žetonų platinime -
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
+[]|\TU/texgyretermes(0)/m/n/12 Minimalaus investavimo
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
+[]|\TU/texgyretermes(0)/m/n/12 Naudotojas turi būtinai
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 184--184
+[]|\TU/texgyretermes(0)/m/n/12 Jei ICO nepasiekia
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 184--184
+\TU/texgyretermes(0)/m/n/12 nusistatyto minimalaus
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 184--184
+\TU/texgyretermes(0)/m/n/12 suinvestuotų pinigų ribos,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 190--190
+[]|\TU/texgyretermes(0)/m/n/12 Žetono kaina gali
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 190--190
+\TU/texgyretermes(0)/m/n/12 kisti neatsižvelgiant į
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+[]|\TU/texgyretermes(0)/m/n/12 Kontrakto savininko
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+\TU/texgyretermes(0)/m/n/12 nustatymas bei kai kurio
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+\TU/texgyretermes(0)/m/n/12 funkcionalumo priskyrimas
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+[]|\TU/texgyretermes(0)/m/n/12 Išmanusis kontraktas turi
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+\TU/texgyretermes(0)/m/n/12 priviligijuotą adresą -
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+\TU/texgyretermes(0)/m/n/12 kontrakto savininką, kuris
+ []
+
+
+Underfull \hbox (badness 2435) in paragraph at lines 193--193
+\TU/texgyretermes(0)/m/n/12 turi daugiau funkcionalumo
  []
 
 
@@ -1328,18 +1439,108 @@ Underfull \hbox (badness 1072) in paragraph at lines 196--196
  []
 
 
-Underfull \hbox (badness 1838) in paragraph at lines 199--199
-[]|\TU/texgyretermes(0)/m/n/12 Naudotojas pirkdamas žeto-
+Underfull \hbox (badness 10000) in paragraph at lines 199--199
+[]|\TU/texgyretermes(0)/m/n/12 Galimybė pirkimo metu
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 199--199
+\TU/texgyretermes(0)/m/n/12 nustatyti kitą adresą kaip
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 199--199
+[]|\TU/texgyretermes(0)/m/n/12 Naudotojas pirkdamas
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 199--199
+\TU/texgyretermes(0)/m/n/12 žetonus nustato adresą
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 202--202
-[]|\TU/texgyretermes(0)/m/n/12 Pirkimas tik indentifikuo-
+[]|\TU/texgyretermes(0)/m/n/12 Pirkimas tik
  []
 
 
-Underfull \hbox (badness 1259) in paragraph at lines 218--218
-[]|\TU/texgyretermes(0)/m/n/12 Nustatytas maksimalus gali-
+Underfull \hbox (badness 10000) in paragraph at lines 202--202
+\TU/texgyretermes(0)/m/n/12 indentifikuotiems
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 202--202
+[]|\TU/texgyretermes(0)/m/n/12 Pirkti žetonus gali tik
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 202--202
+\TU/texgyretermes(0)/m/n/12 anksčiau į išmaniajame
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 202--202
+\TU/texgyretermes(0)/m/n/12 kontrakte pažymėti
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 205--205
+[]|\TU/texgyretermes(0)/m/n/12 ICO galima sustabdyti ar
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 208--208
+[]|\TU/texgyretermes(0)/m/n/12 Pelno pasiskirstymas tarp
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 208--208
+[]|\TU/texgyretermes(0)/m/n/12 Surinkta pinigų suma yra
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 215--215
+[]|\TU/texgyretermes(0)/m/n/12 Galimybė papidinti ar
+ []
+
+
+Underfull \hbox (badness 4036) in paragraph at lines 215--215
+\TU/texgyretermes(0)/m/n/12 sumažinti investicijų sumos
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 218--218
+[]|\TU/texgyretermes(0)/m/n/12 Nustatytas maksimalus
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 218--218
+\TU/texgyretermes(0)/m/n/12 galimas žetonų kiekis
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 218--218
+[]|\TU/texgyretermes(0)/m/n/12 Naudotojas gali nusipirkti
+ []
+
+
+Underfull \hbox (badness 3148) in paragraph at lines 218--218
+\TU/texgyretermes(0)/m/n/12 ne daugiau žetonų nei yra
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 221--221
+[]|\TU/texgyretermes(0)/m/n/12 Nereikalingų žetonų
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 221--221
+[]|\TU/texgyretermes(0)/m/n/12 Likusių žetonų nuo ICO
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 224--224
+[]|\TU/texgyretermes(0)/m/n/12 Žetonų paskirstymas
  []
 
 
@@ -1355,10 +1556,32 @@ Overfull \hbox (24.0809pt too wide) in paragraph at lines 251--252
  []
 
 [9] [10]
+Underfull \hbox (badness 10000) in paragraph at lines 266--266
+[]|\TU/texgyretermes(0)/bx/n/12 ICO išmaniųjų
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 266--266
+\TU/texgyretermes(0)/bx/n/12 kontraktų
+ []
+
+
 Underfull \vbox (badness 10000) detected at line 301
  []
 
-[11] [12
+[11]
+Underfull \hbox (badness 1924) in paragraph at lines 319--320
+[]\TU/texgyretermes(0)/m/n/12 Darbo tikslas - ištirti pirminio finansavimo krip
+tovaliutomis išmaniuosius kontraktus,
+ []
+
+
+Underfull \hbox (badness 3954) in paragraph at lines 319--320
+\TU/texgyretermes(0)/m/n/12 nustatyti, kokios savybės yra pastavios, o kokios -
+ kintamos bei pasiūlyti būdus kodo
+ []
+
+[12
 
 ]
 
@@ -1366,7 +1589,7 @@ Package biblatex Warning: '\mkdaterangeiso8601' is deprecated.
 (biblatex)                Please use '\mkdaterangeiso'.
 
 
-Underfull \hbox (badness 3271) in paragraph at lines 340--340
+Underfull \hbox (badness 3271) in paragraph at lines 339--339
 []\TU/texgyretermes(0)/m/n/12 Don Batory. Feature Models, Grammars, and Proposi
 tional Formulas. \TU/texgyretermes(0)/m/it/12 LNCS\TU/texgyretermes(0)/m/n/12 ,
 
@@ -1377,8 +1600,10 @@ Package biblatex Warning: '\mkdaterangeiso8601' is deprecated.
 (biblatex)                Please use '\mkdaterangeiso'.
 
 
-Package biblatex Warning: '\mkdaterangeiso8601' is deprecated.
-(biblatex)                Please use '\mkdaterangeiso'.
+Underfull \hbox (badness 10000) in paragraph at lines 339--339
+[]\TU/texgyretermes(0)/m/n/12 Vitalik Buterin. A NEXT GENERATION SMART CONTRACT
+ &
+ []
 
 
 Package biblatex Warning: '\mkdaterangeiso8601' is deprecated.
@@ -1387,6 +1612,16 @@ Package biblatex Warning: '\mkdaterangeiso8601' is deprecated.
 
 Package biblatex Warning: '\mkdaterangeiso8601' is deprecated.
 (biblatex)                Please use '\mkdaterangeiso'.
+
+
+Package biblatex Warning: '\mkdaterangeiso8601' is deprecated.
+(biblatex)                Please use '\mkdaterangeiso'.
+
+
+Underfull \hbox (badness 6332) in paragraph at lines 339--339
+\TU/texgyretermes(0)/m/n/12 Foundations of Cryptocurrency and Blockchain Progra
+mming for Beginners
+ []
 
 
 Package biblatex Warning: '\mkdaterangeiso8601' is deprecated.
@@ -1437,12 +1672,12 @@ Package logreq Info: Writing requests to 'kursinis.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 24288 strings out of 493007
- 477469 string characters out of 6136719
- 976026 words of memory out of 5000000
- 27949 multiletter control sequences out of 15000+600000
+ 24291 strings out of 494956
+ 477497 string characters out of 6177213
+ 971017 words of memory out of 5000000
+ 27831 multiletter control sequences out of 15000+600000
  544799 words of font info for 99 fonts, out of 8000000 for 9000
- 1348 hyphenation exceptions out of 8191
- 67i,12n,96p,10537b,5927s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 14 hyphenation exceptions out of 8191
+ 67i,11n,96p,10537b,5927s stack positions out of 5000i,500n,10000p,200000b,80000s
 
 Output written on kursinis.pdf (17 pages).
